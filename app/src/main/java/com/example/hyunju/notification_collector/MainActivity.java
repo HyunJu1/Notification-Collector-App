@@ -4,11 +4,14 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.ContentUris;
 import android.content.Context;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -16,6 +19,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Contacts;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,9 +41,59 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        lv_contactlist = (ListView) findViewById(R.id.lv_contactlist);
-    }
 
+        if (
+
+                checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED ||
+
+                        checkSelfPermission(Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED
+
+                )
+        requestPermissions(new String[]{Manifest.permission.READ_CONTACTS,
+                Manifest.permission.SEND_SMS}, 1);
+
+
+        lv_contactlist = (ListView) findViewById(R.id.lv_contactlist);
+
+
+
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
+    {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == 1)
+        {
+            if (grantResults.length > 0)
+            {
+                for (int i=0; i<grantResults.length; ++i)
+                {
+                    if (grantResults[i] == PackageManager.PERMISSION_DENIED)
+                    {
+                        // 하나라도 거부한다면.
+                        new AlertDialog.Builder(this).setTitle("알림").setMessage("권한을 허용해주셔야 앱을 이용할 수 있습니다.")
+                                .setPositiveButton("종료", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                        MainActivity.this.finish();
+                                    }
+                                }).setNegativeButton("권한 설정", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                                        .setData(Uri.parse("package:" + getApplicationContext().getPackageName()));
+                                getApplicationContext().startActivity(intent);
+                            }
+                        }).setCancelable(false).show();
+
+                        return;
+                    }
+                }
+
+            }
+        }
+    }
     @Override
     protected void onResume() {
         super.onResume();
@@ -53,18 +111,18 @@ public class MainActivity extends Activity {
                                             int position, long resid) {
 
 
-						Contact phonenumber = (Contact) contactlist.getItemAtPosition(position);
+                        Contact phonenumber = (Contact) contactlist.getItemAtPosition(position);
 
-						if (phonenumber == null) {
-							return;
-						}
+                        if (phonenumber == null) {
+                            return;
+                        }
 
 
-						Intent intent = new Intent(MainActivity.this, SenderActivity.class);
-						intent.putExtra("phone_num",phonenumber.getPhonenum().replaceAll("-", ""));
-                        intent.putExtra("name",phonenumber.getName());
+                        Intent intent = new Intent(MainActivity.this, SenderActivity.class);
+                        intent.putExtra("phone_num", phonenumber.getPhonenum().replaceAll("-", ""));
+                        intent.putExtra("name", phonenumber.getName());
 
-						startActivity(intent);
+                        startActivity(intent);
 
                     }
                 });
