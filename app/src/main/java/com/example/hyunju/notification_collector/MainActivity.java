@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.content.ContentUris;
 import android.content.Context;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -52,19 +53,19 @@ public class MainActivity extends Activity {
                                             int position, long resid) {
 
 
-//						Contact phonenumber = (Contact) contactlist
-//								.getItemAtPosition(position);
-//
-//						if (phonenumber == null) {
-//							return;
-//						}
-//
-//						Intent data = new Intent();
-//						data.putExtra(MainActivity.SELECTED_PHONE, phonenumber
-//								.getPhonenum().replaceAll("-", ""));
-//
-//						setResult(MainActivity.SUCCESS, data);
-//						finish();
+						Contact phonenumber = (Contact) contactlist.getItemAtPosition(position);
+
+						if (phonenumber == null) {
+							return;
+						}
+
+
+						Intent intent = new Intent(MainActivity.this, SenderActivity.class);
+						intent.putExtra("phone_num",phonenumber.getPhonenum().replaceAll("-", ""));
+                        intent.putExtra("name",phonenumber.getName());
+
+						startActivity(intent);
+
                     }
                 });
 
@@ -156,7 +157,7 @@ public class MainActivity extends Activity {
                 holder.tv_phonenumber.setText(acontact.getPhonenum());
 
                 Bitmap bm = openPhoto(acontact.getPhotoid());
-                // ���������� �⺻ ���� �����ֱ�
+
                 if (bm != null) {
                     holder.iv_photoid.setImageBitmap(bm);
                 } else {
