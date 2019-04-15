@@ -63,6 +63,12 @@
             android:inputType="textPersonName" />
 
         <Button
+            android:id="@+id/button_attachment"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="첨부파일" />
+
+        <Button
             android:id="@+id/button_sender"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

@@ -101,7 +101,7 @@ public class SendMail extends AsyncTask<Void,Void,Void> {
                 mm.setContent(multipart);
 
             } else {
-
+                mm.setText(message);
             }
 
             Transport.send(mm);

@@ -21,8 +21,6 @@ import android.provider.ContactsContract;
 import android.provider.ContactsContract.Contacts;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -47,9 +45,11 @@ public class MainActivity extends Activity {
 
 
         if (checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED ||
-                checkSelfPermission(Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED
+                checkSelfPermission(Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED ||
+                checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED ||
+                checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
                 ) {
-            requestPermissions(new String[]{Manifest.permission.READ_CONTACTS, Manifest.permission.SEND_SMS}, 1);
+            requestPermissions(new String[]{Manifest.permission.READ_CONTACTS, Manifest.permission.SEND_SMS, Manifest.permission.READ_PHONE_STATE, Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
         }else{
             ContactsAdapter adapter = new ContactsAdapter(MainActivity.this,
                     R.layout.layout_phonelist, getContactList());
@@ -73,6 +73,7 @@ public class MainActivity extends Activity {
                             Intent intent = new Intent(MainActivity.this, SenderActivity.class);
                             intent.putExtra("phone_num", phonenumber.getPhonenum().replaceAll("-", ""));
                             intent.putExtra("name", phonenumber.getName());
+                            intent.putExtra("email", phonenumber.getEmail());
 
                             startActivity(intent);
 
