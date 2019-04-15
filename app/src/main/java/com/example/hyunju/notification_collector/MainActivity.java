@@ -24,6 +24,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,14 +43,43 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (    checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED ||
-                        checkSelfPermission(Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED
+        lv_contactlist = (ListView) findViewById(R.id.lv_contactlist);
+
+
+        if (checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED ||
+                checkSelfPermission(Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED
                 ) {
             requestPermissions(new String[]{Manifest.permission.READ_CONTACTS, Manifest.permission.SEND_SMS}, 1);
+        }else{
+            ContactsAdapter adapter = new ContactsAdapter(MainActivity.this,
+                    R.layout.layout_phonelist, getContactList());
+
+            lv_contactlist.setAdapter(adapter);
+            lv_contactlist
+                    .setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+                        @Override
+                        public void onItemClick(AdapterView<?> contactlist, View v,
+                                                int position, long resid) {
+
+
+                            Contact phonenumber = (Contact) contactlist.getItemAtPosition(position);
+
+                            if (phonenumber == null) {
+                                return;
+                            }
+
+
+                            Intent intent = new Intent(MainActivity.this, SenderActivity.class);
+                            intent.putExtra("phone_num", phonenumber.getPhonenum().replaceAll("-", ""));
+                            intent.putExtra("name", phonenumber.getName());
+
+                            startActivity(intent);
+
+                        }
+                    });
         }
 
-
-        lv_contactlist = (ListView) findViewById(R.id.lv_contactlist);
 
 
     }
@@ -91,85 +121,160 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (    checkSelfPermission(Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED &&
-                checkSelfPermission(Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED
-                ) {
 
-            ContactsAdapter adapter = new ContactsAdapter(MainActivity.this,
-                    R.layout.layout_phonelist, getContactList());
-
-            lv_contactlist.setAdapter(adapter);
-            lv_contactlist
-                    .setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-                        @Override
-                        public void onItemClick(AdapterView<?> contactlist, View v,
-                                                int position, long resid) {
-
-
-                            Contact phonenumber = (Contact) contactlist.getItemAtPosition(position);
-
-                            if (phonenumber == null) {
-                                return;
-                            }
-
-
-                            Intent intent = new Intent(MainActivity.this, SenderActivity.class);
-                            intent.putExtra("phone_num", phonenumber.getPhonenum().replaceAll("-", ""));
-                            intent.putExtra("name", phonenumber.getName());
-
-                            startActivity(intent);
-
-                        }
-                    });
-        }
-        else{
-            requestPermissions(new String[]{Manifest.permission.READ_CONTACTS, Manifest.permission.SEND_SMS}, 1);
-        }
     }
 
 
     private ArrayList<Contact> getContactList() {
 
-        Uri uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
-
-        String[] projection = new String[]{
-                ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
-                ContactsContract.CommonDataKinds.Phone.NUMBER,
-                ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME};
-
-        String[] selectionArgs = null;
-
-        String sortOrder = ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
-                + " COLLATE LOCALIZED ASC";
-
-        Cursor contactCursor = managedQuery(uri, projection, null,
-                selectionArgs, sortOrder);
-
         ArrayList<Contact> contactlist = new ArrayList<Contact>();
 
-        if (contactCursor.moveToFirst()) {
-            do {
-                String phonenumber = contactCursor.getString(1).replaceAll("-",
-                        "");
-                if (phonenumber.length() == 10) {
-                    phonenumber = phonenumber.substring(0, 3) + "-"
-                            + phonenumber.substring(3, 6) + "-"
-                            + phonenumber.substring(6);
-                } else if (phonenumber.length() > 8) {
-                    phonenumber = phonenumber.substring(0, 3) + "-"
-                            + phonenumber.substring(3, 7) + "-"
-                            + phonenumber.substring(7);
+        String[] arrProjection = {
+                ContactsContract.Contacts._ID, // ID 열에 해당 하는 정보. 저장된 각 사용자는 고유의 ID를 가진다.
+                ContactsContract.Contacts.DISPLAY_NAME // 연락처에 저장된 이름 정보.
+        };
+
+        String[] arrPhoneProjection = {
+                ContactsContract.CommonDataKinds.Phone.NUMBER // 연락처에 저장된 전화번호 정보
+        };
+
+        String[] arrEmailProjection = {
+                ContactsContract.CommonDataKinds.Email.DATA // 연락처에 저장된 이메일 정보
+        };
+        Cursor clsCursor = MainActivity.this.getContentResolver().query(
+                ContactsContract.Contacts.CONTENT_URI,
+                arrProjection,
+                ContactsContract.Contacts.HAS_PHONE_NUMBER + "=1", // HAS_PHONE_NUMBER : 하나 이상의 전화번호가 있으면 1, 그 외에는 0
+                null,
+                null
+        );
+        if (clsCursor.moveToFirst()) {
+            while (clsCursor.moveToNext()) {
+                Contact acontact = new Contact();
+
+                String strContactId = clsCursor.getString(0);
+
+                // Log.d("Unity", "연락처 사용자 ID : " + clsCursor.getString(0));
+                Log.d("Unity", "연락처 사용자 이름 : " + clsCursor.getString(1));
+                //acontact.setPhotoid(Long.parseLong(clsCursor.getString( 0 )));
+                acontact.setName(clsCursor.getString(1));
+                // phone number에 접근하는 Cursor
+                Cursor clsPhoneCursor = MainActivity.this.getContentResolver().query(
+                        ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                        arrPhoneProjection,
+                        ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + strContactId, // where 절 : 연락처의 ID와 일치하는 전화번호를 가져온다.
+                        null,
+                        null
+                );
+
+
+                while (clsPhoneCursor.moveToNext()) {
+                    //   Log.d("Unity", "연락처 사용자 번호 : " + clsPhoneCursor.getString(0));
+                    acontact.setPhonenum(clsPhoneCursor.getString(0));
                 }
 
-                Contact acontact = new Contact();
-                acontact.setPhotoid(contactCursor.getLong(0));
-                acontact.setPhonenum(phonenumber);
-                acontact.setName(contactCursor.getString(2));
+                clsPhoneCursor.close();
 
+
+                // email에 접근하는 Cursor
+                Cursor clsEmailCursor = MainActivity.this.getContentResolver().query(
+                        ContactsContract.CommonDataKinds.Email.CONTENT_URI,
+                        arrEmailProjection, // 연락처의 [이메일] 컬럼의 정보를 가져온다.
+                        ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + strContactId,
+                        null,
+                        null
+                );
+
+
+                while (clsEmailCursor.moveToNext()) {
+                    Log.d("Unity", "연락처 사용자 email : " + clsEmailCursor.getString(0));
+                    acontact.setEmail(clsEmailCursor.getString(0));
+                }
+
+                clsEmailCursor.close();
+
+
+                // note(메모)
+                String noteWhere = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
+                String[] noteWhereParams = new String[]{
+                        strContactId,
+                        ContactsContract.CommonDataKinds.Note.CONTENT_ITEM_TYPE // MIMETYPE 중 Note(즉, 메모)에 해당하는 내용을 불러오라는 뜻
+                };
+
+                // note(메모)에 접근하는 Cursor
+                Cursor clsNoteCursor = MainActivity.this.getContentResolver().query(
+                        ContactsContract.Data.CONTENT_URI,
+                        null,
+                        noteWhere,
+                        noteWhereParams,
+                        null
+                );
+
+
+                while (clsNoteCursor.moveToNext()) {
+
+                    // Log.d("Unity", "연락처 사용자 메모 : " + clsNoteCursor.getString(clsNoteCursor.getColumnIndex(ContactsContract.CommonDataKinds.Note.NOTE)));
+                }
+                clsNoteCursor.close();
+
+
+                // address(주소지)
+                String addressWhere = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
+                String[] addressWhereParams = new String[]{
+                        strContactId,
+                        ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_ITEM_TYPE  // MIMETYPE 중  StructuredPostal(즉, 우편주소)에 해당하는 내용을 불러오라는 뜻
+                };
+
+                Cursor clsAddressCursor = MainActivity.this.getContentResolver().query(
+                        ContactsContract.Data.CONTENT_URI,
+                        null,
+                        addressWhere,
+                        addressWhereParams, // addressWhere 첫번째 ?에 addressWhereParams[0]이 들어가고, 두번째 ?d에 addressWhereParams[1]이 들어간다.
+                        null
+                );
+
+
+                while (clsAddressCursor.moveToNext()) {
+//사용자 주소 쓰고싶으면 이거 활용하면 됨
+//                Log.d("Unity", "연락처 사용자 주소 poBox : " + clsAddressCursor.getString(clsAddressCursor.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.POBOX)) );
+//                Log.d("Unity", "연락처 사용자 주소 street : " + clsAddressCursor.getString(clsAddressCursor.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.STREET)) );
+//                Log.d("Unity", "연락처 사용자 주소 city : " + clsAddressCursor.getString(clsAddressCursor.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.CITY)) );
+//                Log.d("Unity", "연락처 사용자 주소 region : " + clsAddressCursor.getString(clsAddressCursor.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.REGION)) );
+//                Log.d("Unity", "연락처 사용자 주소 postCode : " + clsAddressCursor.getString(clsAddressCursor.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.POSTCODE)) );
+//                Log.d("Unity", "연락처 사용자 주소 country : " + clsAddressCursor.getString(clsAddressCursor.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.COUNTRY)) );
+//                Log.d("Unity", "연락처 사용자 주소 type : " + clsAddressCursor.getString(clsAddressCursor.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.TYPE)) );
+                }
+                // address(주소지) 정보에 접근하는 Cursor 닫는다.
+                clsAddressCursor.close();
+
+
+                // Organization(회사)
+                String orgWhere = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
+                String[] orgWhereParams = new String[]{
+                        strContactId,
+                        ContactsContract.CommonDataKinds.Organization.CONTENT_ITEM_TYPE // MIMETYPE 중  Organization(즉, 회사)에 해당하는 내용을 불러오라는 뜻
+                };
+
+                Cursor clsOrgCursor = MainActivity.this.getContentResolver().query(
+                        ContactsContract.Data.CONTENT_URI,
+                        null,
+                        orgWhere,
+                        orgWhereParams,
+                        null
+                );
+
+                while (clsOrgCursor.moveToNext()) {
+// 회사/ 직급 활용하고 싶으면 이거 활용
+//                Log.d("Unity", "연락처 사용자 회사 : " + clsOrgCursor.getString(clsOrgCursor.getColumnIndex(ContactsContract.CommonDataKinds.Organization.DATA)));
+//                Log.d("Unity", "연락처 사용자 직급 : " + clsOrgCursor.getString(clsOrgCursor.getColumnIndex(ContactsContract.CommonDataKinds.Organization.TITLE)));
+                }
+
+                clsOrgCursor.close();
                 contactlist.add(acontact);
-            } while (contactCursor.moveToNext());
+            }
         }
+        clsCursor.close();
+
 
         return contactlist;
 
