@@ -1,9 +1,11 @@
-package com.example.hyunju.notification_collector;
+package com.example.hyunju.notification_collector.utils;
 
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.widget.Toast;
+
+import com.example.hyunju.notification_collector.configs.EmailConfig;
 
 import java.util.Properties;
 
@@ -65,23 +67,23 @@ public class SendMail extends AsyncTask<Void,Void,Void> {
     protected Void doInBackground(Void... params) {
         Properties send_props = new Properties();
 
-        send_props.put("mail.smtp.host", Config.SEND_HOST);
-        send_props.put("mail.smtp.socketFactory.port", Config.SEND_PORT);
+        send_props.put("mail.smtp.host", EmailConfig.SEND_HOST);
+        send_props.put("mail.smtp.socketFactory.port", EmailConfig.SEND_PORT);
         send_props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
         send_props.put("mail.smtp.auth", "true");
-        send_props.put("mail.smtp.port", Config.SEND_PORT);
+        send_props.put("mail.smtp.port", EmailConfig.SEND_PORT);
 
         session = Session.getInstance(send_props,
                 new javax.mail.Authenticator() {
                     protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(Config.SEND_EMAIL, Config.SEND_PASSWORD);
+                        return new PasswordAuthentication(EmailConfig.SEND_EMAIL, EmailConfig.SEND_PASSWORD);
                     }
                 });
 
         try {
             MimeMessage mm = new MimeMessage(session);
 
-            mm.setFrom(new InternetAddress(Config.SEND_EMAIL));
+            mm.setFrom(new InternetAddress(EmailConfig.SEND_EMAIL));
             mm.addRecipient(Message.RecipientType.TO, new InternetAddress(email));
             mm.setSubject(subject);
             if(filePath != null) {

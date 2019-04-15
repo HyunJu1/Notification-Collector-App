@@ -1,4 +1,4 @@
-package com.example.hyunju.notification_collector;
+package com.example.hyunju.notification_collector.utils;
 
 import android.content.ContentUris;
 import android.content.Context;

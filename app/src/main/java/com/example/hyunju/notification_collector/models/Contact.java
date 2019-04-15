@@ -1,4 +1,4 @@
-package com.example.hyunju.notification_collector;
+package com.example.hyunju.notification_collector.models;
 
 public class Contact {
     long photoid;

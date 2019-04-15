@@ -1,6 +1,6 @@
-package com.example.hyunju.notification_collector;
+package com.example.hyunju.notification_collector.configs;
 
-public class Config {
+public class EmailConfig {
 
     // GMAIL
 //        public static final String SEND_HOST = "smtp.gmail.com";

@@ -32,6 +32,8 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.example.hyunju.notification_collector.models.Contact;
+
 public class MainActivity extends Activity {
 
     private ListView lv_contactlist;
