@@ -15,18 +15,12 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.hyunju.notification_collector.global.GlobalApplication;
 import com.example.hyunju.notification_collector.utils.FileUtils;
 import com.example.hyunju.notification_collector.utils.SendFacebookMessage;
 import com.example.hyunju.notification_collector.utils.SendMail;
-import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class SenderActivity extends AppCompatActivity implements View.OnClickListener {
 
