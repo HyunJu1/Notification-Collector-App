@@ -15,11 +15,18 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.hyunju.notification_collector.global.GlobalApplication;
 import com.example.hyunju.notification_collector.utils.FileUtils;
+import com.example.hyunju.notification_collector.utils.SendFacebookMessage;
 import com.example.hyunju.notification_collector.utils.SendMail;
+import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class SenderActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -54,7 +61,6 @@ public class SenderActivity extends AppCompatActivity implements View.OnClickLis
 
         button.setOnClickListener(this);
         button_attachment.setOnClickListener(this);
-
     }
 
     /**
@@ -86,13 +92,38 @@ public class SenderActivity extends AppCompatActivity implements View.OnClickLis
             public void onClick(DialogInterface dialog, int pos) {
                 final String text = editText.getText().toString();  // editText의 text 받아온 변수
 
-                if (pos == 0) {
-
+                if (pos == 0) { // 문자
                     SmsManager smsManager = SmsManager.getDefault();
                     smsManager.sendTextMessage(phone_num, null, text, null, null);
 
                     MsgList.add(text);
                     Toast.makeText(SenderActivity.this, "문자 전송 성공", Toast.LENGTH_SHORT).show();
+                } else if (pos == 1) { // facebook message
+                    AlertDialog.Builder recipientDialog = new AlertDialog.Builder(SenderActivity.this);
+                    recipientDialog.setTitle("수신인을 입력하세요");
+                    final EditText et_recipient = new EditText(SenderActivity.this);
+                    recipientDialog.setView(et_recipient);
+
+                    recipientDialog.setPositiveButton("보내기", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            String content = et_recipient.getText().toString();
+                            SendFacebookMessage sfm = new SendFacebookMessage(content, text);
+                            sfm.execute();
+                            MsgList.add(content);
+                        }
+                    });
+
+                    recipientDialog.setNegativeButton("취소", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                        }
+                    });
+
+                    recipientDialog.show();
+                } else if (pos == 2) { // telegram
+
                 } else if(pos == 3) { // 이메일 부분
                     if(email != null) { // 사용자 이메일이 저장되어있는 경우
                         AlertDialog.Builder mail_builder = new AlertDialog.Builder(SenderActivity.this); // 이메일 제목 받는 dialog
