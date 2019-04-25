@@ -15,10 +15,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-<<<<<<< HEAD
 
-=======
->>>>>>> parent of 18c61e8... import 정리
 import com.example.hyunju.notification_collector.global.GlobalApplication;
 import com.example.hyunju.notification_collector.utils.FileUtils;
 import com.example.hyunju.notification_collector.utils.SendFacebookMessage;
