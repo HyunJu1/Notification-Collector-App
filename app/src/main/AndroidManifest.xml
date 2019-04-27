@@ -26,7 +26,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".SenderActivity"></activity>
+        <activity android:name=".telegram.AuthActivity"/>
+
     </application>
-    <uses-permission android:name="android.permission.INTERNET" />
 
 </manifest>
