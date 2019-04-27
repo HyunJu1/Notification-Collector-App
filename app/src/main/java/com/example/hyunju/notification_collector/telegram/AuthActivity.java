@@ -16,7 +16,6 @@ public class AuthActivity extends Activity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_auth);
         TgHelper.init(this);
         checkAuth();
     }
@@ -93,13 +92,14 @@ public class AuthActivity extends Activity{
     private void showLoginDialog(final int action, final TdApi.AuthCodeType nextAuthCodeType) {
         final AuthDialog dialog = new AuthDialog(this);
         dialog.show();
+        dialog.getEditText().setHint("휴대폰번호 입력");
+
 
         if (nextAuthCodeType == null)
             dialog.getResendView().setVisibility(View.GONE);
-
-
-        if (nextAuthCodeType.getConstructor() == TdApi.AuthCodeTypeSms.CONSTRUCTOR) {
+        else if (nextAuthCodeType.getConstructor() == TdApi.AuthCodeTypeSms.CONSTRUCTOR) {
             dialog.getResendView().setText(R.string.btnSendNewSmsCode);
+            dialog.getEditText().setHint("인증번호 입력");
         } else if (nextAuthCodeType.getConstructor() == TdApi.AuthCodeTypeCall.CONSTRUCTOR) {
             dialog.getResendView().setText(R.string.btnRequestAuthCall);
         }
@@ -110,7 +110,7 @@ public class AuthActivity extends Activity{
             public void onClick(View v) {
                 String text = dialog.getEditText().getText().toString();
                 if (text.isEmpty()) {
-                    showLoginDialog(action, nextAuthCodeType);
+                    return;
                 }
 
                 dialog.messageLoading();

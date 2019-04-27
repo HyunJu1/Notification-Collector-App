@@ -42,7 +42,6 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //텔레그램 인증
         startActivity(new Intent(this, AuthActivity.class));
 
         setContentView(R.layout.activity_main);

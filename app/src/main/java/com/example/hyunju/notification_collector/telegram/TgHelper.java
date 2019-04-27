@@ -41,6 +41,7 @@ public class TgHelper {
     }
 
     private final static Client.ResultHandler LoopUpdateHandler = new Client.ResultHandler() {
+        // 다 거침
         @Override
         public void onResult(TdApi.TLObject object) {
             if (object.getConstructor() == TdApi.UpdateUser.CONSTRUCTOR) {
@@ -94,7 +95,6 @@ public class TgHelper {
                 if (object.getConstructor() == TdApi.User.CONSTRUCTOR) {
                     TdApi.User me = (TdApi.User) object;
                     selfProfileId = me.id;
-                    PrefsHelper.set(SETS_PROFILE_ID, selfProfileId);
                     if (callback != null)
                         callback.onResult(object);
                 }

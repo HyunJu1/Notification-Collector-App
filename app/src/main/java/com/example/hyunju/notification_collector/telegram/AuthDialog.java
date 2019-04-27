@@ -109,7 +109,7 @@ public class AuthDialog extends AlertDialog {
         // TD 서버로 보내기 위한 모델
         switch (action) {
             case TdApi.AuthStateWaitPhoneNumber.CONSTRUCTOR:
-                return new TdApi.SetAuthPhoneNumber(mEditText.getText().toString(), true, true);
+                return new TdApi.SetAuthPhoneNumber("+82"+mEditText.getText().toString(), true, true);
             case TdApi.AuthStateWaitCode.CONSTRUCTOR:
                 return  new TdApi.CheckAuthCode(mEditText.getText().toString(), null, null);
             case TdApi.AuthStateWaitPassword.CONSTRUCTOR:
