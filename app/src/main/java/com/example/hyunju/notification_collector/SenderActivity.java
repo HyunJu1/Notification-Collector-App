@@ -15,7 +15,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.hyunju.notification_collector.telegram.TgUtils;
 import com.example.hyunju.notification_collector.utils.FileUtils;
 import com.example.hyunju.notification_collector.utils.SendFacebookMessage;
 import com.example.hyunju.notification_collector.utils.SendMail;
@@ -118,7 +117,6 @@ public class SenderActivity extends AppCompatActivity implements View.OnClickLis
 
                     recipientDialog.show();
                 } else if (pos == 2) { // telegram
-                    TgUtils.sendMessage(-1,"내용");
 
                 } else if(pos == 3) { // 이메일 부분
                     if(email != null) { // 사용자 이메일이 저장되어있는 경우

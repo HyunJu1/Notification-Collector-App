@@ -13,7 +13,7 @@ public class GlobalApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-//        retrofitInit();
+        retrofitInit();
     }
 
     private static void retrofitInit() {

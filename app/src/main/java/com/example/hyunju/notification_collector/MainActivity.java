@@ -1,9 +1,14 @@
 package com.example.hyunju.notification_collector;
 
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
 import android.Manifest;
 import android.app.Activity;
 import android.content.ContentUris;
 import android.content.Context;
+
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -28,11 +33,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.hyunju.notification_collector.models.Contact;
-import com.example.hyunju.notification_collector.telegram.AuthActivity;
-
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends Activity {
 
@@ -41,10 +41,6 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        //텔레그램 인증
-        startActivity(new Intent(this, AuthActivity.class));
-
         setContentView(R.layout.activity_main);
 
         lv_contactlist = (ListView) findViewById(R.id.lv_contactlist);

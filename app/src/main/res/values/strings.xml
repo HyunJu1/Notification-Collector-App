@@ -1,11 +1,3 @@
 <resources>
     <string name="app_name">Notification_Collector</string>
-    <string name="btnSendNewSmsCode">다시보내기</string>
-
-
-    <string name="btnRequestAuthCall">인증받기</string>
-    <string name="auth_phone_hint">폰번호 입력</string>
-    <string name="auth_confirmcode_hint">인증번호 입력</string>
-    <string name="auth_cloud_pass_hint">비밀번호 입력</string>
-    <string name="label_loading">전송완료</string>
 </resources>
