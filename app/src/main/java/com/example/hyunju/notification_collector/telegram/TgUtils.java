@@ -43,24 +43,7 @@ public class TgUtils {
             });
         }
     }
-    // 메세지 전송
-    public static void sendMessage(long chatId, String text) {
-        TdApi.InputMessageText inputMessageText = new TdApi.InputMessageText();
-        inputMessageText.text = text;
-        TdApi.SendMessage sendMessage = new TdApi.SendMessage();
-        sendMessage.chatId = chatId;
-        sendMessage.inputMessageContent = inputMessageText;
-        TgHelper.send(sendMessage);
-    }
-    //파일 전송
-    public static void sendFile(long chatId, TdApi.InputFile file) {
-        TdApi.InputMessageDocument inputMessageText = new TdApi.InputMessageDocument();
-        inputMessageText.document = file;
-        TdApi.SendMessage sendMessage = new TdApi.SendMessage();
-        sendMessage.chatId = chatId;
-        sendMessage.inputMessageContent = inputMessageText;
-        TgHelper.send(sendMessage);
-    }
+
 
     public static TdApi.User getUser(int userId) {
         TdApi.User user = TgHelper.users.get(userId);

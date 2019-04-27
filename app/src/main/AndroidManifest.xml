@@ -18,7 +18,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name=".telegram.AuthActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -26,7 +26,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".SenderActivity"></activity>
-        <activity android:name=".telegram.AuthActivity"/>
+        <activity android:name=".MainActivity"/>
 
     </application>
     <uses-permission android:name="android.permission.INTERNET" />

@@ -25,7 +25,7 @@ public class MatchMessenger {
     private MatchMessenger(){
     }
 
-    public void isUseTelegram(String phoneNum, boolean isUse){
+    public void setUseTelegram(String phoneNum, boolean isUse){
         if (mUserInfo.get(phoneNum)!=null){
             Messenger messenger=  mUserInfo.get(phoneNum);
             messenger.telegram = isUse;
@@ -34,6 +34,19 @@ public class MatchMessenger {
         }else {
             Messenger messenger= new Messenger();
             messenger.telegram = isUse;
+            mUserInfo.put(phoneNum, messenger);
+        }
+    }
+
+    public void setUseEmail(String phoneNum, boolean isUse){
+        if (mUserInfo.get(phoneNum)!=null){
+            Messenger messenger=  mUserInfo.get(phoneNum);
+            messenger.eMail = isUse;
+            mUserInfo.remove(phoneNum);
+            mUserInfo.put(phoneNum, messenger);
+        } else {
+            Messenger messenger= new Messenger();
+            messenger.eMail = isUse;
             mUserInfo.put(phoneNum, messenger);
         }
     }

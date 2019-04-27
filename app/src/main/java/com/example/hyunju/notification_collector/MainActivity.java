@@ -28,7 +28,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.hyunju.notification_collector.models.Contact;
-import com.example.hyunju.notification_collector.telegram.AuthActivity;
+import com.example.hyunju.notification_collector.utils.MatchMessenger;
+import com.example.hyunju.notification_collector.utils.TelegramChatManager;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -37,12 +38,14 @@ import java.util.List;
 public class MainActivity extends Activity {
 
     private ListView lv_contactlist;
+//    Contact mContact = new Contact();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        startActivity(new Intent(this, AuthActivity.class));
+//        startActivity(new Intent(this, AuthActivity.class));
 
         setContentView(R.layout.activity_main);
 
@@ -66,28 +69,13 @@ public class MainActivity extends Activity {
                         @Override
                         public void onItemClick(AdapterView<?> contactlist, View v,
                                                 int position, long resid) {
-
-
-                            Contact phonenumber = (Contact) contactlist.getItemAtPosition(position);
-
-                            if (phonenumber == null) {
-                                return;
-                            }
-
-
+                            Contact contact = (Contact) contactlist.getItemAtPosition(position);
                             Intent intent = new Intent(MainActivity.this, SenderActivity.class);
-                            intent.putExtra("phone_num", phonenumber.getPhonenum().replaceAll("-", ""));
-                            intent.putExtra("name", phonenumber.getName());
-                            intent.putExtra("email", phonenumber.getEmail());
-
+                            intent.putExtra("contact", contact);
                             startActivity(intent);
-
                         }
                     });
         }
-
-
-
     }
 
     @Override
@@ -130,7 +118,6 @@ public class MainActivity extends Activity {
 
     }
 
-
     private ArrayList<Contact> getContactList() {
 
         ArrayList<Contact> contactlist = new ArrayList<Contact>();
@@ -156,14 +143,14 @@ public class MainActivity extends Activity {
         );
         if (clsCursor.moveToFirst()) {
             while (clsCursor.moveToNext()) {
-                Contact acontact = new Contact();
 
                 String strContactId = clsCursor.getString(0);
 
                 // Log.d("Unity", "연락처 사용자 ID : " + clsCursor.getString(0));
                 Log.d("Unity", "연락처 사용자 이름 : " + clsCursor.getString(1));
-                //acontact.setPhotoid(Long.parseLong(clsCursor.getString( 0 )));
-                acontact.setName(clsCursor.getString(1));
+                //mContact.setPhotoid(Long.parseLong(clsCursor.getString( 0 )));
+                Contact contact =  new Contact();
+                contact.name = (clsCursor.getString(1));
                 // phone number에 접근하는 Cursor
                 Cursor clsPhoneCursor = MainActivity.this.getContentResolver().query(
                         ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
@@ -176,7 +163,7 @@ public class MainActivity extends Activity {
 
                 while (clsPhoneCursor.moveToNext()) {
                     //   Log.d("Unity", "연락처 사용자 번호 : " + clsPhoneCursor.getString(0));
-                    acontact.setPhonenum(clsPhoneCursor.getString(0));
+                    contact.phonenum = (clsPhoneCursor.getString(0));
                 }
 
                 clsPhoneCursor.close();
@@ -194,11 +181,19 @@ public class MainActivity extends Activity {
 
                 while (clsEmailCursor.moveToNext()) {
                     Log.d("Unity", "연락처 사용자 email : " + clsEmailCursor.getString(0));
-                    acontact.setEmail(clsEmailCursor.getString(0));
+                    contact.email = (clsEmailCursor.getString(0));
                 }
 
                 clsEmailCursor.close();
 
+                //텔레그램
+                String phoneNum = contact.phonenum.replaceAll("-", "");
+                MatchMessenger.getInstance()
+                        .setUseTelegram(phoneNum, TelegramChatManager.getInstance().isChattingUser(phoneNum));
+
+                //이메일
+                MatchMessenger.getInstance()
+                        .setUseEmail(phoneNum, checkEmail(contact.email));
 
                 // note(메모)
                 String noteWhere = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
@@ -276,7 +271,7 @@ public class MainActivity extends Activity {
                 }
 
                 clsOrgCursor.close();
-                contactlist.add(acontact);
+                contactlist.add(contact);
             }
         }
         clsCursor.close();
@@ -284,6 +279,13 @@ public class MainActivity extends Activity {
 
         return contactlist;
 
+    }
+
+    boolean checkEmail(String str){
+        if(str != null && !str.equals("")){
+            return str.contains("@");
+        }
+        return false;
     }
 
     private class ContactsAdapter extends ArrayAdapter<Contact> {
@@ -321,10 +323,10 @@ public class MainActivity extends Activity {
             Contact acontact = contactlist.get(position);
 
             if (acontact != null) {
-                holder.tv_name.setText(acontact.getName());
-                holder.tv_phonenumber.setText(acontact.getPhonenum());
+                holder.tv_name.setText(acontact.name);
+                holder.tv_phonenumber.setText(acontact.phonenum);
 
-                Bitmap bm = openPhoto(acontact.getPhotoid());
+                Bitmap bm = openPhoto(acontact.photoid);
 
                 if (bm != null) {
                     holder.iv_photoid.setImageBitmap(bm);

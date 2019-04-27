@@ -4,9 +4,8 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.View;
@@ -15,28 +14,28 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
-import com.example.hyunju.notification_collector.global.GlobalApplication;
+import com.example.hyunju.notification_collector.global.CollectorActivity;
+import com.example.hyunju.notification_collector.models.Contact;
+import com.example.hyunju.notification_collector.telegram.TgHelper;
 import com.example.hyunju.notification_collector.utils.FileUtils;
+import com.example.hyunju.notification_collector.utils.MatchMessenger;
 import com.example.hyunju.notification_collector.utils.SendFacebookMessage;
 import com.example.hyunju.notification_collector.utils.SendMail;
-import com.google.gson.JsonObject;
+import com.example.hyunju.notification_collector.utils.TelegramChatManager;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-public class SenderActivity extends AppCompatActivity implements View.OnClickListener {
+public class SenderActivity extends CollectorActivity implements View.OnClickListener {
 
     private static final int REQUEST_CODE = 6384;
 
     TextView textView_phone, textView_name;
     EditText editText;
     Button button;
-    private String phone_num, name, email;
+
+    Contact mContact = new Contact();
+
     private String path;
     private Button button_attachment;
 
@@ -44,21 +43,20 @@ public class SenderActivity extends AppCompatActivity implements View.OnClickLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sender);
-        textView_phone = (TextView) findViewById(R.id.textView_phone_num);
-        textView_name = (TextView) findViewById(R.id.textView_name);
-        Intent intent = getIntent();
-        phone_num = getIntent().getStringExtra("phone_num");
-        name = getIntent().getStringExtra("name");
-        email = getIntent().getStringExtra("email");
 
-        textView_phone.setText(phone_num);
-        textView_name.setText(name);
+        textView_phone = view(R.id.textView_phone_num);
+        textView_name = view(R.id.textView_name);
 
-        editText = (EditText) findViewById(R.id.editText_sender);
-        button = (Button) findViewById(R.id.button_sender);
-        button_attachment = (Button) findViewById(R.id.button_attachment);
+        mContact =  getIntent().getParcelableExtra("contact");
+        mContact.phonenum = mContact.phonenum.replaceAll("-", "");
 
-        String txt = editText.getText().toString();
+
+        textView_phone.setText(mContact.phonenum);
+        textView_name.setText(mContact.name);
+
+        editText = view(R.id.editText_sender);
+        button = view(R.id.button_sender);
+        button_attachment = view(R.id.button_attachment);
 
         button.setOnClickListener(this);
         button_attachment.setOnClickListener(this);
@@ -79,13 +77,21 @@ public class SenderActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     public void Dialog() {
-        final List<String> ListItems = new ArrayList<>();
-        final List<String> MsgList = new ArrayList<>(); // ****** 여기에 메시지 저장하면 됨 *******
-        ListItems.add("문자");
-        ListItems.add("페이스북");
-        ListItems.add("텔레그램");
-        ListItems.add("이메일");
-        final CharSequence[] items = ListItems.toArray(new String[ListItems.size()]);
+        final List<String> listItems = new ArrayList<>();
+        final List<String> msgList = new ArrayList<>(); // ****** 여기에 메시지 저장하면 됨 *******
+        listItems.add("문자");
+        listItems.add("페이스북");
+
+        // 텔레그램 사용유저만
+        if(MatchMessenger.getInstance().getMessengerInfo(mContact.phonenum).telegram) {
+            listItems.add("텔레그램");
+        }
+
+        // 이메일 주소 있을때만 보여지게
+        if(MatchMessenger.getInstance().getMessengerInfo(mContact.phonenum).eMail) {
+            listItems.add("이메일");
+        }
+        final CharSequence[] items = listItems.toArray(new String[listItems.size()]);
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("전송 수단을 선택하시오");
@@ -93,13 +99,13 @@ public class SenderActivity extends AppCompatActivity implements View.OnClickLis
             public void onClick(DialogInterface dialog, int pos) {
                 final String text = editText.getText().toString();  // editText의 text 받아온 변수
 
-                if (pos == 0) { // 문자
+                if ("문자".equals(listItems.get(pos))) { // 문자
                     SmsManager smsManager = SmsManager.getDefault();
-                    smsManager.sendTextMessage(phone_num, null, text, null, null);
+                    smsManager.sendTextMessage(mContact.phonenum, null, text, null, null);
 
-                    MsgList.add(text);
+                    msgList.add(text);
                     Toast.makeText(SenderActivity.this, "문자 전송 성공", Toast.LENGTH_SHORT).show();
-                } else if (pos == 1) { // facebook message
+                } else if ("페이스북".equals(listItems.get(pos))) { // facebook message
                     AlertDialog.Builder recipientDialog = new AlertDialog.Builder(SenderActivity.this);
                     recipientDialog.setTitle("수신인을 입력하세요");
                     final EditText et_recipient = new EditText(SenderActivity.this);
@@ -111,7 +117,7 @@ public class SenderActivity extends AppCompatActivity implements View.OnClickLis
                             String content = et_recipient.getText().toString();
                             SendFacebookMessage sfm = new SendFacebookMessage(content, text);
                             sfm.execute();
-                            MsgList.add(content);
+                            msgList.add(content);
                         }
                     });
 
@@ -123,11 +129,15 @@ public class SenderActivity extends AppCompatActivity implements View.OnClickLis
                     });
 
                     recipientDialog.show();
-                } else if (pos == 2) { // telegram
-                    TgUtils.sendMessage(-1,"내용");
-
-                } else if(pos == 3) { // 이메일 부분
-                    if(email != null) { // 사용자 이메일이 저장되어있는 경우
+                } else if ("텔레그램".equals(listItems.get(pos))) { // telegram
+                    long chatId = TelegramChatManager.getInstance().getChatId(mContact.phonenum);
+                    if(chatId!=TelegramChatManager.EXTRA_EMPTY_CHAT_ID) {
+                        TgHelper.sendMessage(chatId, text);
+                    } else {
+                        Toast.makeText(SenderActivity.this,"잘못된 텔레그램 메신저 사용자입니다.",Toast.LENGTH_SHORT);
+                    }
+                } else if("이메일".equals(listItems.get(pos))) { // 이메일 부분
+                    if(mContact.email != null) { // 사용자 이메일이 저장되어있는 경우
                         AlertDialog.Builder mail_builder = new AlertDialog.Builder(SenderActivity.this); // 이메일 제목 받는 dialog
                         mail_builder.setTitle("메일 제목을 입력해주세요");
                         final EditText editText_subject = new EditText(SenderActivity.this);
@@ -139,13 +149,13 @@ public class SenderActivity extends AppCompatActivity implements View.OnClickLis
                                 String subject = editText_subject.getText().toString();
                                 SendMail sm;
                                 if(path != null) {
-                                    sm = new SendMail(SenderActivity.this, email, subject, text, path);
+                                    sm = new SendMail(SenderActivity.this, mContact.email, subject, text, path);
                                 } else {
-                                    sm = new SendMail(SenderActivity.this, email, subject, text);
+                                    sm = new SendMail(SenderActivity.this, mContact.email, subject, text);
                                 }
                                 sm.execute();
 
-                                MsgList.add(subject);
+                                msgList.add(subject);
                             }
                         });
 
@@ -164,6 +174,7 @@ public class SenderActivity extends AppCompatActivity implements View.OnClickLis
                     String selectedText = items[pos].toString();
                     Toast.makeText(SenderActivity.this, selectedText, Toast.LENGTH_SHORT).show();
                 }
+                refreshTelegram();
             }
 
         });

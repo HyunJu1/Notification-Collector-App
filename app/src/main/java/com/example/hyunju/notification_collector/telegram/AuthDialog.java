@@ -26,7 +26,7 @@ public class AuthDialog extends AlertDialog {
     private TextView mResendView;
 
 
-    protected AuthDialog(@NonNull Context context) {
+    public AuthDialog(@NonNull Context context) {
         super(context);
         mActivity = (Activity) context;
         init();
