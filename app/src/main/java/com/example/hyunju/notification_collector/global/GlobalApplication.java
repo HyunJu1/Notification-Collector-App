@@ -20,7 +20,7 @@ public class GlobalApplication extends Application {
         Retrofit retrofit =
                 new Retrofit
                         .Builder()
-                        .baseUrl("") // 일단 server의 return값으로
+                        .baseUrl("http://test.com") // 일단 server의 return값으로
                         .addConverterFactory(GsonConverterFactory.create())
                         .build();
 

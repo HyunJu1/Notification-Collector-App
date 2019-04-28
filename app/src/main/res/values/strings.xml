@@ -8,4 +8,5 @@
     <string name="auth_confirmcode_hint">인증번호 입력</string>
     <string name="auth_cloud_pass_hint">비밀번호 입력</string>
     <string name="label_loading">전송완료</string>
+    <string name="title_activity_splash">SplashActivity</string>
 </resources>

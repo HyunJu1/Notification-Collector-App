@@ -43,7 +43,11 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         //텔레그램 인증
-        startActivity(new Intent(this, AuthActivity.class));
+
+        /**
+         에러나므로 일단 주석처리 하였음
+         **/
+        //startActivity(new Intent(this, AuthActivity.class));
 
         setContentView(R.layout.activity_main);
 
@@ -331,7 +335,7 @@ public class MainActivity extends Activity {
                     holder.iv_photoid.setImageBitmap(bm);
                 } else {
                     holder.iv_photoid.setImageDrawable(getResources()
-                            .getDrawable(R.mipmap.ic_launcher));
+                            .getDrawable(R.drawable.user_icon));
                 }
 
             }

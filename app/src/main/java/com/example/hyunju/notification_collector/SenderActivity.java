@@ -60,6 +60,7 @@ public class SenderActivity extends AppCompatActivity implements View.OnClickLis
 
     /**
      * 버튼 두 개라서 조잡해서 여기다가 정리함
+
      * **/
     @Override
     public void onClick(View v) {
