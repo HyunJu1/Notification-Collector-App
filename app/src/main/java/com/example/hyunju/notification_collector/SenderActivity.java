@@ -1,35 +1,40 @@
 package com.example.hyunju.notification_collector;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.util.DiffUtil;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.telephony.SmsManager;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
-import com.example.hyunju.notification_collector.global.GlobalApplication;
+import com.example.hyunju.notification_collector.models.SendedMessage;
+import com.example.hyunju.notification_collector.utils.DiffCallback;
 import com.example.hyunju.notification_collector.utils.FileUtils;
+import com.example.hyunju.notification_collector.utils.RecyclerViewAdapter;
 import com.example.hyunju.notification_collector.utils.SendFacebookMessage;
 import com.example.hyunju.notification_collector.utils.SendMail;
-import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-public class SenderActivity extends AppCompatActivity implements View.OnClickListener {
+public class SenderActivity extends AppCompatActivity implements View.OnClickListener, RecyclerViewAdapter.ItemClickListener {
 
     private static final int REQUEST_CODE = 6384;
 
@@ -39,6 +44,11 @@ public class SenderActivity extends AppCompatActivity implements View.OnClickLis
     private String phone_num, name, email;
     private String path;
     private Button button_attachment;
+
+    private Context context;
+    private RecyclerView rv_sendedMsg;
+    private RecyclerViewAdapter rv_adapter;
+    private List<SendedMessage> sendedMessages;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +72,15 @@ public class SenderActivity extends AppCompatActivity implements View.OnClickLis
 
         button.setOnClickListener(this);
         button_attachment.setOnClickListener(this);
+
+        context = this;
+        rv_sendedMsg = findViewById(R.id.rv_sendedMsg);
+        int numberOfColumns = 1;
+        rv_sendedMsg.setLayoutManager(new GridLayoutManager(context, numberOfColumns));
+        sendedMessages = new ArrayList<SendedMessage>();
+        rv_adapter = new RecyclerViewAdapter(context, sendedMessages);
+        rv_adapter.setClickListener(this);
+        rv_sendedMsg.setAdapter(rv_adapter);
     }
 
     /**
@@ -81,7 +100,6 @@ public class SenderActivity extends AppCompatActivity implements View.OnClickLis
 
     public void Dialog() {
         final List<String> ListItems = new ArrayList<>();
-        final List<String> MsgList = new ArrayList<>(); // ****** 여기에 메시지 저장하면 됨 *******
         ListItems.add("문자");
         ListItems.add("페이스북");
         ListItems.add("텔레그램");
@@ -98,7 +116,10 @@ public class SenderActivity extends AppCompatActivity implements View.OnClickLis
                     SmsManager smsManager = SmsManager.getDefault();
                     smsManager.sendTextMessage(phone_num, null, text, null, null);
 
-                    MsgList.add(text);
+                    SendedMessage sendedMessage = new SendedMessage(text, "sms");
+                    sendedMessages.add(sendedMessage);
+                    rv_adapter.notifyDataSetChanged();
+
                     Toast.makeText(SenderActivity.this, "문자 전송 성공", Toast.LENGTH_SHORT).show();
                 } else if (pos == 1) { // facebook message
                     AlertDialog.Builder recipientDialog = new AlertDialog.Builder(SenderActivity.this);
@@ -112,7 +133,10 @@ public class SenderActivity extends AppCompatActivity implements View.OnClickLis
                             String content = et_recipient.getText().toString();
                             SendFacebookMessage sfm = new SendFacebookMessage(content, text);
                             sfm.execute();
-                            MsgList.add(content);
+
+                            SendedMessage sendedMessage = new SendedMessage(text, "facebook");
+                            sendedMessages.add(sendedMessage);
+                            rv_adapter.notifyDataSetChanged();
                         }
                     });
 
@@ -125,7 +149,7 @@ public class SenderActivity extends AppCompatActivity implements View.OnClickLis
 
                     recipientDialog.show();
                 } else if (pos == 2) { // telegram
-                    TgUtils.sendMessage(-1,"내용");
+//                    TgUtils.sendMessage(-1,"내용");
 
                 } else if(pos == 3) { // 이메일 부분
                     if(email != null) { // 사용자 이메일이 저장되어있는 경우
@@ -146,7 +170,9 @@ public class SenderActivity extends AppCompatActivity implements View.OnClickLis
                                 }
                                 sm.execute();
 
-                                MsgList.add(subject);
+                                SendedMessage sendedMessage = new SendedMessage(text, "email");
+                                sendedMessages.add(sendedMessage);
+                                rv_adapter.notifyDataSetChanged();
                             }
                         });
 
@@ -194,5 +220,8 @@ public class SenderActivity extends AppCompatActivity implements View.OnClickLis
         }
     }
 
-
+    @Override
+    public void onItemClick(View view, int position) {
+        Toast.makeText(this, rv_adapter.getItem(position).toString(), Toast.LENGTH_SHORT).show();
+    }
 }
