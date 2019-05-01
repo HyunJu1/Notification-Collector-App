@@ -15,6 +15,7 @@
             android:id="@+id/iv_photo"
             android:layout_width="50dp"
             android:layout_height="50dp"
+            android:padding="3dp"
             android:scaleType="fitXY" />
 
         <TextView
@@ -22,6 +23,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="4"
+            android:padding="2dp"
             android:singleLine="true"
             android:textSize="20sp" />
 

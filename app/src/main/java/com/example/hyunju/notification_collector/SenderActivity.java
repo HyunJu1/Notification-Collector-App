@@ -25,7 +25,7 @@ import android.widget.Toast;
 
 
 import com.example.hyunju.notification_collector.models.SendedMessage;
-import com.example.hyunju.notification_collector.utils.DiffCallback;
+//import com.example.hyunju.notification_collector.utils.DiffCallback;
 import com.example.hyunju.notification_collector.utils.FileUtils;
 import com.example.hyunju.notification_collector.utils.RecyclerViewAdapter;
 import com.example.hyunju.notification_collector.utils.SendFacebookMessage;

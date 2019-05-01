@@ -29,7 +29,8 @@
         <activity android:name=".SenderActivity" />
         <activity android:name=".telegram.AuthActivity" />
         <activity
-            android:name=".MainActivity" />
+            android:name=".MainActivity"
+            android:windowSoftInputMode="adjustNothing"/>
     </application>
     <uses-permission android:name="android.permission.INTERNET" />
 

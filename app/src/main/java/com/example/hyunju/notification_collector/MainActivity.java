@@ -23,6 +23,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -37,6 +40,9 @@ import java.util.List;
 public class MainActivity extends Activity {
 
     private ListView lv_contactlist;
+
+    private ImageButton btnSearch; // 리스트 검색 기능 추후 구현 예정 (현주)
+    private EditText edtSearch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +59,9 @@ public class MainActivity extends Activity {
 
         lv_contactlist = (ListView) findViewById(R.id.lv_contactlist);
 
+        btnSearch = (ImageButton) findViewById(R.id.btnSearch);
+        edtSearch =(EditText)findViewById(R.id.editSearch);
+
 
         if (checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED ||
                 checkSelfPermission(Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED ||
@@ -60,7 +69,7 @@ public class MainActivity extends Activity {
                 checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
                 ) {
             requestPermissions(new String[]{Manifest.permission.READ_CONTACTS, Manifest.permission.SEND_SMS, Manifest.permission.READ_PHONE_STATE, Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
-        }else{
+        } else {
             ContactsAdapter adapter = new ContactsAdapter(MainActivity.this,
                     R.layout.layout_phonelist, getContactList());
 
@@ -90,7 +99,6 @@ public class MainActivity extends Activity {
                         }
                     });
         }
-
 
 
     }
