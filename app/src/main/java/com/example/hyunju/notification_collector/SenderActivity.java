@@ -6,26 +6,19 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.telephony.SmsManager;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
 import com.example.hyunju.notification_collector.models.SendedMessage;
-//import com.example.hyunju.notification_collector.utils.DiffCallback;
 import com.example.hyunju.notification_collector.utils.FileUtils;
 import com.example.hyunju.notification_collector.utils.RecyclerViewAdapter;
 import com.example.hyunju.notification_collector.utils.SendFacebookMessage;
@@ -34,7 +27,7 @@ import com.example.hyunju.notification_collector.utils.SendMail;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SenderActivity extends AppCompatActivity implements View.OnClickListener, RecyclerViewAdapter.ItemClickListener {
+public class SenderActivity extends Activity implements View.OnClickListener, RecyclerViewAdapter.ItemClickListener {
 
     private static final int REQUEST_CODE = 6384;
 
@@ -118,7 +111,7 @@ public class SenderActivity extends AppCompatActivity implements View.OnClickLis
 
                     SendedMessage sendedMessage = new SendedMessage(text, "sms");
                     sendedMessages.add(sendedMessage);
-                    rv_adapter.notifyDataSetChanged();
+                    rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
 
                     Toast.makeText(SenderActivity.this, "문자 전송 성공", Toast.LENGTH_SHORT).show();
                 } else if (pos == 1) { // facebook message
@@ -136,7 +129,7 @@ public class SenderActivity extends AppCompatActivity implements View.OnClickLis
 
                             SendedMessage sendedMessage = new SendedMessage(text, "facebook");
                             sendedMessages.add(sendedMessage);
-                            rv_adapter.notifyDataSetChanged();
+                            rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
                         }
                     });
 
@@ -172,7 +165,7 @@ public class SenderActivity extends AppCompatActivity implements View.OnClickLis
 
                                 SendedMessage sendedMessage = new SendedMessage(text, "email");
                                 sendedMessages.add(sendedMessage);
-                                rv_adapter.notifyDataSetChanged();
+                                rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
                             }
                         });
 
