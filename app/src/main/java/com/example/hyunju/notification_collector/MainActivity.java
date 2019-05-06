@@ -29,6 +29,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.hyunju.notification_collector.models.Contact;
 import com.example.hyunju.notification_collector.telegram.AuthActivity;
@@ -44,12 +45,15 @@ public class MainActivity extends Activity {
     private ImageButton btnSearch; // 리스트 검색 기능 추후 구현 예정 (현주)
     private EditText edtSearch;
 
+    private Button btn_multi, btn_multi_send;
+    private boolean isMultiMode = false;
+    private ArrayList<Contact> contactGroup;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         //텔레그램 인증
-
         /**
          에러나므로 일단 주석처리 하였음
          **/
@@ -57,11 +61,33 @@ public class MainActivity extends Activity {
 
         setContentView(R.layout.activity_main);
 
-        lv_contactlist = (ListView) findViewById(R.id.lv_contactlist);
+        lv_contactlist = findViewById(R.id.lv_contactlist);
 
-        btnSearch = (ImageButton) findViewById(R.id.btnSearch);
-        edtSearch =(EditText)findViewById(R.id.editSearch);
+        btnSearch = findViewById(R.id.btnSearch);
+        edtSearch = findViewById(R.id.editSearch);
 
+        btn_multi = findViewById(R.id.btn_multi);
+        btn_multi.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                isMultiMode = !isMultiMode;
+                btn_multi_send.setVisibility(isMultiMode ? View.VISIBLE : View.INVISIBLE);
+            }
+        });
+        contactGroup = new ArrayList<>();
+        btn_multi_send = findViewById(R.id.btn_multi_send);
+        btn_multi_send.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (contactGroup.size() == 0) {
+                    return;
+                }
+
+                Intent intent = new Intent(MainActivity.this, SendToGroupActivity.class);
+                intent.putExtra("contacts", contactGroup);
+                startActivity(intent);
+            }
+        });
 
         if (checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED ||
                 checkSelfPermission(Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED ||
@@ -76,31 +102,33 @@ public class MainActivity extends Activity {
             lv_contactlist.setAdapter(adapter);
             lv_contactlist
                     .setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
                         @Override
                         public void onItemClick(AdapterView<?> contactlist, View v,
                                                 int position, long resid) {
-
-
                             Contact phonenumber = (Contact) contactlist.getItemAtPosition(position);
 
                             if (phonenumber == null) {
                                 return;
                             }
 
-
-                            Intent intent = new Intent(MainActivity.this, SenderActivity.class);
-                            intent.putExtra("phone_num", phonenumber.getPhonenum().replaceAll("-", ""));
-                            intent.putExtra("name", phonenumber.getName());
-                            intent.putExtra("email", phonenumber.getEmail());
-
-                            startActivity(intent);
-
+                            if (isMultiMode) {
+                                Contact contact = new Contact(
+                                        phonenumber.getPhonenum().replaceAll("-", ""),
+                                        phonenumber.getName(),
+                                        phonenumber.getEmail()
+                                );
+                                contactGroup.add(contact);
+                                Toast.makeText(getApplicationContext(), phonenumber.getName() + " 추가", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Intent intent = new Intent(MainActivity.this, SenderActivity.class);
+                                intent.putExtra("phone_num", phonenumber.getPhonenum().replaceAll("-", ""));
+                                intent.putExtra("name", phonenumber.getName());
+                                intent.putExtra("email", phonenumber.getEmail());
+                                startActivity(intent);
+                            }
                         }
                     });
         }
-
-
     }
 
     @Override
@@ -136,13 +164,6 @@ public class MainActivity extends Activity {
 
         }
     }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-    }
-
 
     private ArrayList<Contact> getContactList() {
 
@@ -322,10 +343,9 @@ public class MainActivity extends Activity {
             if (v == null) {
                 v = Inflater.inflate(resId, null);
                 holder = new ViewHolder();
-                holder.tv_name = (TextView) v.findViewById(R.id.tv_name);
-                holder.tv_phonenumber = (TextView) v
-                        .findViewById(R.id.tv_phonenumber);
-                holder.iv_photoid = (ImageView) v.findViewById(R.id.iv_photo);
+                holder.tv_name = v.findViewById(R.id.tv_name);
+                holder.tv_phonenumber = v.findViewById(R.id.tv_phonenumber);
+                holder.iv_photoid = v.findViewById(R.id.iv_photo);
                 v.setTag(holder);
             } else {
                 holder = (ViewHolder) v.getTag();
@@ -347,7 +367,6 @@ public class MainActivity extends Activity {
                 }
 
             }
-
             return v;
         }
 
@@ -372,5 +391,4 @@ public class MainActivity extends Activity {
         }
 
     }
-    //
 }

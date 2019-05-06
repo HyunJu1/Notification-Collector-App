@@ -1,6 +1,8 @@
 package com.example.hyunju.notification_collector.models;
 
-public class Contact {
+import java.io.Serializable;
+
+public class Contact implements Serializable {
     long photoid;
     String phonenum;
     String name;
@@ -10,6 +12,14 @@ public class Contact {
     String group;
     String addr;
 
+    public Contact() {
+    }
+
+    public Contact(String phonenum, String name, String email) {
+        this.phonenum = phonenum;
+        this.name = name;
+        this.email = email;
+    }
 
     public long getPhotoid() {
         return photoid;

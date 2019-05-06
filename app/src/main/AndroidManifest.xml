@@ -31,7 +31,6 @@
         <activity
             android:name=".MainActivity"
             android:windowSoftInputMode="adjustNothing"/>
+        <activity android:name=".SendToGroupActivity" />
     </application>
-    <uses-permission android:name="android.permission.INTERNET" />
-
 </manifest>
