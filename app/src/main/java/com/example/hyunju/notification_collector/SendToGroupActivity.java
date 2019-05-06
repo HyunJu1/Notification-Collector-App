@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -36,6 +37,7 @@ public class SendToGroupActivity extends AppCompatActivity {
     private ListViewAdapter adapter;
     private ArrayList<Contact> contacts;
     private ArrayList<Boolean> didSend;
+    private ArrayList<NotificationEvent> replyList;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -43,6 +45,17 @@ public class SendToGroupActivity extends AppCompatActivity {
         setContentView(R.layout.activity_send_to_group);
 
         lv_recipients = findViewById(R.id.lv_recipients);
+        lv_recipients.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapter, View view, int i, long l) {
+                Contact contact = (Contact) adapter.getItemAtPosition(i);
+                for (NotificationEvent e : replyList) {
+                    if (e.getTitle().equals(contact.getName())) {
+                        Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+        });
         et_msg = findViewById(R.id.et_msg);
         btn_attachment = findViewById(R.id.btn_attachment);
         btn_send = findViewById(R.id.btn_send);
@@ -68,6 +81,7 @@ public class SendToGroupActivity extends AppCompatActivity {
         }
         adapter = new ListViewAdapter(contacts, didSend);
         lv_recipients.setAdapter(adapter);
+        replyList = new ArrayList<>();
     }
 
     @Override
@@ -83,6 +97,7 @@ public class SendToGroupActivity extends AppCompatActivity {
             if (contacts.get(i).getName().equals(name)) {
                 didSend.set(i, true);
                 adapter.notifyDataSetChanged();
+                replyList.add(e);
                 break;
             }
         }
