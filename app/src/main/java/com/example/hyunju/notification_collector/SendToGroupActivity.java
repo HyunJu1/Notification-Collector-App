@@ -33,6 +33,7 @@ public class SendToGroupActivity extends AppCompatActivity {
     private ListView lv_recipients;
     private EditText et_msg;
     private Button btn_attachment, btn_send;
+    private TextView tv_group_text;
 
     private ListViewAdapter adapter;
     private ArrayList<Contact> contacts;
@@ -44,6 +45,7 @@ public class SendToGroupActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_send_to_group);
 
+        tv_group_text = findViewById(R.id.tv_group_text);
         lv_recipients = findViewById(R.id.lv_recipients);
         lv_recipients.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -62,6 +64,7 @@ public class SendToGroupActivity extends AppCompatActivity {
         btn_send.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
+                tv_group_text.setText("보낸 메세지: " + et_msg.getText().toString());
                 SmsManager smsManager = SmsManager.getDefault();
                 for (Contact contact : contacts) {
                     smsManager.sendTextMessage(
