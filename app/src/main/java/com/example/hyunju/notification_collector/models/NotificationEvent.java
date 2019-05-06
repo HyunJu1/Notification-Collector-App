@@ -8,19 +8,22 @@ public class NotificationEvent {
     private CharSequence subText;
     private int smallIconRes;
     private Bitmap largeIcon;
+    private String postTime;
 
-    public NotificationEvent(String title, CharSequence text, CharSequence subText, int smallIconRes, Bitmap largeIcon) {
+    public NotificationEvent(String title, CharSequence text, CharSequence subText, int smallIconRes, Bitmap largeIcon, String postTime) {
         this.title = title;
         this.text = text;
         this.subText = subText;
         this.smallIconRes = smallIconRes;
         this.largeIcon = largeIcon;
+        this.postTime = postTime;
     }
 
-    public NotificationEvent(String title, CharSequence text, CharSequence subText) {
+    public NotificationEvent(String title, CharSequence text, CharSequence subText, String postTime) {
         this.title = title;
         this.text = text;
         this.subText = subText;
+        this.postTime = postTime;
     }
 
     public String getTitle() {
@@ -63,12 +66,19 @@ public class NotificationEvent {
         this.largeIcon = largeIcon;
     }
 
+    public String getPostTime() {
+        return postTime;
+    }
+
+    public void setPostTime(String postTime) {
+        this.postTime = postTime;
+    }
+
     @Override
     public String toString() {
-        return "NotificationEvent{" +
-                "title='" + title + '\'' +
+        return "title='" + title + '\'' +
                 ", text=" + text +
                 ", subText=" + subText +
-                '}';
+                ", postTime='" + postTime;
     }
 }

@@ -11,15 +11,18 @@ import com.example.hyunju.notification_collector.models.NotificationEvent;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class NotificationListener extends NotificationListenerService {
     private final static String TAG = NotificationListener.class.getName();
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         super.onNotificationPosted(sbn);
-//        Log.i(TAG, "onNotificationPosted() - " + sbn.toString());
-//        Log.i(TAG, "PackageName:" + sbn.getPackageName());
-        Log.i(TAG, "PostTime:" + sbn.getPostTime());
+        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd,yyyy HH:mm");
+        Date date = new Date(sbn.getPostTime());
+        String formattedDate = sdf.format(date);
 
         Notification notification = sbn.getNotification();
         Bundle extras = notification.extras;
@@ -30,7 +33,7 @@ public class NotificationListener extends NotificationListenerService {
         int smallIconRes = extras.getInt(Notification.EXTRA_SMALL_ICON);
         Bitmap largeIcon = extras.getParcelable(Notification.EXTRA_LARGE_ICON);
 
-        NotificationEvent notificationEvent = new NotificationEvent(title, text, subText);
+        NotificationEvent notificationEvent = new NotificationEvent(title, text, subText, formattedDate);
         Log.i(TAG, notificationEvent.toString());
         EventBus.getDefault().post(notificationEvent);
     }
