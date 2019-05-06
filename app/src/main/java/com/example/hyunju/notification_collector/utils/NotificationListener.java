@@ -7,6 +7,10 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
+import com.example.hyunju.notification_collector.models.NotificationEvent;
+
+import org.greenrobot.eventbus.EventBus;
+
 public class NotificationListener extends NotificationListenerService {
     private final static String TAG = NotificationListener.class.getName();
 
@@ -19,14 +23,15 @@ public class NotificationListener extends NotificationListenerService {
 
         Notification notification = sbn.getNotification();
         Bundle extras = notification.extras;
+
         String title = extras.getString(Notification.EXTRA_TITLE);
         CharSequence text = extras.getCharSequence(Notification.EXTRA_TEXT);
         CharSequence subText = extras.getCharSequence(Notification.EXTRA_SUB_TEXT);
         int smallIconRes = extras.getInt(Notification.EXTRA_SMALL_ICON);
         Bitmap largeIcon = extras.getParcelable(Notification.EXTRA_LARGE_ICON);
 
-        Log.i(TAG, "Title:" + title);
-        Log.i(TAG, "Text:" + text);
-        Log.i(TAG, "Sub Text:" + subText);
+        NotificationEvent notificationEvent = new NotificationEvent(title, text, subText);
+        Log.i(TAG, notificationEvent.toString());
+        EventBus.getDefault().post(notificationEvent);
     }
 }

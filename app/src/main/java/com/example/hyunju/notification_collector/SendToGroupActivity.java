@@ -18,6 +18,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.hyunju.notification_collector.models.Contact;
+import com.example.hyunju.notification_collector.models.NotificationEvent;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 
@@ -63,6 +68,30 @@ public class SendToGroupActivity extends AppCompatActivity {
         }
         adapter = new ListViewAdapter(contacts, didSend);
         lv_recipients.setAdapter(adapter);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onNotificationEvent(NotificationEvent e) {
+        String name = e.getTitle();
+        for (int i = 0; i < contacts.size(); i++) {
+            if (contacts.get(i).getName().equals(name)) {
+                didSend.set(i, true);
+                adapter.notifyDataSetChanged();
+                break;
+            }
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
     }
 }
 
