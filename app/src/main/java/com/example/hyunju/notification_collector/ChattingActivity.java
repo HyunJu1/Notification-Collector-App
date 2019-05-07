@@ -20,11 +20,11 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.hyunju.notification_collector.models.ReceivedMessage;
+
 import com.example.hyunju.notification_collector.models.SendedMessage;
 import com.example.hyunju.notification_collector.utils.FileUtils;
 import com.example.hyunju.notification_collector.utils.RecyclerViewAdapter;
-import com.example.hyunju.notification_collector.utils.RecyclerViewAdapterRC;
+
 import com.example.hyunju.notification_collector.utils.SendFacebookMessage;
 import com.example.hyunju.notification_collector.utils.SendMail;
 
@@ -51,9 +51,9 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
     private RecyclerView rv_recievdMsg;
 
     private RecyclerViewAdapter rv_adapter;
-    private RecyclerViewAdapterRC rv_adapter_rc;
+
     private List<SendedMessage> sendedMessages;
-    private List<ReceivedMessage> receiveddMessages;
+
 
     private String formatDate;
     @Override
@@ -89,7 +89,7 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
 
         int numberOfColumns = 1;
         rv_sendedMsg = findViewById(R.id.rv_sendedMsg);
-        rv_recievdMsg = findViewById(R.id.rv_receivedMsg);
+       // rv_recievdMsg = findViewById(R.id.rv_receivedMsg);
 
         rv_sendedMsg.setLayoutManager(new GridLayoutManager(context, numberOfColumns));
         sendedMessages = new ArrayList<SendedMessage>();
@@ -98,13 +98,6 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
         rv_sendedMsg.setAdapter(rv_adapter);
 
 
-
-        int numberOfColumns2 = 1;
-        rv_recievdMsg.setLayoutManager(new GridLayoutManager(context, numberOfColumns2));
-        receiveddMessages = new ArrayList<ReceivedMessage>();
-        rv_adapter_rc = new RecyclerViewAdapterRC(context, receiveddMessages);
-        //rv_adapter_rc.setClickListener(this);
-        rv_recievdMsg.setAdapter(rv_adapter_rc);
 
 
 
@@ -120,11 +113,11 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
 
             try {
 
-                ReceivedMessage model = new ReceivedMessage(message,"sms",receivedDate);
+                SendedMessage model = new SendedMessage(message,"sms",receivedDate);
 
 
-                    receiveddMessages.add(model);
-                    rv_adapter_rc.notifyItemChanged(sendedMessages.size() - 1);
+                    sendedMessages.add(model);
+                    rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
 
 
 
@@ -234,7 +227,7 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
                                 sm.execute();
 
                                 SendedMessage sendedMessage = new SendedMessage(text, "email",getTime());
-                                sendedMessages.add(sendedMessage);
+                                sendedMessages.add(sendedMessage,1);
                                 rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
                             }
                         });
