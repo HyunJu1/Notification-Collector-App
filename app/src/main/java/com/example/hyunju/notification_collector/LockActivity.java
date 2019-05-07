@@ -16,7 +16,7 @@ public class LockActivity extends AppCompatActivity {
     private PinLockView mPinLockView;
     private IndicatorDots mIndicatorDots;
     private final static String TAG = LockActivity.class.getSimpleName();
-    private final static String TRUE_CODE = "123456";
+    private final static String TRUE_CODE = "1234";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -27,13 +27,10 @@ public class LockActivity extends AppCompatActivity {
         mPinLockView = (PinLockView) findViewById(R.id.pin_lock_view);
         mIndicatorDots = (IndicatorDots) findViewById(R.id.indicator_dots);
 
-        //attach lock view with dot indicator
         mPinLockView.attachIndicatorDots(mIndicatorDots);
 
-        //set lock code length
-        mPinLockView.setPinLength(6);
+        mPinLockView.setPinLength(4);
 
-        //set listener for lock code change
         mPinLockView.setPinLockListener(new PinLockListener() {
             @Override
             public void onComplete(String pin) {
@@ -42,11 +39,10 @@ public class LockActivity extends AppCompatActivity {
                 //User input true code
                 if (pin.equals(TRUE_CODE)) {
                     Intent intent = new Intent(LockActivity.this, MainActivity.class);
-                    intent.putExtra("code", pin);
                     startActivity(intent);
                     finish();
                 } else {
-                    Toast.makeText(LockActivity.this, "Failed code, try again!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LockActivity.this, "비밀번호가 올바르지 않습니다.", Toast.LENGTH_SHORT).show();
                 }
             }
 

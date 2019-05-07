@@ -1,15 +1,17 @@
 package com.example.hyunju.notification_collector;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
-public class SplashActivity extends AppCompatActivity {
+public class SplashActivity extends AppCompatActivity  {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -17,16 +19,32 @@ public class SplashActivity extends AppCompatActivity {
         setContentView(R.layout.activity_splash);
 
         Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Intent intent = new Intent(SplashActivity.this, MainActivity.class);
-                startActivity(intent);
-                finish();
-            }
-        }, 1000);
-        /** 빠른 디버깅을 위해 일단 1초로 설정. 추후 변동 가능
-         *
-         */
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        // 어플 잠금 설정이 되어있는 경우
+        if(sharedPreferences.getBoolean("pref_lock", false) == true) {
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    Intent intent = new Intent(SplashActivity.this, LockActivity.class);
+                    startActivity(intent);
+                    finish();
+                }
+            }, 1000);
+        } else { // 어플 잠금 설정이 되어있지 않는 경우
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    Intent intent = new Intent(SplashActivity.this, MainActivity.class);
+                    startActivity(intent);
+                    finish();
+                }
+            }, 1000);
+            /** 빠른 디버깅을 위해 일단 1초로 설정. 추후 변동 가능
+             *
+             */
+        }
     }
+
 }

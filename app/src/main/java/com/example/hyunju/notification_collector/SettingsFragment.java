@@ -28,9 +28,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
             }
         }
 
-        Preference preference = findPreference(getString(R.string.pref_size_key));
-        preference.setOnPreferenceChangeListener(this);
-
     }
 
 
