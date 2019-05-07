@@ -113,14 +113,16 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
 
             try {
 
-                SendedMessage model = new SendedMessage(message,"sms",receivedDate);
+                SendedMessage model = new SendedMessage(message,"sms ",receivedDate,1);
 
 
                     sendedMessages.add(model);
                     rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
 
-
-
+/***
+ * type 변수 추가 -> 0이면 send, 1이면 receive
+ *
+ */
 
 
             } catch (Exception e) {
@@ -171,7 +173,7 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
                     SmsManager smsManager = SmsManager.getDefault();
                     smsManager.sendTextMessage(phone_num, null, text, null, null);
 
-                    SendedMessage sendedMessage = new SendedMessage(text, "sms",getTime());
+                    SendedMessage sendedMessage = new SendedMessage(text, "sms ",getTime(),0);
                     sendedMessages.add(sendedMessage);
                     rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
 
@@ -190,7 +192,7 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
                             SendFacebookMessage sfm = new SendFacebookMessage(content, text);
                             sfm.execute();
 
-                            SendedMessage sendedMessage = new SendedMessage(text, "facebook",getTime());
+                            SendedMessage sendedMessage = new SendedMessage(text, "facebook ",getTime(),0);
                             sendedMessages.add(sendedMessage);
                             rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
                         }
@@ -226,8 +228,8 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
                                 }
                                 sm.execute();
 
-                                SendedMessage sendedMessage = new SendedMessage(text, "email",getTime());
-                                sendedMessages.add(sendedMessage,1);
+                                SendedMessage sendedMessage = new SendedMessage(text, "email ",getTime(),0);
+                                sendedMessages.add(sendedMessage);
                                 rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
                             }
                         });
