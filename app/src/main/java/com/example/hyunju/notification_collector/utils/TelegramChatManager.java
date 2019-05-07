@@ -107,6 +107,26 @@ public class TelegramChatManager {
         TgHelper.send(sendMessage);
     }
 
+    public void sendFile(long chatId, String text, String path) {
+        TdApi.InputMessageDocument inputMessageDocument = new TdApi.InputMessageDocument();
+        inputMessageDocument.caption = text;
+        inputMessageDocument.document = new TdApi.InputFileLocal(path);
+        TdApi.SendMessage sendMessage = new TdApi.SendMessage();
+        sendMessage.chatId = chatId;
+        sendMessage.inputMessageContent = inputMessageDocument;
+        TgHelper.send(sendMessage);
+    }
+
+    public void sendPhoto(long chatId, String text, String path) {
+        TdApi.InputMessagePhoto inputMessagePhoto = new TdApi.InputMessagePhoto();
+        inputMessagePhoto.caption = text;
+        inputMessagePhoto.photo = new TdApi.InputFileLocal(path);
+        TdApi.SendMessage sendMessage = new TdApi.SendMessage();
+        sendMessage.chatId = chatId;
+        sendMessage.inputMessageContent = inputMessagePhoto;
+        TgHelper.send(sendMessage);
+    }
+
     public HashMap<String, TdApi.Chat> getChatList() {
         return mChatList;
     }
@@ -122,9 +142,11 @@ public class TelegramChatManager {
         void onResult(T result);
     }
 
+
     /**
      * 메시지 전송 상태
      */
+
     public enum MessageState {
         /**
          * 메시지 전송은 했으나 아직 텔레그램 서버는 못받은 상태

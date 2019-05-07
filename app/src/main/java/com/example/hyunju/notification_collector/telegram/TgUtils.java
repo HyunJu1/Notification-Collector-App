@@ -1,6 +1,8 @@
 package com.example.hyunju.notification_collector.telegram;
 
 
+import com.example.hyunju.notification_collector.utils.TelegramChatManager;
+
 import org.drinkless.td.libcore.telegram.Client;
 import org.drinkless.td.libcore.telegram.Client.ResultHandler;
 import org.drinkless.td.libcore.telegram.TdApi;
@@ -42,8 +44,17 @@ public class TgUtils {
                 }
             });
         }
+
     }
 
+    public void getTelegramContact(String name, final TelegramChatManager.Callback<TdApi.Users> callback) {
+        TgHelper.send(new TdApi.SearchContacts(name, 200), new Client.ResultHandler() {
+            @Override
+            public void onResult(TdApi.TLObject object) {
+                callback.onResult((TdApi.Users) object);
+            }
+        });
+    }
 
     public static TdApi.User getUser(int userId) {
         TdApi.User user = TgHelper.users.get(userId);
