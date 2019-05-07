@@ -1,6 +1,7 @@
 package com.example.hyunju.notification_collector.utils;
 
 import android.app.Notification;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
@@ -31,11 +32,19 @@ public class NotificationListener extends NotificationListenerService {
         String title = extras.getString(Notification.EXTRA_TITLE);
         CharSequence text = extras.getCharSequence(Notification.EXTRA_TEXT);
         CharSequence subText = extras.getCharSequence(Notification.EXTRA_SUB_TEXT);
+      //  CharSequence postTime = extras.getCharSequence(Notification.EXTRA_);
+
         int smallIconRes = extras.getInt(Notification.EXTRA_SMALL_ICON);
         Bitmap largeIcon = extras.getParcelable(Notification.EXTRA_LARGE_ICON);
 
         NotificationEvent notificationEvent = new NotificationEvent(title, text, subText, formattedDate);
         Log.i(TAG, notificationEvent.toString());
+
+        Intent msgrcv = new Intent("Msg");
+        msgrcv.putExtra("title", title);
+        msgrcv.putExtra("text", text);
+        msgrcv.putExtra("subText", subText);
+       // msgrcv.putExtra("postTime", postTime);
         EventBus.getDefault().post(notificationEvent);
 
     }

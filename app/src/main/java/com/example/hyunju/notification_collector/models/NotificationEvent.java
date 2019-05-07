@@ -77,7 +77,7 @@ public class NotificationEvent {
     @Override
     public String toString() {
         return "title='" + title + '\'' +
-                ", text=" + text +
+                ", text=" + text +'\'' +
                 ", subText=" + subText +
                 ", postTime='" + postTime;
     }

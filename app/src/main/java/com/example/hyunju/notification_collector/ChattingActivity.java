@@ -5,7 +5,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -21,6 +23,7 @@ import android.widget.Toast;
 
 import com.example.hyunju.notification_collector.models.SendedMessage;
 import com.example.hyunju.notification_collector.utils.FileUtils;
+import com.example.hyunju.notification_collector.utils.NotificationListener;
 import com.example.hyunju.notification_collector.utils.RecyclerViewAdapter;
 import com.example.hyunju.notification_collector.utils.SendFacebookMessage;
 import com.example.hyunju.notification_collector.utils.SendMail;
@@ -43,7 +46,7 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
     private String senderNum,message,time;
     private Context context;
     private RecyclerView rv_sendedMsg;
-    private RecyclerView rv_revievdMsg;
+    private RecyclerView rv_recievdMsg;
 
     private RecyclerViewAdapter rv_adapter;
     private List<SendedMessage> sendedMessages;
@@ -54,6 +57,8 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chatting);
+
+
         textView_phone = (TextView) findViewById(R.id.textView_phone_num);
         textView_name = (TextView) findViewById(R.id.textView_name);
         Intent intent = getIntent();
@@ -63,12 +68,12 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
         name = getIntent().getStringExtra("name");
         email = getIntent().getStringExtra("email");
 
-        senderNum = intent.getExtras().getString("senderNum");
-        message = intent.getExtras().getString("message");
-        time = intent.getExtras().getString("time");
+//        senderNum = intent.getExtras().getString("senderNum");
+//        message = intent.getExtras().getString("message");
+//        time = intent.getExtras().getString("time");
+//
+//        Log.d("문자 수신 완료",senderNum+ message + time);
 
-        Log.d("문자 수신 완료",senderNum+ message + time);
-        Toast.makeText(ChattingActivity.this, "문자 수신완료"+message+ senderNum, Toast.LENGTH_LONG).show();
         textView_phone.setText(phone_num);
         textView_name.setText(name);
 
@@ -85,7 +90,7 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
 
         int numberOfColumns = 1;
         rv_sendedMsg = findViewById(R.id.rv_sendedMsg);
-        rv_revievdMsg = findViewById(R.id.rv_receivedMsg);
+        rv_recievdMsg = findViewById(R.id.rv_receivedMsg);
 
         rv_sendedMsg.setLayoutManager(new GridLayoutManager(context, numberOfColumns));
         sendedMessages = new ArrayList<SendedMessage>();
@@ -93,14 +98,22 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
         rv_adapter.setClickListener(this);
         rv_sendedMsg.setAdapter(rv_adapter);
 
-        //이 부분 해야함
-        int numberOfColumns2 = 1;
-        rv_revievdMsg.setLayoutManager(new GridLayoutManager(context, numberOfColumns2));
-        receiveddMessages = new ArrayList<SendedMessage>();
-        rv_adapter = new RecyclerViewAdapter(context, receiveddMessages);
-        rv_adapter.setClickListener(this);
-        rv_revievdMsg.setAdapter(rv_adapter);
 
+//        String title = intent.getStringExtra("title");
+//        String text = intent.getStringExtra("text");
+//        String subText = intent.getStringExtra("subText");
+//
+//        //이 부분 해야함.
+//
+//        int numberOfColumns2 = 1;
+//        rv_recievdMsg.setLayoutManager(new GridLayoutManager(context, numberOfColumns2));
+//        receiveddMessages = new ArrayList<SendedMessage>();
+//        rv_adapter = new RecyclerViewAdapter(context, receiveddMessages);
+//        rv_adapter.setClickListener(this);
+//        rv_recievdMsg.setAdapter(rv_adapter);
+//
+//        SendedMessage sendedMessage = new SendedMessage(title, text,getTime());
+//        sendedMessages.add(sendedMessage);
 
     }
     public String getTime() {

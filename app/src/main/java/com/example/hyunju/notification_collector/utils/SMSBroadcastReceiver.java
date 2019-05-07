@@ -52,10 +52,10 @@ public class SMSBroadcastReceiver extends BroadcastReceiver {
                         SimpleDateFormat sdf = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" );
                         String receivedDate = sdf.format( curDate );
 
-                        Intent intent2 = new Intent(context,ChattingActivity.class);
-                        intent2.putExtra("senderNum",senderNo);
-                        intent2.putExtra("message",message);
-                        intent2.putExtra("time",receivedDate);
+//                           Intent intent2 = new Intent(context,ChattingActivity.class);
+//                        intent2.putExtra("senderNum",senderNo);
+//                        intent2.putExtra("message",message);
+//                        intent2.putExtra("time",receivedDate);
                         Toast.makeText(context, "senderNum: " + senderNo + " :\n message: " + message +" \n time:"+receivedDate, Toast.LENGTH_LONG).show();
 
 
