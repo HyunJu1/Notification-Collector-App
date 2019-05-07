@@ -28,7 +28,7 @@ import com.example.hyunju.notification_collector.utils.SendMail;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SenderActivity extends Activity implements View.OnClickListener, RecyclerViewAdapter.ItemClickListener {
+public class ChattingActivity extends Activity implements View.OnClickListener, RecyclerViewAdapter.ItemClickListener {
 
     private static final int REQUEST_CODE = 6384;
 
@@ -41,13 +41,14 @@ public class SenderActivity extends Activity implements View.OnClickListener, Re
 
     private Context context;
     private RecyclerView rv_sendedMsg;
+    private RecyclerView rv_revievdMsg;
     private RecyclerViewAdapter rv_adapter;
     private List<SendedMessage> sendedMessages;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_sender);
+        setContentView(R.layout.activity_chatting);
         textView_phone = (TextView) findViewById(R.id.textView_phone_num);
         textView_name = (TextView) findViewById(R.id.textView_name);
         Intent intent = getIntent();
@@ -68,13 +69,16 @@ public class SenderActivity extends Activity implements View.OnClickListener, Re
         button_attachment.setOnClickListener(this);
 
         context = this;
-        rv_sendedMsg = findViewById(R.id.rv_sendedMsg);
+
         int numberOfColumns = 1;
         rv_sendedMsg.setLayoutManager(new GridLayoutManager(context, numberOfColumns));
         sendedMessages = new ArrayList<SendedMessage>();
         rv_adapter = new RecyclerViewAdapter(context, sendedMessages);
         rv_adapter.setClickListener(this);
         rv_sendedMsg.setAdapter(rv_adapter);
+
+        rv_sendedMsg = findViewById(R.id.rv_sendedMsg);
+        rv_revievdMsg = findViewById(R.id.rv_receivedMsg);
     }
 
     /**
@@ -114,12 +118,12 @@ public class SenderActivity extends Activity implements View.OnClickListener, Re
                     sendedMessages.add(sendedMessage);
                     rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
 
-                    Toast.makeText(SenderActivity.this, "문자 전송 성공", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ChattingActivity.this, "문자 전송 성공", Toast.LENGTH_SHORT).show();
 
                 } else if (pos == 1) { // facebook message
-                    AlertDialog.Builder recipientDialog = new AlertDialog.Builder(SenderActivity.this);
+                    AlertDialog.Builder recipientDialog = new AlertDialog.Builder(ChattingActivity.this);
                     recipientDialog.setTitle("수신인을 입력하세요");
-                    final EditText et_recipient = new EditText(SenderActivity.this);
+                    final EditText et_recipient = new EditText(ChattingActivity.this);
                     recipientDialog.setView(et_recipient);
 
                     recipientDialog.setPositiveButton("보내기", new DialogInterface.OnClickListener() {
@@ -148,9 +152,9 @@ public class SenderActivity extends Activity implements View.OnClickListener, Re
 
                 } else if(pos == 3) { // 이메일 부분
                     if(email != null) { // 사용자 이메일이 저장되어있는 경우
-                        AlertDialog.Builder mail_builder = new AlertDialog.Builder(SenderActivity.this); // 이메일 제목 받는 dialog
+                        AlertDialog.Builder mail_builder = new AlertDialog.Builder(ChattingActivity.this); // 이메일 제목 받는 dialog
                         mail_builder.setTitle("메일 제목을 입력해주세요");
-                        final EditText editText_subject = new EditText(SenderActivity.this);
+                        final EditText editText_subject = new EditText(ChattingActivity.this);
                         mail_builder.setView(editText_subject);
 
                         mail_builder.setPositiveButton("보내기", new DialogInterface.OnClickListener() { // 제목 입력 후 보내기 누른 경우
@@ -159,9 +163,9 @@ public class SenderActivity extends Activity implements View.OnClickListener, Re
                                 String subject = editText_subject.getText().toString();
                                 SendMail sm;
                                 if(path != null) {
-                                    sm = new SendMail(SenderActivity.this, email, subject, text, path);
+                                    sm = new SendMail(ChattingActivity.this, email, subject, text, path);
                                 } else {
-                                    sm = new SendMail(SenderActivity.this, email, subject, text);
+                                    sm = new SendMail(ChattingActivity.this, email, subject, text);
                                 }
                                 sm.execute();
 
@@ -180,11 +184,11 @@ public class SenderActivity extends Activity implements View.OnClickListener, Re
 
                         mail_builder.show();
                     } else { // 사용자 이메일이 지정되어있지 않는 경우
-                        Toast.makeText(SenderActivity.this, "메일주소가 존재하지 않습니다.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(ChattingActivity.this, "메일주소가 존재하지 않습니다.", Toast.LENGTH_LONG).show();
                     }
                 } else {
                     String selectedText = items[pos].toString();
-                    Toast.makeText(SenderActivity.this, selectedText, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ChattingActivity.this, selectedText, Toast.LENGTH_SHORT).show();
                 }
             }
 

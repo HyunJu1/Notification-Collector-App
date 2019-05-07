@@ -35,7 +35,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.hyunju.notification_collector.models.Contact;
-import com.example.hyunju.notification_collector.telegram.AuthActivity;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -128,7 +127,7 @@ public class MainActivity extends Activity {
                                 contactGroup.add(contact);
                                 Toast.makeText(getApplicationContext(), phonenumber.getName() + " 추가", Toast.LENGTH_SHORT).show();
                             } else {
-                                Intent intent = new Intent(MainActivity.this, SenderActivity.class);
+                                Intent intent = new Intent(MainActivity.this, ChattingActivity.class);
                                 intent.putExtra("phone_num", phonenumber.getPhonenum().replaceAll("-", ""));
                                 intent.putExtra("name", phonenumber.getName());
                                 intent.putExtra("email", phonenumber.getEmail());

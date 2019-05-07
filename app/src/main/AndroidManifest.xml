@@ -27,7 +27,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SenderActivity"
+            android:name=".ChattingActivity"
             android:windowSoftInputMode="adjustNothing" />
         <activity android:name=".telegram.AuthActivity" />
         <activity
