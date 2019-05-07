@@ -4,5 +4,5 @@
         android:key="pref_lock"
         android:title="@string/pref_lock"
         android:summary="@string/pref_lock_summ"
-        android:defaultValue="true" />
+        android:defaultValue="false" />
 </PreferenceScreen>

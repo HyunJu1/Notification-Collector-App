@@ -48,7 +48,7 @@ public class MainActivity extends Activity {
     private ImageButton btnSearch; // 리스트 검색 기능 추후 구현 예정 (현주)
     private EditText edtSearch;
 
-    private Button btn_multi, btn_multi_send;
+    private Button btn_multi, btn_multi_send, btn_settings;
     private boolean isMultiMode = false;
     private ArrayList<Contact> contactGroup;
 
@@ -88,6 +88,15 @@ public class MainActivity extends Activity {
 
                 Intent intent = new Intent(MainActivity.this, SendToGroupActivity.class);
                 intent.putExtra("contacts", contactGroup);
+                startActivity(intent);
+            }
+        });
+
+        btn_settings = findViewById(R.id.btn_settings);
+        btn_settings.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
                 startActivity(intent);
             }
         });
