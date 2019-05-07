@@ -52,7 +52,7 @@ public class SendToGroupActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> adapter, View view, int i, long l) {
                 Contact contact = (Contact) adapter.getItemAtPosition(i);
                 for (NotificationEvent e : replyList) {
-                    if (e.getTitle().equals(contact.getName())) {
+                    if (e.getTitle().equals(contact.name)) {
                         Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_SHORT).show();
                     }
                 }
@@ -68,7 +68,7 @@ public class SendToGroupActivity extends AppCompatActivity {
                 SmsManager smsManager = SmsManager.getDefault();
                 for (Contact contact : contacts) {
                     smsManager.sendTextMessage(
-                            contact.getPhonenum(), null, et_msg.getText().toString(), null, null
+                            contact.phonenum, null, et_msg.getText().toString(), null, null
                     );
                 }
                 adapter.setDidSend(true);
@@ -97,7 +97,7 @@ public class SendToGroupActivity extends AppCompatActivity {
     public void onNotificationEvent(NotificationEvent e) {
         String name = e.getTitle();
         for (int i = 0; i < contacts.size(); i++) {
-            if (contacts.get(i).getName().equals(name)) {
+            if (contacts.get(i).name.equals(name)) {
                 didSend.set(i, true);
                 adapter.notifyDataSetChanged();
                 replyList.add(e);
@@ -111,60 +111,61 @@ public class SendToGroupActivity extends AppCompatActivity {
         super.onStop();
         EventBus.getDefault().unregister(this);
     }
-}
 
-class ListViewAdapter extends BaseAdapter {
-    LayoutInflater inflater = null;
-    private ArrayList<Contact> data = null;
-    private boolean didSend = false;
-    private ArrayList<Boolean> didReply = null;
 
-    public ListViewAdapter(ArrayList<Contact> data, ArrayList<Boolean> didReply) {
-        this.data = data;
-        this.didReply = didReply;
-    }
+    class ListViewAdapter extends BaseAdapter {
+        LayoutInflater inflater = null;
+        private ArrayList<Contact> data = null;
+        private boolean didSend = false;
+        private ArrayList<Boolean> didReply = null;
 
-    public void setDidSend(boolean didSend) {
-        this.didSend = didSend;
-    }
+        public ListViewAdapter(ArrayList<Contact> data, ArrayList<Boolean> didReply) {
+            this.data = data;
+            this.didReply = didReply;
+        }
 
-    @Override
-    public int getCount() {
-        return data.size();
-    }
+        public void setDidSend(boolean didSend) {
+            this.didSend = didSend;
+        }
 
-    @Override
-    public Object getItem(int i) {
-        return data.get(i);
-    }
+        @Override
+        public int getCount() {
+            return data.size();
+        }
 
-    @Override
-    public long getItemId(int i) {
-        return i;
-    }
+        @Override
+        public Object getItem(int i) {
+            return data.get(i);
+        }
 
-    @Override
-    public View getView(int i, View view, ViewGroup viewGroup) {
-        if (view == null) {
-            final Context context = viewGroup.getContext();
-            if (inflater == null) {
-                inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        @Override
+        public long getItemId(int i) {
+            return i;
+        }
+
+        @Override
+        public View getView(int i, View view, ViewGroup viewGroup) {
+            if (view == null) {
+                final Context context = viewGroup.getContext();
+                if (inflater == null) {
+                    inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                }
+                view = inflater.inflate(R.layout.item_listview, viewGroup, false);
             }
-            view = inflater.inflate(R.layout.item_listview, viewGroup, false);
-        }
 
-        TextView tv_name_item = view.findViewById(R.id.tv_name_item);
-        TextView tv_phone_item = view.findViewById(R.id.tv_phone_item);
-        TextView tv_dot = view.findViewById(R.id.tv_dot);
-        tv_name_item.setText(data.get(i).getName());
-        tv_phone_item.setText(data.get(i).getPhonenum());
-        if (!didSend) {
-            tv_dot.setVisibility(View.INVISIBLE);
-        } else {
-            tv_dot.setVisibility(View.VISIBLE);
-            tv_dot.setBackgroundColor(didReply.get(i) ? Color.GREEN : Color.RED);
-        }
+            TextView tv_name_item = view.findViewById(R.id.tv_name_item);
+            TextView tv_phone_item = view.findViewById(R.id.tv_phone_item);
+            TextView tv_dot = view.findViewById(R.id.tv_dot);
+            tv_name_item.setText(data.get(i).name);
+            tv_phone_item.setText(data.get(i).phonenum);
+            if (!didSend) {
+                tv_dot.setVisibility(View.INVISIBLE);
+            } else {
+                tv_dot.setVisibility(View.VISIBLE);
+                tv_dot.setBackgroundColor(didReply.get(i) ? Color.GREEN : Color.RED);
+            }
 
-        return view;
+            return view;
+        }
     }
 }

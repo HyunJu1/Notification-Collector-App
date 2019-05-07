@@ -1,16 +1,15 @@
 package com.example.hyunju.notification_collector;
 
 import android.app.Activity;
-//import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.Uri;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
+
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.telephony.SmsManager;
 import android.util.Log;
@@ -20,53 +19,59 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
+import com.example.hyunju.notification_collector.global.CollectorActivity;
+import com.example.hyunju.notification_collector.models.Contact;
 import com.example.hyunju.notification_collector.models.SendedMessage;
+import com.example.hyunju.notification_collector.telegram.TgHelper;
+import com.example.hyunju.notification_collector.telegram.TgUtils;
 import com.example.hyunju.notification_collector.utils.FileUtils;
-import com.example.hyunju.notification_collector.utils.NotificationListener;
+import com.example.hyunju.notification_collector.utils.MatchMessenger;
 import com.example.hyunju.notification_collector.utils.RecyclerViewAdapter;
 import com.example.hyunju.notification_collector.utils.SendFacebookMessage;
 import com.example.hyunju.notification_collector.utils.SendMail;
+import com.example.hyunju.notification_collector.utils.TelegramChatManager;
+
+import org.drinkless.td.libcore.telegram.TdApi;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class ChattingActivity extends Activity implements View.OnClickListener, RecyclerViewAdapter.ItemClickListener {
+//import android.app.AlertDialog;
+
+
+public class ChattingActivity extends CollectorActivity implements View.OnClickListener, RecyclerViewAdapter.ItemClickListener {
+
 
     private static final int REQUEST_CODE = 6384;
 
     TextView textView_phone, textView_name;
     EditText editText;
     Button button;
-    private String phone_num, name, email;
+
+    Contact mContact = new Contact();
+
     private String path;
     private Button button_attachment;
-    private String senderNum,message,time;
-    private Context context;
     private RecyclerView rv_sendedMsg;
     private RecyclerView rv_recievdMsg;
 
     private RecyclerViewAdapter rv_adapter;
-    private List<SendedMessage> sendedMessages;
+    private ArrayList<SendedMessage> sendedMessages = new ArrayList<>();
     private List<SendedMessage> receiveddMessages;
 
     private String formatDate;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_chatting);
 
 
         textView_phone = (TextView) findViewById(R.id.textView_phone_num);
         textView_name = (TextView) findViewById(R.id.textView_name);
-        Intent intent = getIntent();
 
-
-        phone_num = getIntent().getStringExtra("phone_num");
-        name = getIntent().getStringExtra("name");
-        email = getIntent().getStringExtra("email");
 
 //        senderNum = intent.getExtras().getString("senderNum");
 //        message = intent.getExtras().getString("message");
@@ -74,27 +79,35 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
 //
 //        Log.d("문자 수신 완료",senderNum+ message + time);
 
-        textView_phone.setText(phone_num);
-        textView_name.setText(name);
 
-        editText = (EditText) findViewById(R.id.editText_sender);
-        button = (Button) findViewById(R.id.button_sender);
-        button_attachment = (Button) findViewById(R.id.button_attachment);
 
-        String txt = editText.getText().toString();
+        textView_phone = view(R.id.textView_phone_num);
+        textView_name = view(R.id.textView_name);
+
+        mContact =  getIntent().getParcelableExtra("contact");
+        mContact.phonenum = mContact.phonenum.replaceAll("-", "");
+
+
+
+        textView_phone.setText(mContact.phonenum);
+        textView_name.setText(mContact.name);
+
+        editText = view(R.id.editText_sender);
+        button = view(R.id.button_sender);
+        button_attachment = view(R.id.button_attachment);
 
         button.setOnClickListener(this);
         button_attachment.setOnClickListener(this);
 
-        context = this;
 
         int numberOfColumns = 1;
         rv_sendedMsg = findViewById(R.id.rv_sendedMsg);
         rv_recievdMsg = findViewById(R.id.rv_receivedMsg);
 
-        rv_sendedMsg.setLayoutManager(new GridLayoutManager(context, numberOfColumns));
-        sendedMessages = new ArrayList<SendedMessage>();
-        rv_adapter = new RecyclerViewAdapter(context, sendedMessages);
+        rv_sendedMsg.setLayoutManager(new LinearLayoutManager(this));
+//        sendedMessages = new ArrayList<SendedMessage>();
+        rv_adapter = new RecyclerViewAdapter();
+        rv_adapter.setList(sendedMessages);
         rv_adapter.setClickListener(this);
         rv_sendedMsg.setAdapter(rv_adapter);
 
@@ -103,8 +116,7 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
 //        String text = intent.getStringExtra("text");
 //        String subText = intent.getStringExtra("subText");
 //
-//        //이 부분 해야함.
-//
+            //TODO: 이부분해야함
 //        int numberOfColumns2 = 1;
 //        rv_recievdMsg.setLayoutManager(new GridLayoutManager(context, numberOfColumns2));
 //        receiveddMessages = new ArrayList<SendedMessage>();
@@ -142,12 +154,22 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
     }
 
     public void Dialog() {
-        final List<String> ListItems = new ArrayList<>();
-        ListItems.add("문자");
-        ListItems.add("페이스북");
-        ListItems.add("텔레그램");
-        ListItems.add("이메일");
-        final CharSequence[] items = ListItems.toArray(new String[ListItems.size()]);
+
+        final List<String> listItems = new ArrayList<>();
+        final List<String> msgList = new ArrayList<>(); // ****** 여기에 메시지 저장하면 됨 *******
+        listItems.add("문자");
+        listItems.add("페이스북");
+
+        // 텔레그램 사용유저만
+        if(MatchMessenger.getInstance().getMessengerInfo(mContact.phonenum).telegram) {
+            listItems.add("텔레그램");
+        }
+
+        // 이메일 주소 있을때만 보여지게
+        if(MatchMessenger.getInstance().getMessengerInfo(mContact.phonenum).eMail) {
+            listItems.add("이메일");
+        }
+        final CharSequence[] items = listItems.toArray(new String[listItems.size()]);
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("전송 수단을 선택하시오");
@@ -155,18 +177,20 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
             public void onClick(DialogInterface dialog, int pos) {
                 final String text = editText.getText().toString();  // editText의 text 받아온 변수
 
-                if (pos == 0) { // 문자
+                if ("문자".equals(listItems.get(pos))) { // 문자
                     SmsManager smsManager = SmsManager.getDefault();
-                    smsManager.sendTextMessage(phone_num, null, text, null, null);
+                    smsManager.sendTextMessage(mContact.phonenum, null, text, null, null);
 
-                    SendedMessage sendedMessage = new SendedMessage(text, "sms",getTime());
+
+                    SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_SMS,getTime());
                     sendedMessages.add(sendedMessage);
-                    rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
+//                    rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
 
+                    msgList.add(text);
                     Toast.makeText(ChattingActivity.this, "문자 전송 성공", Toast.LENGTH_SHORT).show();
-
-                } else if (pos == 1) { // facebook message
+                } else if ("페이스북".equals(listItems.get(pos))) { // facebook message
                     AlertDialog.Builder recipientDialog = new AlertDialog.Builder(ChattingActivity.this);
+
                     recipientDialog.setTitle("수신인을 입력하세요");
                     final EditText et_recipient = new EditText(ChattingActivity.this);
                     recipientDialog.setView(et_recipient);
@@ -178,9 +202,12 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
                             SendFacebookMessage sfm = new SendFacebookMessage(content, text);
                             sfm.execute();
 
-                            SendedMessage sendedMessage = new SendedMessage(text, "facebook",getTime());
+                            SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_FACEBOOK,getTime());
                             sendedMessages.add(sendedMessage);
                             rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
+
+                            msgList.add(content);
+
                         }
                     });
 
@@ -192,12 +219,31 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
                     });
 
                     recipientDialog.show();
-                } else if (pos == 2) { // telegram
-//                    TgUtils.sendMessage(-1,"내용");
 
-                } else if(pos == 3) { // 이메일 부분
-                    if(email != null) { // 사용자 이메일이 저장되어있는 경우
+                } else if ("텔레그램".equals(listItems.get(pos))) { // telegram
+                    long chatId = TelegramChatManager.getInstance().getChatId(mContact.phonenum);
+                    if(chatId!= TelegramChatManager.EXTRA_EMPTY_CHAT_ID) {
+                        TgHelper.sendMessage(chatId, text, new TelegramChatManager.Callback() {
+                            @Override
+                            public void onResult(Object result) {
+                                switch (TgHelper.sendState((TdApi.Message) result)){
+                                    case BEINGSENT:
+                                        SendedMessage sendedMessage = new SendedMessage(text,SendedMessage.PLATFORM_TELEGRAM,getTime());
+                                        rv_adapter.addList(sendedMessage);
+                                        break;
+                                    case FAILED:
+                                        toast("전송실패");
+                                        break;
+                                }
+                            }
+                        });
+                    } else {
+                        toast("잘못된 텔레그램 메신저 사용자입니다.");
+                    }
+                } else if("이메일".equals(listItems.get(pos))) { // 이메일 부분
+                    if(mContact.email != null) { // 사용자 이메일이 저장되어있는 경우
                         AlertDialog.Builder mail_builder = new AlertDialog.Builder(ChattingActivity.this); // 이메일 제목 받는 dialog
+
                         mail_builder.setTitle("메일 제목을 입력해주세요");
                         final EditText editText_subject = new EditText(ChattingActivity.this);
                         mail_builder.setView(editText_subject);
@@ -208,15 +254,20 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
                                 String subject = editText_subject.getText().toString();
                                 SendMail sm;
                                 if(path != null) {
-                                    sm = new SendMail(ChattingActivity.this, email, subject, text, path);
+
+                                    sm = new SendMail(ChattingActivity.this, mContact.email, subject, text, path);
                                 } else {
-                                    sm = new SendMail(ChattingActivity.this, email, subject, text);
+                                    sm = new SendMail(ChattingActivity.this, mContact.email, subject, text);
                                 }
                                 sm.execute();
 
-                                SendedMessage sendedMessage = new SendedMessage(text, "email",getTime());
+                                SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_EMAIL,getTime());
                                 sendedMessages.add(sendedMessage);
                                 rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
+
+
+                                msgList.add(subject);
+
                             }
                         });
 
@@ -229,12 +280,13 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
 
                         mail_builder.show();
                     } else { // 사용자 이메일이 지정되어있지 않는 경우
-                        Toast.makeText(ChattingActivity.this, "메일주소가 존재하지 않습니다.", Toast.LENGTH_LONG).show();
+                        toast("메일주소가 존재하지 않습니다.");
                     }
                 } else {
                     String selectedText = items[pos].toString();
-                    Toast.makeText(ChattingActivity.this, selectedText, Toast.LENGTH_SHORT).show();
+                    toast(selectedText);
                 }
+                refreshTelegram();
             }
 
         });
@@ -266,6 +318,6 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
 
     @Override
     public void onItemClick(View view, int position) {
-        Toast.makeText(this, rv_adapter.getItem(position).toString(), Toast.LENGTH_SHORT).show();
+       toast(rv_adapter.getItem(position).toString());
     }
 }

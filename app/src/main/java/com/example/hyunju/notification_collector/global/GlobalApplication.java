@@ -2,6 +2,7 @@ package com.example.hyunju.notification_collector.global;
 
 import android.app.Application;
 
+import com.example.hyunju.notification_collector.telegram.TgHelper;
 import com.example.hyunju.notification_collector.utils.NetworkService;
 
 import java.util.concurrent.TimeUnit;
@@ -16,6 +17,8 @@ public class GlobalApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        TgHelper.init(this);
+
 //        retrofitInit();
     }
 

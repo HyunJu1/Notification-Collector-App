@@ -11,22 +11,20 @@ import android.widget.TextView;
 import com.example.hyunju.notification_collector.R;
 import com.example.hyunju.notification_collector.models.SendedMessage;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
-    private List<SendedMessage> mData;
-    private LayoutInflater mInflater;
+    private ArrayList<SendedMessage> mData = new ArrayList<>();
     private ItemClickListener mClickListener;
 
-    public RecyclerViewAdapter(Context context, List<SendedMessage> mData) {
-        this.mInflater = LayoutInflater.from(context);
-        this.mData = mData;
+    public RecyclerViewAdapter() {
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-        View view = mInflater.inflate(R.layout.activity_recyclerview_item, viewGroup, false);
+        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.activity_recyclerview_item, viewGroup, false);
         return new ViewHolder(view);
     }
 
@@ -41,6 +39,16 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     @Override
     public int getItemCount() {
         return mData.size();
+    }
+
+    public void setList(ArrayList<SendedMessage> list) {
+        mData = list;
+        notifyDataSetChanged();
+    }
+
+    public void addList(SendedMessage message){
+        mData.add(message);
+        notifyItemChanged(mData.size()-1);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

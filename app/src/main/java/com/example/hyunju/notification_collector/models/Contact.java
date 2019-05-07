@@ -1,81 +1,57 @@
 package com.example.hyunju.notification_collector.models;
 
-import java.io.Serializable;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-public class Contact implements Serializable {
-    long photoid;
-    String phonenum;
-    String name;
+public class Contact implements Parcelable {
+    public long photoid;
+    public String phonenum;
+    public  String name;
 
-    String email;
-    String note;
-    String group;
-    String addr;
+    public  String email;
+    public  String note;
+    public  String group;
+    public  String addr;
+
 
     public Contact() {
     }
 
-    public Contact(String phonenum, String name, String email) {
-        this.phonenum = phonenum;
-        this.name = name;
-        this.email = email;
+    protected Contact(Parcel in) {
+        photoid = in.readLong();
+        phonenum = in.readString();
+        name = in.readString();
+        email = in.readString();
+        note = in.readString();
+        group = in.readString();
+        addr = in.readString();
     }
 
-    public long getPhotoid() {
-        return photoid;
+    public static final Creator<Contact> CREATOR = new Creator<Contact>() {
+        @Override
+        public Contact createFromParcel(Parcel in) {
+            return new Contact(in);
+        }
+
+        @Override
+        public Contact[] newArray(int size) {
+            return new Contact[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
-    public void setPhotoid(long photoid) {
-        this.photoid = photoid;
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(photoid);
+        dest.writeString(phonenum);
+        dest.writeString(name);
+        dest.writeString(email);
+        dest.writeString(note);
+        dest.writeString(group);
+        dest.writeString(addr);
     }
-
-    public String getPhonenum() {
-        return phonenum;
-    }
-
-    public void setPhonenum(String phonenum) {
-        this.phonenum = phonenum;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getNote() {
-        return note;
-    }
-
-    public void setNote(String note) {
-        this.note = note;
-    }
-
-    public String getGroup() {
-        return group;
-    }
-
-    public void setGroup(String group) {
-        this.group = group;
-    }
-
-    public String getAddr() {
-        return addr;
-    }
-
-    public void setAddr(String addr) {
-        this.addr = addr;
-    }
-
 }
