@@ -1,15 +1,15 @@
 package com.example.hyunju.notification_collector;
 
 import android.app.Activity;
-//import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
-import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.telephony.SmsManager;
@@ -20,11 +20,11 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
+import com.example.hyunju.notification_collector.models.ReceivedMessage;
 import com.example.hyunju.notification_collector.models.SendedMessage;
 import com.example.hyunju.notification_collector.utils.FileUtils;
-import com.example.hyunju.notification_collector.utils.NotificationListener;
 import com.example.hyunju.notification_collector.utils.RecyclerViewAdapter;
+import com.example.hyunju.notification_collector.utils.RecyclerViewAdapterRC;
 import com.example.hyunju.notification_collector.utils.SendFacebookMessage;
 import com.example.hyunju.notification_collector.utils.SendMail;
 
@@ -32,6 +32,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+//import android.app.AlertDialog;
 
 public class ChattingActivity extends Activity implements View.OnClickListener, RecyclerViewAdapter.ItemClickListener {
 
@@ -49,8 +51,9 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
     private RecyclerView rv_recievdMsg;
 
     private RecyclerViewAdapter rv_adapter;
+    private RecyclerViewAdapterRC rv_adapter_rc;
     private List<SendedMessage> sendedMessages;
-    private List<SendedMessage> receiveddMessages;
+    private List<ReceivedMessage> receiveddMessages;
 
     private String formatDate;
     @Override
@@ -58,6 +61,7 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chatting);
 
+        LocalBroadcastManager.getInstance(this).registerReceiver(onNotice, new IntentFilter("SMS"));
 
         textView_phone = (TextView) findViewById(R.id.textView_phone_num);
         textView_name = (TextView) findViewById(R.id.textView_name);
@@ -68,11 +72,6 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
         name = getIntent().getStringExtra("name");
         email = getIntent().getStringExtra("email");
 
-//        senderNum = intent.getExtras().getString("senderNum");
-//        message = intent.getExtras().getString("message");
-//        time = intent.getExtras().getString("time");
-//
-//        Log.d("문자 수신 완료",senderNum+ message + time);
 
         textView_phone.setText(phone_num);
         textView_name.setText(name);
@@ -99,23 +98,43 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
         rv_sendedMsg.setAdapter(rv_adapter);
 
 
-//        String title = intent.getStringExtra("title");
-//        String text = intent.getStringExtra("text");
-//        String subText = intent.getStringExtra("subText");
-//
-//        //이 부분 해야함.
-//
-//        int numberOfColumns2 = 1;
-//        rv_recievdMsg.setLayoutManager(new GridLayoutManager(context, numberOfColumns2));
-//        receiveddMessages = new ArrayList<SendedMessage>();
-//        rv_adapter = new RecyclerViewAdapter(context, receiveddMessages);
-//        rv_adapter.setClickListener(this);
-//        rv_recievdMsg.setAdapter(rv_adapter);
-//
-//        SendedMessage sendedMessage = new SendedMessage(title, text,getTime());
-//        sendedMessages.add(sendedMessage);
+
+        int numberOfColumns2 = 1;
+        rv_recievdMsg.setLayoutManager(new GridLayoutManager(context, numberOfColumns2));
+        receiveddMessages = new ArrayList<ReceivedMessage>();
+        rv_adapter_rc = new RecyclerViewAdapterRC(context, receiveddMessages);
+        //rv_adapter_rc.setClickListener(this);
+        rv_recievdMsg.setAdapter(rv_adapter_rc);
+
+
 
     }
+
+    private BroadcastReceiver onNotice= new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String senderNo = intent.getStringExtra("senderNo");
+            String message = intent.getStringExtra("message");
+            String receivedDate = intent.getStringExtra("receivedDate");
+
+            try {
+
+                ReceivedMessage model = new ReceivedMessage(message,"sms",receivedDate);
+
+
+                    receiveddMessages.add(model);
+                    rv_adapter_rc.notifyItemChanged(sendedMessages.size() - 1);
+
+
+
+
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    };
     public String getTime() {
         // 보낸 시각 표시
         long now = System.currentTimeMillis();

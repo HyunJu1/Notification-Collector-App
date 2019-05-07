@@ -5,11 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.SmsMessage;
 import android.util.Log;
 import android.widget.Toast;
-
-import com.example.hyunju.notification_collector.ChattingActivity;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -52,10 +51,13 @@ public class SMSBroadcastReceiver extends BroadcastReceiver {
                         SimpleDateFormat sdf = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" );
                         String receivedDate = sdf.format( curDate );
 
-//                           Intent intent2 = new Intent(context,ChattingActivity.class);
-//                        intent2.putExtra("senderNum",senderNo);
-//                        intent2.putExtra("message",message);
-//                        intent2.putExtra("time",receivedDate);
+                        Intent msgrcv = new Intent("SMS");
+
+                        msgrcv.putExtra("senderNo", senderNo);
+                        msgrcv.putExtra("message", message);
+                        msgrcv.putExtra("receivedDate",receivedDate);
+                        LocalBroadcastManager.getInstance(context).sendBroadcast(msgrcv);
+
                         Toast.makeText(context, "senderNum: " + senderNo + " :\n message: " + message +" \n time:"+receivedDate, Toast.LENGTH_LONG).show();
 
 
