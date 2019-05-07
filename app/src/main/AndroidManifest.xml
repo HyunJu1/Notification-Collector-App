@@ -26,11 +26,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SenderActivity" />
+        <activity
+            android:name=".SenderActivity"
+            android:windowSoftInputMode="adjustNothing" />
         <activity android:name=".telegram.AuthActivity" />
         <activity
             android:name=".MainActivity"
-            android:windowSoftInputMode="adjustNothing"/>
+            android:windowSoftInputMode="adjustNothing" />
         <activity android:name=".SendToGroupActivity" />
 
         <service

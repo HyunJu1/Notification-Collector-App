@@ -114,6 +114,7 @@ public class SenderActivity extends Activity implements View.OnClickListener, Re
                     rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
 
                     Toast.makeText(SenderActivity.this, "문자 전송 성공", Toast.LENGTH_SHORT).show();
+
                 } else if (pos == 1) { // facebook message
                     AlertDialog.Builder recipientDialog = new AlertDialog.Builder(SenderActivity.this);
                     recipientDialog.setTitle("수신인을 입력하세요");
