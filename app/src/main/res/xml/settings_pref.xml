@@ -5,4 +5,9 @@
         android:title="@string/pref_lock"
         android:summary="@string/pref_lock_summ"
         android:defaultValue="false" />
+    <EditTextPreference
+        android:key="pref_pw"
+        android:title="@string/pref_pw"
+        android:summary="@string/pref_pw_summ"
+        android:dialogLayout="@layout/preference_edit_text" />
 </PreferenceScreen>

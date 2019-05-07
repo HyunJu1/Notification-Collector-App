@@ -1,7 +1,9 @@
 package com.example.hyunju.notification_collector;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -16,13 +18,13 @@ public class LockActivity extends AppCompatActivity {
     private PinLockView mPinLockView;
     private IndicatorDots mIndicatorDots;
     private final static String TAG = LockActivity.class.getSimpleName();
-    private final static String TRUE_CODE = "1234";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_lock);
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         mPinLockView = (PinLockView) findViewById(R.id.pin_lock_view);
         mIndicatorDots = (IndicatorDots) findViewById(R.id.indicator_dots);
@@ -35,9 +37,9 @@ public class LockActivity extends AppCompatActivity {
             @Override
             public void onComplete(String pin) {
                 Log.d(TAG, "lock code: " + pin);
+                Log.e("sfasdf", sharedPreferences.getString("pref_pw", "1234"));
 
-                //User input true code
-                if (pin.equals(TRUE_CODE)) {
+                if (pin.equals(sharedPreferences.getString("pref_pw", "1234"))) {
                     Intent intent = new Intent(LockActivity.this, MainActivity.class);
                     startActivity(intent);
                     finish();
