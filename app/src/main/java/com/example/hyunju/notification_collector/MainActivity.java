@@ -2,6 +2,7 @@ package com.example.hyunju.notification_collector;
 
 import android.Manifest;
 import android.app.Activity;
+//import android.app.AlertDialog;
 import android.app.AlertDialog;
 import android.content.ContentUris;
 import android.content.Context;
@@ -17,8 +18,8 @@ import android.provider.ContactsContract;
 import android.provider.ContactsContract.Contacts;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+
 import android.support.v4.app.NotificationManagerCompat;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
