@@ -8,6 +8,7 @@ import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
 import com.example.hyunju.notification_collector.models.NotificationEvent;
+import com.example.hyunju.notification_collector.models.SendedMessage;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -36,5 +37,6 @@ public class NotificationListener extends NotificationListenerService {
         NotificationEvent notificationEvent = new NotificationEvent(title, text, subText, formattedDate);
         Log.i(TAG, notificationEvent.toString());
         EventBus.getDefault().post(notificationEvent);
+
     }
 }

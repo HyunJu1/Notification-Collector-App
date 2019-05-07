@@ -35,6 +35,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         SendedMessage msg = mData.get(position);
         holder.tv_platformType.setText(msg.getPlatfrom());
         holder.tv_sendedMessageContent.setText(msg.getMessage());
+        holder.tv_sendedTime.setText(msg.getTime());
     }
 
     @Override
@@ -43,13 +44,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        TextView tv_platformType, tv_sendedMessageContent;
+        TextView tv_platformType, tv_sendedMessageContent,tv_sendedTime;
 
         public ViewHolder(View itemView) {
             super(itemView);
             tv_platformType = itemView.findViewById(R.id.tv_platformType);
             tv_sendedMessageContent = itemView.findViewById(R.id.tv_sendedMessageContent);
-
+            tv_sendedTime=itemView.findViewById(R.id.tv_sendedTime);
             itemView.setOnClickListener(this);
         }
 

@@ -4,9 +4,11 @@ public class SendedMessage {
     private String message;
     private String platfrom;
 
-    public SendedMessage(String message, String platfrom) {
+    private String time;
+    public SendedMessage(String message, String platfrom, String time ) {
         this.message = message;
         this.platfrom = platfrom;
+        this.time=time;
     }
 
     public String getMessage() {
@@ -25,11 +27,20 @@ public class SendedMessage {
         this.platfrom = platfrom;
     }
 
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
     @Override
     public String toString() {
         return "SendedMessage{" +
                 "message='" + message + '\'' +
                 ", platfrom='" + platfrom + '\'' +
+                ", time='" + time + '\'' +
                 '}';
     }
 }

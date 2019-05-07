@@ -25,7 +25,9 @@ import com.example.hyunju.notification_collector.utils.RecyclerViewAdapter;
 import com.example.hyunju.notification_collector.utils.SendFacebookMessage;
 import com.example.hyunju.notification_collector.utils.SendMail;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class ChattingActivity extends Activity implements View.OnClickListener, RecyclerViewAdapter.ItemClickListener {
@@ -38,13 +40,16 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
     private String phone_num, name, email;
     private String path;
     private Button button_attachment;
-
+    private String senderNum,message,time;
     private Context context;
     private RecyclerView rv_sendedMsg;
     private RecyclerView rv_revievdMsg;
+
     private RecyclerViewAdapter rv_adapter;
     private List<SendedMessage> sendedMessages;
+    private List<SendedMessage> receiveddMessages;
 
+    private String formatDate;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,10 +57,18 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
         textView_phone = (TextView) findViewById(R.id.textView_phone_num);
         textView_name = (TextView) findViewById(R.id.textView_name);
         Intent intent = getIntent();
+
+
         phone_num = getIntent().getStringExtra("phone_num");
         name = getIntent().getStringExtra("name");
         email = getIntent().getStringExtra("email");
 
+        senderNum = intent.getExtras().getString("senderNum");
+        message = intent.getExtras().getString("message");
+        time = intent.getExtras().getString("time");
+
+        Log.d("문자 수신 완료",senderNum+ message + time);
+        Toast.makeText(ChattingActivity.this, "문자 수신완료"+message+ senderNum, Toast.LENGTH_LONG).show();
         textView_phone.setText(phone_num);
         textView_name.setText(name);
 
@@ -80,8 +93,26 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
         rv_adapter.setClickListener(this);
         rv_sendedMsg.setAdapter(rv_adapter);
 
-    }
+        //이 부분 해야함
+        int numberOfColumns2 = 1;
+        rv_revievdMsg.setLayoutManager(new GridLayoutManager(context, numberOfColumns2));
+        receiveddMessages = new ArrayList<SendedMessage>();
+        rv_adapter = new RecyclerViewAdapter(context, receiveddMessages);
+        rv_adapter.setClickListener(this);
+        rv_revievdMsg.setAdapter(rv_adapter);
 
+
+    }
+    public String getTime() {
+        // 보낸 시각 표시
+        long now = System.currentTimeMillis();
+        Date date = new Date(now);
+        SimpleDateFormat sdfNow = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        formatDate = sdfNow.format(date);
+        return formatDate;
+
+
+    }
     /**
      * 버튼 두 개라서 조잡해서 여기다가 정리함
 
@@ -115,7 +146,7 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
                     SmsManager smsManager = SmsManager.getDefault();
                     smsManager.sendTextMessage(phone_num, null, text, null, null);
 
-                    SendedMessage sendedMessage = new SendedMessage(text, "sms");
+                    SendedMessage sendedMessage = new SendedMessage(text, "sms",getTime());
                     sendedMessages.add(sendedMessage);
                     rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
 
@@ -134,7 +165,7 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
                             SendFacebookMessage sfm = new SendFacebookMessage(content, text);
                             sfm.execute();
 
-                            SendedMessage sendedMessage = new SendedMessage(text, "facebook");
+                            SendedMessage sendedMessage = new SendedMessage(text, "facebook",getTime());
                             sendedMessages.add(sendedMessage);
                             rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
                         }
@@ -170,7 +201,7 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
                                 }
                                 sm.execute();
 
-                                SendedMessage sendedMessage = new SendedMessage(text, "email");
+                                SendedMessage sendedMessage = new SendedMessage(text, "email",getTime());
                                 sendedMessages.add(sendedMessage);
                                 rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
                             }

@@ -30,7 +30,7 @@
         </activity>
         <activity
             android:name=".ChattingActivity"
-            android:windowSoftInputMode="adjustNothing" />
+       />
         <activity android:name=".telegram.AuthActivity" />
         <activity
             android:name=".MainActivity"
@@ -47,7 +47,7 @@
         </service>
 
         <receiver
-            android:name=".models.SMSBroadcastReceiver"
+            android:name=".utils.SMSBroadcastReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter android:priority="1">
