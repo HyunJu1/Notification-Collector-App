@@ -53,7 +53,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
             linear_layout_1=itemView.findViewById(R.id.linear_layout_1);
             if (type==0 ){
-            linear_layout_1.setBackgroundResource(R.drawable.inbox2_9);}
+            linear_layout_1.setBackgroundResource(R.drawable.inbox2);}
 
             tv_platformType = itemView.findViewById(R.id.tv_platformType);
 
