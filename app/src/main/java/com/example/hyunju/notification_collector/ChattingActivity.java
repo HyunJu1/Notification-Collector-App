@@ -71,14 +71,15 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
         context = this;
 
         int numberOfColumns = 1;
+        rv_sendedMsg = findViewById(R.id.rv_sendedMsg);
+        rv_revievdMsg = findViewById(R.id.rv_receivedMsg);
+
         rv_sendedMsg.setLayoutManager(new GridLayoutManager(context, numberOfColumns));
         sendedMessages = new ArrayList<SendedMessage>();
         rv_adapter = new RecyclerViewAdapter(context, sendedMessages);
         rv_adapter.setClickListener(this);
         rv_sendedMsg.setAdapter(rv_adapter);
 
-        rv_sendedMsg = findViewById(R.id.rv_sendedMsg);
-        rv_revievdMsg = findViewById(R.id.rv_receivedMsg);
     }
 
     /**
