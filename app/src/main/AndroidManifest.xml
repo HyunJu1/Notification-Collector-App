@@ -34,6 +34,7 @@
 
         <activity android:name=".ChattingActivity" />
         <activity android:name=".telegram.AuthActivity" />
+        <activity android:name=".MailDetailActivity" />
         <activity
             android:name=".LockActivity"
             android:theme="@style/AppTheme.NoActionBar" />

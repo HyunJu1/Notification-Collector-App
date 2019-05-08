@@ -94,7 +94,7 @@ public class SendedMessage {
     public String getBody() {
         Log.e("type!!!", mailType);
         String str = "";
-        if(mailType.contains("multipart/MIXED")) {
+        if(mailType.contains("multipart/MIXED") || mailType.contains("multipart/mixed")) {
             MimeMultipart mimeMultipart = (MimeMultipart) body;
             try {
                 for (int i = 0; i < mimeMultipart.getCount(); i++) {

@@ -297,6 +297,18 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
 
     @Override
     public void onItemClick(View view, int position) {
-        Toast.makeText(this, rv_adapter.getItem(position).toString(), Toast.LENGTH_SHORT).show();
+        // 메일인 경우 클릭시 메일 상세페이지로 이동
+        if(rv_adapter.getItem(position).getPlatfrom().equals("Email")) {
+            Intent intent = new Intent(ChattingActivity.this, MailDetailActivity.class);
+
+            intent.putExtra("subject", rv_adapter.getItem(position).getMessage());
+            intent.putExtra("date", rv_adapter.getItem(position).getTime());
+            intent.putExtra("body", rv_adapter.getItem(position).getBody());
+            intent.putExtra("from", email);
+
+            startActivity(intent);
+        } else {
+            Toast.makeText(this, rv_adapter.getItem(position).toString(), Toast.LENGTH_SHORT).show();
+        }
     }
 }

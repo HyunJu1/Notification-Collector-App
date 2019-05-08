@@ -28,12 +28,11 @@ public class MailDetailActivity extends AppCompatActivity {
         webView = (WebView) findViewById(R.id.webView);
 
         Intent intent = getIntent();
-        SimpleDateFormat df = new SimpleDateFormat("yyyy년 MM월 dd일 HH:mm");
 
         textViewFrom.setText(intent.getExtras().getString("from"));
         textViewSubject.setText(intent.getExtras().getString("subject"));
 
-        textViewDate.setText(df.format((Date) intent.getSerializableExtra("date")));
+        textViewDate.setText(intent.getExtras().getString("date"));
         webView.loadData(intent.getExtras().getString("body"), "text/html", "UTF-8");
 
     }
