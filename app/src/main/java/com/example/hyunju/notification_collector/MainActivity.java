@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -17,11 +18,13 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.RadioButton;
 import android.widget.Toast;
 
 import com.example.hyunju.notification_collector.R;
@@ -35,17 +38,17 @@ import java.util.List;
 
 public class MainActivity extends Activity {
 
+    ArrayList<Contact> contactlist = new ArrayList<Contact>();
+    ContactsAdapter adapter;
     private ListView lv_contactlist;
-
+    private RadioButton radioButton1;
     private ImageButton btnSearch;
     private EditText edtSearch;
-
     private Button btn_multi, btn_multi_send, btn_settings;
     private boolean isMultiMode = false;
     private ArrayList<Contact> contactGroup;
-    ArrayList<Contact> contactlist = new ArrayList<Contact>();
-    ContactsAdapter adapter;
-    private List<Contact> list=new ArrayList<Contact>();
+    private List<Contact> list = new ArrayList<Contact>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,16 +67,20 @@ public class MainActivity extends Activity {
         btnSearch = findViewById(R.id.btnSearch);
         edtSearch = findViewById(R.id.editSearch);
 
+        btn_multi_send = findViewById(R.id.btn_multi_send);
+
         btn_multi = findViewById(R.id.btn_multi);
         btn_multi.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 isMultiMode = !isMultiMode;
                 btn_multi_send.setVisibility(isMultiMode ? View.VISIBLE : View.INVISIBLE);
             }
         });
         contactGroup = new ArrayList<>();
-        btn_multi_send = findViewById(R.id.btn_multi_send);
+
+
         btnSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -103,7 +110,6 @@ public class MainActivity extends Activity {
         });
 
 
-
         edtSearch.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -111,14 +117,14 @@ public class MainActivity extends Activity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-               // Log.d("search내용",edtSearch.getText().toString());
+                // Log.d("search내용",edtSearch.getText().toString());
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
                 // input창에 문자를 입력할때마다 호출된다.
                 // search 메소드를 호출한다.
-                Log.d("search내용",edtSearch.getText().toString());
+                Log.d("search내용", edtSearch.getText().toString());
                 String text = edtSearch.getText().toString();
                 search(text);
             }
@@ -133,8 +139,8 @@ public class MainActivity extends Activity {
         if (checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED ||
                 checkSelfPermission(Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED ||
                 checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED ||
-                checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED||
-                checkSelfPermission(Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED||
+                checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+                checkSelfPermission(Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED ||
                 checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED
                 ) {
             requestPermissions(new String[]{Manifest.permission.READ_CONTACTS, Manifest.permission.SEND_SMS, Manifest.permission.READ_PHONE_STATE, Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -161,8 +167,10 @@ public class MainActivity extends Activity {
                                         phonenumber.getEmail()
                                 );
                                 contactGroup.add(contact);
+
                                 Toast.makeText(getApplicationContext(), phonenumber.getName() + " 추가", Toast.LENGTH_SHORT).show();
                             } else {
+
                                 Intent intent = new Intent(MainActivity.this, ChattingActivity.class);
                                 intent.putExtra("phone_num", phonenumber.getPhonenum().replaceAll("-", ""));
                                 intent.putExtra("name", phonenumber.getName());
@@ -211,28 +219,23 @@ public class MainActivity extends Activity {
     // 검색을 수행하는 메소드
     public void search(String charText) {
 
-        // 문자 입력시마다 리스트를 지우고 새로 뿌려준다.
         contactlist.clear();
 
-        // 문자 입력이 없을때는 모든 데이터를 보여준다.
         if (charText.length() == 0) {
             contactlist.addAll(list);
         }
         // 문자 입력을 할때..
-        else
-        {
+        else {
             // 리스트의 모든 데이터를 검색한다.
-            for(int i = 0;i < list.size(); i++)
-            {
+            for (int i = 0; i < list.size(); i++) {
                 // arraylist의 모든 데이터에 입력받은 단어(charText)가 포함되어 있으면 true를 반환한다.
-                if (list.get(i).getName().toLowerCase().contains(charText))
-                {
-                    // 검색된 데이터를 리스트에 추가한다.
+                if (list.get(i).getName().toLowerCase().contains(charText)) {
+
                     contactlist.add(list.get(i));
                 }
             }
         }
-        // 리스트 데이터가 변경되었으므로 아답터를 갱신하여 검색된 데이터를 화면에 보여준다.
+
         adapter.notifyDataSetChanged();
     }
 
@@ -307,7 +310,7 @@ public class MainActivity extends Activity {
                 /**
                  *
                  *  메모 내용, 주소, 회사 정보, 직급 등의 정보 필요할 땐 아래의 코드 사용. 지금은 필요없으므로 주석처리 -> 불러오는 속도 개선
-                  */
+                 */
 /*
                 // note(메모)
                 String noteWhere = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
@@ -388,8 +391,8 @@ public class MainActivity extends Activity {
                clsOrgCursor.close();
 
               */
-               contactlist.add(acontact);
-               list.add(acontact);
+                contactlist.add(acontact);
+                list.add(acontact);
             }
         }
         clsCursor.close();
