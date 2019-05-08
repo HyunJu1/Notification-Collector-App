@@ -8,12 +8,13 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
-import com.example.hyunju.notification_collector.R;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationManagerCompat;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -23,10 +24,12 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.hyunju.notification_collector.R;
 import com.example.hyunju.notification_collector.models.Contact;
 import com.example.hyunju.notification_collector.utils.ContactsAdapter;
 
 import java.util.ArrayList;
+import java.util.List;
 
 //import android.app.AlertDialog;
 
@@ -34,17 +37,20 @@ public class MainActivity extends Activity {
 
     private ListView lv_contactlist;
 
-    private ImageButton btnSearch; // 리스트 검색 기능 추후 구현 예정 (현주)
+    private ImageButton btnSearch;
     private EditText edtSearch;
 
     private Button btn_multi, btn_multi_send, btn_settings;
     private boolean isMultiMode = false;
     private ArrayList<Contact> contactGroup;
-
+    ArrayList<Contact> contactlist = new ArrayList<Contact>();
+    ContactsAdapter adapter;
+    private List<Contact> list=new ArrayList<Contact>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        adapter = new ContactsAdapter(MainActivity.this,
+                R.layout.layout_phonelist, getContactList());
         //텔레그램 인증
         /**
          에러나므로 일단 주석처리 하였음
@@ -95,7 +101,30 @@ public class MainActivity extends Activity {
                 startActivity(intent);
             }
         });
-        
+
+
+
+        edtSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+               // Log.d("search내용",edtSearch.getText().toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                // input창에 문자를 입력할때마다 호출된다.
+                // search 메소드를 호출한다.
+                Log.d("search내용",edtSearch.getText().toString());
+                String text = edtSearch.getText().toString();
+                search(text);
+            }
+        });
+
+
         if (!NotificationManagerCompat.getEnabledListenerPackages(getApplicationContext()).contains(getPackageName())) {
             Intent intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
             startActivity(intent);
@@ -111,8 +140,7 @@ public class MainActivity extends Activity {
             requestPermissions(new String[]{Manifest.permission.READ_CONTACTS, Manifest.permission.SEND_SMS, Manifest.permission.READ_PHONE_STATE, Manifest.permission.READ_EXTERNAL_STORAGE,
                     Manifest.permission.RECEIVE_SMS, Manifest.permission.READ_PHONE_STATE}, 1);
         } else {
-            ContactsAdapter adapter = new ContactsAdapter(MainActivity.this,
-                    R.layout.layout_phonelist, getContactList());
+
 
             lv_contactlist.setAdapter(adapter);
             lv_contactlist
@@ -180,9 +208,37 @@ public class MainActivity extends Activity {
         }
     }
 
+    // 검색을 수행하는 메소드
+    public void search(String charText) {
+
+        // 문자 입력시마다 리스트를 지우고 새로 뿌려준다.
+        contactlist.clear();
+
+        // 문자 입력이 없을때는 모든 데이터를 보여준다.
+        if (charText.length() == 0) {
+            contactlist.addAll(list);
+        }
+        // 문자 입력을 할때..
+        else
+        {
+            // 리스트의 모든 데이터를 검색한다.
+            for(int i = 0;i < list.size(); i++)
+            {
+                // arraylist의 모든 데이터에 입력받은 단어(charText)가 포함되어 있으면 true를 반환한다.
+                if (list.get(i).getName().toLowerCase().contains(charText))
+                {
+                    // 검색된 데이터를 리스트에 추가한다.
+                    contactlist.add(list.get(i));
+                }
+            }
+        }
+        // 리스트 데이터가 변경되었으므로 아답터를 갱신하여 검색된 데이터를 화면에 보여준다.
+        adapter.notifyDataSetChanged();
+    }
+
+
     private ArrayList<Contact> getContactList() {
 
-        ArrayList<Contact> contactlist = new ArrayList<Contact>();
 
         String[] arrProjection = {
                 ContactsContract.Contacts._ID, // ID 열에 해당 하는 정보. 저장된 각 사용자는 고유의 ID를 가진다.
@@ -248,7 +304,11 @@ public class MainActivity extends Activity {
 
                 clsEmailCursor.close();
 
-
+                /**
+                 *
+                 *  메모 내용, 주소, 회사 정보, 직급 등의 정보 필요할 땐 아래의 코드 사용. 지금은 필요없으므로 주석처리 -> 불러오는 속도 개선
+                  */
+/*
                 // note(메모)
                 String noteWhere = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
                 String[] noteWhereParams = new String[]{
@@ -264,6 +324,7 @@ public class MainActivity extends Activity {
                         noteWhereParams,
                         null
                 );
+
 
 
                 while (clsNoteCursor.moveToNext()) {
@@ -324,8 +385,11 @@ public class MainActivity extends Activity {
 //                Log.d("Unity", "연락처 사용자 직급 : " + clsOrgCursor.getString(clsOrgCursor.getColumnIndex(ContactsContract.CommonDataKinds.Organization.TITLE)));
                 }
 
-                clsOrgCursor.close();
-                contactlist.add(acontact);
+               clsOrgCursor.close();
+
+              */
+               contactlist.add(acontact);
+               list.add(acontact);
             }
         }
         clsCursor.close();
