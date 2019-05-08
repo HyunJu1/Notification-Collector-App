@@ -18,7 +18,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private List<SendedMessage> mData;
     private LayoutInflater mInflater;
     private ItemClickListener mClickListener;
-    private int type=1;
+    private int type = 1;
+
     public RecyclerViewAdapter(Context context, List<SendedMessage> mData) {
         this.mInflater = LayoutInflater.from(context);
         this.mData = mData;
@@ -37,38 +38,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         holder.tv_platformType.setText(msg.getPlatfrom());
         holder.tv_sendedMessageContent.setText(msg.getMessage());
         holder.tv_sendedTime.setText(msg.getTime());
-        type=msg.getType();
+        type = msg.getType();
     }
 
     @Override
     public int getItemCount() {
         return mData.size();
-    }
-
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        TextView tv_platformType, tv_sendedMessageContent,tv_sendedTime;
-        LinearLayout linear_layout_1;
-        public ViewHolder(View itemView) {
-            super(itemView);
-
-            linear_layout_1=itemView.findViewById(R.id.linear_layout_1);
-            if (type==0 ){
-            linear_layout_1.setBackgroundResource(R.drawable.inbox2);}
-
-            tv_platformType = itemView.findViewById(R.id.tv_platformType);
-
-            tv_sendedMessageContent = itemView.findViewById(R.id.tv_sendedMessageContent);
-
-            tv_sendedTime=itemView.findViewById(R.id.tv_sendedTime);
-
-            itemView.setOnClickListener(this);
-        }
-
-        @Override
-        public void onClick(View view) {
-            if (mClickListener != null) mClickListener.onItemClick(view, getAdapterPosition());
-        }
-
     }
 
     public SendedMessage getItem(int idx) {
@@ -81,5 +56,33 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     public interface ItemClickListener {
         void onItemClick(View view, int position);
+    }
+
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        TextView tv_platformType, tv_sendedMessageContent, tv_sendedTime;
+        LinearLayout linear_layout_1;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+
+            linear_layout_1 = itemView.findViewById(R.id.linear_layout_1);
+            if (type == 0) {
+                linear_layout_1.setBackgroundResource(R.drawable.inbox2);
+            }
+
+            tv_platformType = itemView.findViewById(R.id.tv_platformType);
+
+            tv_sendedMessageContent = itemView.findViewById(R.id.tv_sendedMessageContent);
+
+            tv_sendedTime = itemView.findViewById(R.id.tv_sendedTime);
+
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            if (mClickListener != null) mClickListener.onItemClick(view, getAdapterPosition());
+        }
+
     }
 }

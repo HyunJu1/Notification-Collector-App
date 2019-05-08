@@ -2,44 +2,33 @@ package com.example.hyunju.notification_collector;
 
 import android.Manifest;
 import android.app.Activity;
-//import android.app.AlertDialog;
 import android.app.AlertDialog;
-import android.content.ContentUris;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
+import com.example.hyunju.notification_collector.R;
 import android.os.Bundle;
 import android.provider.ContactsContract;
-import android.provider.ContactsContract.Contacts;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-
 import android.support.v4.app.NotificationManagerCompat;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.hyunju.notification_collector.models.Contact;
+import com.example.hyunju.notification_collector.utils.ContactsAdapter;
 
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.List;
+
+//import android.app.AlertDialog;
 
 public class MainActivity extends Activity {
 
@@ -79,6 +68,12 @@ public class MainActivity extends Activity {
         });
         contactGroup = new ArrayList<>();
         btn_multi_send = findViewById(R.id.btn_multi_send);
+        btnSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                edtSearch.setVisibility(View.VISIBLE);
+            }
+        });
         btn_multi_send.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -331,75 +326,4 @@ public class MainActivity extends Activity {
 
     }
 
-    private class ContactsAdapter extends ArrayAdapter<Contact> {
-
-        private int resId;
-        private ArrayList<Contact> contactlist;
-        private LayoutInflater Inflater;
-        private Context context;
-
-        public ContactsAdapter(Context context, int textViewResourceId,
-                               List<Contact> objects) {
-            super(context, textViewResourceId, objects);
-            this.context = context;
-            resId = textViewResourceId;
-            contactlist = (ArrayList<Contact>) objects;
-            Inflater = (LayoutInflater) ((Activity) context)
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        }
-
-        @Override
-        public View getView(int position, View v, ViewGroup parent) {
-            ViewHolder holder;
-            if (v == null) {
-                v = Inflater.inflate(resId, null);
-                holder = new ViewHolder();
-                holder.tv_name = v.findViewById(R.id.tv_name);
-                holder.tv_phonenumber = v.findViewById(R.id.tv_phonenumber);
-                holder.iv_photoid = v.findViewById(R.id.iv_photo);
-                v.setTag(holder);
-            } else {
-                holder = (ViewHolder) v.getTag();
-            }
-
-            Contact acontact = contactlist.get(position);
-
-            if (acontact != null) {
-                holder.tv_name.setText(acontact.getName());
-                holder.tv_phonenumber.setText(acontact.getPhonenum());
-
-                Bitmap bm = openPhoto(acontact.getPhotoid());
-
-                if (bm != null) {
-                    holder.iv_photoid.setImageBitmap(bm);
-                } else {
-                    holder.iv_photoid.setImageDrawable(getResources()
-                            .getDrawable(R.drawable.user_icon));
-                }
-
-            }
-            return v;
-        }
-
-        private Bitmap openPhoto(long contactId) {
-            Uri contactUri = ContentUris.withAppendedId(Contacts.CONTENT_URI,
-                    contactId);
-            InputStream input = Contacts
-                    .openContactPhotoInputStream(context.getContentResolver(),
-                            contactUri);
-
-            if (input != null) {
-                return BitmapFactory.decodeStream(input);
-            }
-
-            return null;
-        }
-
-        private class ViewHolder {
-            ImageView iv_photoid;
-            TextView tv_name;
-            TextView tv_phonenumber;
-        }
-
-    }
 }

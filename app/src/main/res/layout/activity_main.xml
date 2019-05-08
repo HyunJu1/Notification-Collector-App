@@ -8,7 +8,8 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="6"
         android:background="@android:color/background_light"
         android:orientation="horizontal"
         android:padding="2dp"
@@ -27,29 +28,29 @@
 
         <EditText
             android:id="@+id/editSearch"
-            android:layout_width="wrap_content"
+            android:layout_width="200dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:inputType="textPersonName"
             android:textColorLink="@color/design_default_color_primary_dark"
-            android:visibility="gone" />
+            android:visibility="invisible" />
 
         <ImageButton
             android:id="@+id/btnSearch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:layout_gravity="center"
+            android:layout_weight="1"
             android:background="@android:color/transparent"
-            android:src="@android:drawable/ic_menu_search"
-        />
+            android:src="@android:drawable/ic_menu_search" />
 
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/ll_options"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="6"
         android:orientation="horizontal">
 
         <Button
@@ -75,7 +76,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="bottom"
         android:layout_weight="1"
-        android:padding="3dp" />
+        android:padding="2dp" />
 
 
 </LinearLayout>
