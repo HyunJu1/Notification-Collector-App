@@ -28,9 +28,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
             }
         }
 
-        Preference preference = findPreference(getString(R.string.pref_size_key));
-        preference.setOnPreferenceChangeListener(this);
-
     }
 
 
@@ -54,10 +51,8 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        // Figure out which preference was changed
         Preference preference = findPreference(key);
         if (null != preference) {
-            // Updates the summary for the preference
             if (!(preference instanceof CheckBoxPreference)) {
                 String value = sharedPreferences.getString(preference.getKey(), "");
                 setPreferenceSummary(preference, value);
@@ -67,15 +62,12 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
 
     private void setPreferenceSummary(Preference preference, String value) {
         if (preference instanceof ListPreference) {
-            // For list preferences, figure out the label of the selected value
             ListPreference listPreference = (ListPreference) preference;
             int prefIndex = listPreference.findIndexOfValue(value);
             if (prefIndex >= 0) {
-                // Set the summary to that label
                 listPreference.setSummary(listPreference.getEntries()[prefIndex]);
             }
         } else if (preference instanceof EditTextPreference) {
-            // For EditTextPreferences, set the summary to the value's simple string representation.
             preference.setSummary(value);
         }
     }
