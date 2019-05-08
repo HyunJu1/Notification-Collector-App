@@ -10,20 +10,19 @@ import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.Store;
-import javax.mail.internet.MimeUtility;
 
 import com.example.hyunju.notification_collector.configs.EmailConfig;
-import com.example.hyunju.notification_collector.models.Mail;
+import com.example.hyunju.notification_collector.models.SendedMessage;
 import com.sun.mail.imap.IMAPFolder;
 
-public class ReadMail extends AsyncTask<Integer, Void, ArrayList<Mail>> {
+public class ReadMail extends AsyncTask<String, Void, ArrayList<SendedMessage>> {
 
     public int totalMessages;
     private Session session;
     private Store store;
     private IMAPFolder folder;
     private String subject;
-    private ArrayList<Mail> list;
+    private ArrayList<SendedMessage> list;
 
     @Override
     protected void onCancelled() {
@@ -32,7 +31,7 @@ public class ReadMail extends AsyncTask<Integer, Void, ArrayList<Mail>> {
 
 
     @Override
-    protected ArrayList<Mail> doInBackground(Integer... integers) {
+    protected ArrayList<SendedMessage> doInBackground(String... strings) {
         try {
             Properties read_props = new Properties();
 
@@ -48,17 +47,22 @@ public class ReadMail extends AsyncTask<Integer, Void, ArrayList<Mail>> {
             if(!folder.isOpen()) {
                 folder.open(Folder.READ_WRITE);
                 Message[] messages = folder.getMessages();
-                list = new ArrayList<Mail>();
+                list = new ArrayList<SendedMessage>();
                 totalMessages = folder.getMessageCount();
-                int start_num = messages.length - 1 - Integer.parseInt(integers[0].toString());
+                int start_num = messages.length - 1 - Integer.parseInt(strings[1]);
                 for(int i = start_num; i > (start_num - 10 >= 0? start_num - 10 : 0); i--) {
-                    long start = System.currentTimeMillis();
                     Message msg = messages[i];
-
+                    String from = msg.getFrom()[0].toString().split("<")[1];
+//                    msg.getFrom()[0].toString().split("<")[1].substring(0, msg.getFrom()[0].toString().split("<")[1].length()-1))
                     Log.e("email", "s : " + msg.getSubject());
+                    Log.e("???",strings[0]);
+                    Log.e("???", from.substring(0, from.length() - 1));
+                    Log.e("...how", String.valueOf(strings[0] == from.substring(0, from.length() - 1)));
 
-                    list.add(new Mail(msg.getSubject(), MimeUtility.decodeText(msg.getFrom()[0].toString()), msg.getReceivedDate(), msg.getContentType(), msg.getContent()));
-                    long end = System.currentTimeMillis();
+                    if(strings[0].equals(from.substring(0, from.length() - 1))) {
+                        Log.e("input", "s : " + msg.getSubject());
+                        list.add(new SendedMessage(msg.getSubject(), msg.getReceivedDate(), msg.getContentType(), msg.getContent(), 1));
+                    }
                 }
             }
         } catch (Exception e) {
@@ -68,7 +72,7 @@ public class ReadMail extends AsyncTask<Integer, Void, ArrayList<Mail>> {
         return list;
     }
 
-    protected void onPostExecute(ArrayList<Mail> list) {
+    protected void onPostExecute(ArrayList<SendedMessage> list) {
 
     }
 }

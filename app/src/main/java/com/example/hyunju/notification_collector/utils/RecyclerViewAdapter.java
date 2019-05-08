@@ -65,13 +65,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView tv_platformType, tv_sendedMessageContent, tv_sendedTime;
         LinearLayout linear_layout_1;
-        int type ;
+        int type;
 
         public ViewHolder(View itemView) {
             super(itemView);
 
             linear_layout_1 = itemView.findViewById(R.id.linear_layout_1);
-
 
             tv_platformType = itemView.findViewById(R.id.tv_platformType);
 

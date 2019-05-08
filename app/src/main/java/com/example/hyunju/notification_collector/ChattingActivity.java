@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import com.example.hyunju.notification_collector.models.SendedMessage;
 import com.example.hyunju.notification_collector.utils.FileUtils;
+import com.example.hyunju.notification_collector.utils.ReadMail;
 import com.example.hyunju.notification_collector.utils.RecyclerViewAdapter;
 
 import com.example.hyunju.notification_collector.utils.SendFacebookMessage;
@@ -67,7 +68,6 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
         textView_name = (TextView) findViewById(R.id.textView_name);
         Intent intent = getIntent();
 
-
         phone_num = getIntent().getStringExtra("phone_num");
         name = getIntent().getStringExtra("name");
         email = getIntent().getStringExtra("email");
@@ -93,14 +93,33 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
 
         rv_sendedMsg.setLayoutManager(new GridLayoutManager(context, numberOfColumns));
         sendedMessages = new ArrayList<SendedMessage>();
+
+        ArrayList<SendedMessage> mails = addReceiveMail(email);
+        for(int index = 0; index < mails.size(); index++) {
+            sendedMessages.add(mails.get(index));
+        }
+
         rv_adapter = new RecyclerViewAdapter(context, sendedMessages);
         rv_adapter.setClickListener(this);
         rv_sendedMsg.setAdapter(rv_adapter);
+    }
 
+    /**
+     * 해당 이메일에게 받은 메일 읽어오는 함수
+     * **/
+    private ArrayList<SendedMessage> addReceiveMail(String email) {
+        ArrayList<SendedMessage> mails = new ArrayList<>();;
 
+        if(email != null) {
+            ReadMail rm = new ReadMail();
+            try {
+                mails = rm.execute(email, "10").get();
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+        }
 
-
-
+        return mails;
     }
 
     private BroadcastReceiver onNotice= new BroadcastReceiver() {
@@ -124,12 +143,12 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
  *
  */
 
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     };
+
     public String getTime() {
         // 보낸 시각 표시
         long now = System.currentTimeMillis();
@@ -137,8 +156,6 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
         SimpleDateFormat sdfNow = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         formatDate = sdfNow.format(date);
         return formatDate;
-
-
     }
     /**
      * 버튼 두 개라서 조잡해서 여기다가 정리함

@@ -50,7 +50,7 @@ public class LockActivity extends AppCompatActivity {
 
             @Override
             public void onEmpty() {
-                Log.d(TAG, "lock code is empty!");
+                Log.d(TAG, "비밀번호를 입력해주세요.");
             }
 
             @Override
