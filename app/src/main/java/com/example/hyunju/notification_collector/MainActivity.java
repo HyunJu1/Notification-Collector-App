@@ -7,18 +7,16 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.v4.app.NotificationManagerCompat;
+import androidx.annotation.NonNull;
+import androidx.core.app.NotificationManagerCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -27,7 +25,6 @@ import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
-import com.example.hyunju.notification_collector.R;
 import com.example.hyunju.notification_collector.models.Contact;
 import com.example.hyunju.notification_collector.utils.ContactsAdapter;
 

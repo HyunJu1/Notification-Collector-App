@@ -2,8 +2,8 @@ package com.example.hyunju.notification_collector.telegram;
 
 import android.app.Activity;
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AlertDialog;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import android.text.InputType;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;

@@ -2,12 +2,9 @@ package com.example.hyunju.notification_collector;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.webkit.WebView;
 import android.widget.TextView;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class MailDetailActivity extends AppCompatActivity {
 
