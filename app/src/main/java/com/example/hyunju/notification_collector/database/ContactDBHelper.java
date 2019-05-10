@@ -12,7 +12,13 @@ public class ContactDBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-
+        db.execSQL("create table contact(" +
+                " contact_id Integer primary key," +
+                " phonenum TEXT ," +
+                " name TEXT ," +
+                " email TEXT," +
+                " photo_id TEXT" +
+                ");");
     }
 
     @Override
