@@ -95,8 +95,10 @@ public class ChattingActivity extends Activity implements View.OnClickListener, 
         sendedMessages = new ArrayList<SendedMessage>();
 
         ArrayList<SendedMessage> mails = addReceiveMail(email);
-        for(int index = 0; index < mails.size(); index++) {
-            sendedMessages.add(mails.get(index));
+        if(mails != null) {
+            for (int index = 0; index < mails.size(); index++) {
+                sendedMessages.add(mails.get(index));
+            }
         }
 
         rv_adapter = new RecyclerViewAdapter(context, sendedMessages);
