@@ -6,6 +6,8 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.example.hyunju.notification_collector.utils.TelegramChatManager;
+import com.example.hyunju.notification_collector.utils.TelegramChatManager.MessageState;
 
 import org.drinkless.td.libcore.telegram.Client;
 import org.drinkless.td.libcore.telegram.TG;
@@ -43,8 +45,38 @@ public class TgHelper {
     private final static Client.ResultHandler LoopUpdateHandler = new Client.ResultHandler() {
         @Override
         public void onResult(TdApi.TLObject object) {
+            if (object.getConstructor() == TdApi.UserStatusOffline.CONSTRUCTOR || object.getConstructor() == TdApi.UserStatusOnline.CONSTRUCTOR
+                    || object.getConstructor() == TdApi.UpdateUserStatus.CONSTRUCTOR) {
+                return;
+            }
             if (object.getConstructor() == TdApi.UpdateUser.CONSTRUCTOR) {
                 updateUser((TdApi.UpdateUser) object);
+            } else if (object.getConstructor() == TdApi.UpdateNewMessage.CONSTRUCTOR) {
+                TdApi.UpdateNewMessage updateNewChat = (TdApi.UpdateNewMessage) object;
+
+                switch (sendState((updateNewChat).message)) {
+                    case SUCCESS:
+                        // 보냄
+                        break;
+                    case BEINGSENT:
+                        // 보냄
+                        break;
+                    case INCOMING:
+                        String message = ((TdApi.MessageText) updateNewChat.message.content).text;
+                        // 받음
+                        break;
+                    default:
+                        // 실패
+                        break;
+                }
+                TdApi.Message chat = updateNewChat.message;
+            } else if (object.getConstructor() == TdApi.UpdateMessageContent.CONSTRUCTOR) {
+                TdApi.UpdateMessageContent updateChat = (TdApi.UpdateMessageContent) object;
+                TdApi.MessageContent chat = updateChat.newContent;
+            } else if (object.getConstructor() == TdApi.UpdateOption.CONSTRUCTOR) {
+//                ((TdApi.UpdateOption)object).name
+            } else if (object.getConstructor() == TdApi.UpdateChannel.CONSTRUCTOR) {
+
             }
             synchronized (LOCK) {
                 for (Client.ResultHandler r : list)
@@ -53,6 +85,16 @@ public class TgHelper {
         }
     };
 
+    public static MessageState sendState(TdApi.Message message) {
+        if (message.sendState instanceof TdApi.MessageIsIncoming) {
+            return MessageState.INCOMING;
+        } else if (message.sendState instanceof TdApi.MessageIsSuccessfullySent) {
+            return MessageState.SUCCESS;
+        } else if (message.sendState instanceof TdApi.MessageIsBeingSent) {
+            return MessageState.BEINGSENT;
+        }
+        return MessageState.FAILED;
+    }
     private static void updateUser(TdApi.UpdateUser updateUser) {
         users.put(updateUser.user.id, updateUser.user);
         //TODO memory leak on long usage
@@ -63,10 +105,45 @@ public class TgHelper {
         TG.setUpdatesHandler(LoopUpdateHandler);
     }
 
+    // 메세지 전송
+    public static void sendMessage(long chatId, String text) {
+        TdApi.InputMessageText inputMessageText = new TdApi.InputMessageText();
+        inputMessageText.text = text;
+        TdApi.SendMessage sendMessage = new TdApi.SendMessage();
+        sendMessage.chatId = chatId;
+        sendMessage.inputMessageContent = inputMessageText;
+        TgHelper.send(sendMessage);
+    }
+    // 메세지 전송
+    public static void sendMessage(long chatId, String text, TelegramChatManager.Callback callback) {
+        TdApi.InputMessageText inputMessageText = new TdApi.InputMessageText();
+        inputMessageText.text = text;
+        TdApi.SendMessage sendMessage = new TdApi.SendMessage();
+        sendMessage.chatId = chatId;
+        sendMessage.inputMessageContent = inputMessageText;
+        send(sendMessage, callback);
+    }
+    //파일 전송
+    public static void sendFile(long chatId, TdApi.InputFile file) {
+        TdApi.InputMessageDocument inputMessageText = new TdApi.InputMessageDocument();
+        inputMessageText.document = file;
+        TdApi.SendMessage sendMessage = new TdApi.SendMessage();
+        sendMessage.chatId = chatId;
+        sendMessage.inputMessageContent = inputMessageText;
+        TgHelper.send(sendMessage);
+    }
+
     public static void send(final TdApi.TLFunction function) {
         send(function, TgUtils.emptyResultHandler());
     }
-
+    public static void send(final TdApi.TLFunction function, final TelegramChatManager.Callback callback) {
+        send(function, new Client.ResultHandler() {
+            @Override
+            public void onResult(TdApi.TLObject object) {
+                callback.onResult(object);
+            }
+        });
+    }
 
     public static void send(TdApi.TLFunction function, @Nullable final Client.ResultHandler resultHandler) {
         TG().send(function, resultHandler != null ? resultHandler : TgUtils.emptyResultHandler());
@@ -94,7 +171,6 @@ public class TgHelper {
                 if (object.getConstructor() == TdApi.User.CONSTRUCTOR) {
                     TdApi.User me = (TdApi.User) object;
                     selfProfileId = me.id;
-                    PrefsHelper.set(SETS_PROFILE_ID, selfProfileId);
                     if (callback != null)
                         callback.onResult(object);
                 }
