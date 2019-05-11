@@ -16,6 +16,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    //텔레그램JNI
     sourceSets.main {
         jniLibs.srcDir 'src/main/libs'
         jni.srcDirs = [] //important!!!! disable automatic ndk-build call
