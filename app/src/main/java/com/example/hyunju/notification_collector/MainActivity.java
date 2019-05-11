@@ -76,11 +76,6 @@ public class MainActivity extends Activity {
 
         mAdapter = new ContactsAdapter(MainActivity.this,
                 R.layout.layout_phonelist, getContactList());
-        //텔레그램 인증
-        /**
-         에러나므로 일단 주석처리 하였음
-         **/
-        startActivity(new Intent(this, AuthActivity.class));
 
 
         setContentView(R.layout.activity_main);
