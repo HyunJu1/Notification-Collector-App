@@ -100,14 +100,6 @@ public class TelegramChatManager {
         return mChatList.get(phoneNum) != null;
     }
 
-    public void sendMessage(long chatId, String text) {
-        TdApi.InputMessageText inputMessageText = new TdApi.InputMessageText();
-        inputMessageText.text = text;
-        TdApi.SendMessage sendMessage = new TdApi.SendMessage();
-        sendMessage.chatId = chatId;
-        sendMessage.inputMessageContent = inputMessageText;
-        TgHelper.send(sendMessage);
-    }
     public void sendMessage(long chatId, String text, Callback callback) {
         TdApi.InputMessageText inputMessageText = new TdApi.InputMessageText();
         inputMessageText.text = text;
@@ -116,24 +108,14 @@ public class TelegramChatManager {
         sendMessage.inputMessageContent = inputMessageText;
         TgHelper.send(sendMessage, callback);
     }
-    public void sendFile(long chatId, String text, String path) {
+    public void sendFile(long chatId, String text,  TdApi.InputFile file, Callback callback) {
         TdApi.InputMessageDocument inputMessageDocument = new TdApi.InputMessageDocument();
         inputMessageDocument.caption = text;
-        inputMessageDocument.document = new TdApi.InputFileLocal(path);
+        inputMessageDocument.document = file;
         TdApi.SendMessage sendMessage = new TdApi.SendMessage();
         sendMessage.chatId = chatId;
         sendMessage.inputMessageContent = inputMessageDocument;
-        TgHelper.send(sendMessage);
-    }
-
-    public void sendPhoto(long chatId, String text, String path) {
-        TdApi.InputMessagePhoto inputMessagePhoto = new TdApi.InputMessagePhoto();
-        inputMessagePhoto.caption = text;
-        inputMessagePhoto.photo = new TdApi.InputFileLocal(path);
-        TdApi.SendMessage sendMessage = new TdApi.SendMessage();
-        sendMessage.chatId = chatId;
-        sendMessage.inputMessageContent = inputMessagePhoto;
-        TgHelper.send(sendMessage);
+        TgHelper.send(sendMessage,callback);
     }
 
     public HashMap<String, TdApi.Chat> getChatList() {

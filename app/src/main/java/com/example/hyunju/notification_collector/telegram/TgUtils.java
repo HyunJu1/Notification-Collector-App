@@ -26,6 +26,7 @@ public class TgUtils {
         return chatType == TdApi.ChannelChatInfo.CONSTRUCTOR;
     }
 
+    // 채팅방 정보 가져올떼
     public static void getChatFullInfo(TdApi.Chat chat, final ResultHandler callbackHandler) {
         if (TgUtils.isSuperGroup(chat.type.getConstructor())) {
             TdApi.ChannelChatInfo ci = (TdApi.ChannelChatInfo) chat.type;
@@ -47,6 +48,8 @@ public class TgUtils {
 
     }
 
+
+    // 이름으로 텔레그램 연락처 검색
     public void getTelegramContact(String name, final TelegramChatManager.Callback<TdApi.Users> callback) {
         TgHelper.send(new TdApi.SearchContacts(name, 200), new Client.ResultHandler() {
             @Override
@@ -56,6 +59,7 @@ public class TgUtils {
         });
     }
 
+    // 텔래그렘 사용자 정보
     public static TdApi.User getUser(int userId) {
         TdApi.User user = TgHelper.users.get(userId);
         if(user==null){
@@ -67,10 +71,12 @@ public class TgUtils {
         return user;
     }
 
+    //텔레그램 사용자 정보
     public static TdApi.User getUser(TdApi.ChatMember member) {
         return getUser(member.userId);
     }
 
+    // 채팅방 채팅상대 이름
     public static String getChatUsername(TdApi.Chat chat) {
         if(isSuperGroup(chat.type.getConstructor())){
             TdApi.ChannelChatInfo channelInfo = (TdApi.ChannelChatInfo) chat.type;

@@ -152,7 +152,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
 
             try {
 
-                SendedMessage model = new SendedMessage(message,"sms ",receivedDate,1);
+                SendedMessage model = new SendedMessage(message,"sms ",receivedDate,SendedMessage.MESSAGE_RECEIVER);
 
 
                     sendedMessages.add(model);
@@ -220,7 +220,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
                     SmsManager smsManager = SmsManager.getDefault();
                     smsManager.sendTextMessage(mContact.phonenum, null, text, null, null);
 
-                    SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_SMS,getTime(),0);
+                    SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_SMS,getTime(),SendedMessage.MESSAGE_SEND);
 
                     sendedMessages.add(sendedMessage);
 //                    rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
@@ -241,7 +241,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
                             SendFacebookMessage sfm = new SendFacebookMessage(content, text);
                             sfm.execute();
 
-                            SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_FACEBOOK,getTime(),0);
+                            SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_FACEBOOK,getTime(),SendedMessage.MESSAGE_SEND);
 
                             sendedMessages.add(sendedMessage);
                             rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
@@ -263,20 +263,37 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
                 } else if ("텔레그램".equals(listItems.get(pos))) { // telegram
                     long chatId = TelegramChatManager.getInstance().getChatId(mContact.phonenum);
                     if(chatId!= TelegramChatManager.EXTRA_EMPTY_CHAT_ID) {
-                        TgHelper.sendMessage(chatId, text, new TelegramChatManager.Callback() {
-                            @Override
-                            public void onResult(Object result) {
-                                switch (TgHelper.sendState((TdApi.Message) result)){
-                                    case BEINGSENT:
-                                        SendedMessage sendedMessage = new SendedMessage(text,SendedMessage.PLATFORM_TELEGRAM,getTime(),0);
-                                        rv_adapter.addList(sendedMessage);
-                                        break;
-                                    case FAILED:
-                                        toast("전송실패");
-                                        break;
+                        if(path != null) {
+                            TelegramChatManager.getInstance().sendFile(chatId, text, new TdApi.InputFileLocal(path), new TelegramChatManager.Callback() {
+                                @Override
+                                public void onResult(Object result) {
+                                    switch (TgHelper.sendState((TdApi.Message) result)) {
+                                        case BEINGSENT:
+                                            SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_TELEGRAM, getTime(), SendedMessage.MESSAGE_SEND);
+                                            rv_adapter.addList(sendedMessage);
+                                            break;
+                                        case FAILED:
+                                            toast("전송실패");
+                                            break;
+                                    }
                                 }
-                            }
-                        });
+                            });
+                        }else {
+                            TelegramChatManager.getInstance().sendMessage(chatId, text, new TelegramChatManager.Callback() {
+                                @Override
+                                public void onResult(Object result) {
+                                    switch (TgHelper.sendState((TdApi.Message) result)) {
+                                        case BEINGSENT:
+                                            SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_TELEGRAM, getTime(), SendedMessage.MESSAGE_SEND);
+                                            rv_adapter.addList(sendedMessage);
+                                            break;
+                                        case FAILED:
+                                            toast("전송실패");
+                                            break;
+                                    }
+                                }
+                            });
+                        }
                     } else {
                         toast("잘못된 텔레그램 메신저 사용자입니다.");
                     }
@@ -301,7 +318,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
                                 }
                                 sm.execute();
 
-                                SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_EMAIL,getTime(),0);
+                                SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_EMAIL,getTime(),SendedMessage.MESSAGE_SEND);
 
                                 sendedMessages.add(sendedMessage);
                                 rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
@@ -361,11 +378,11 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
     public void onItemClick(View view, int position) {
 
         // 메일인 경우 클릭시 메일 상세페이지로 이동
-        if(rv_adapter.getItem(position).getPlatfrom().equals("Email")) {
+        if(rv_adapter.getItem(position).platfrom.equals(SendedMessage.PLATFORM_EMAIL)) {
             Intent intent = new Intent(ChattingActivity.this, MailDetailActivity.class);
 
-            intent.putExtra("subject", rv_adapter.getItem(position).getMessage());
-            intent.putExtra("date", rv_adapter.getItem(position).getTime());
+            intent.putExtra("subject", rv_adapter.getItem(position).message);
+            intent.putExtra("date", rv_adapter.getItem(position).time);
             intent.putExtra("body", rv_adapter.getItem(position).getBody());
             intent.putExtra("from", mContact.email);
 

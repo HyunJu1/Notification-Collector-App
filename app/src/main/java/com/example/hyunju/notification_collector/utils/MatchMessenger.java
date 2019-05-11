@@ -25,6 +25,7 @@ public class MatchMessenger {
     private MatchMessenger(){
     }
 
+    // 휴대폰번호로 텔레그램 사용자인지 여부 저장
     public void setUseTelegram(String phoneNum, boolean isUse){
         if (mUserInfo.get(phoneNum)!=null){
             Messenger messenger=  mUserInfo.get(phoneNum);
@@ -38,6 +39,7 @@ public class MatchMessenger {
         }
     }
 
+    // 휴대폰번호로 이메일 사용자인지 여부 저장
     public void setUseEmail(String phoneNum, boolean isUse){
         if (mUserInfo.get(phoneNum)!=null){
             Messenger messenger=  mUserInfo.get(phoneNum);
@@ -51,6 +53,7 @@ public class MatchMessenger {
         }
     }
 
+    // 휴대폰번호로 해당사용자의 사용 메신저 정보 반환
     public Messenger getMessengerInfo(String phoneNum){
         return mUserInfo.get(phoneNum);
     }

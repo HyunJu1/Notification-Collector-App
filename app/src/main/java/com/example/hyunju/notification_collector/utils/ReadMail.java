@@ -61,7 +61,7 @@ public class ReadMail extends AsyncTask<String, Void, ArrayList<SendedMessage>> 
 
                     if(strings[0].equals(from.substring(0, from.length() - 1))) {
                         Log.e("input", "s : " + msg.getSubject());
-                        list.add(new SendedMessage(msg.getSubject(), msg.getReceivedDate(), msg.getContentType(), msg.getContent(), 1));
+                        list.add(new SendedMessage(msg.getSubject(), msg.getReceivedDate(), msg.getContentType(), msg.getContent(), SendedMessage.MESSAGE_RECEIVER));
                     }
                 }
             }

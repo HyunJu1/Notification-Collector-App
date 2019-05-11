@@ -22,9 +22,13 @@ public class SendedMessage implements Parcelable {
     public static final String PLATFORM_SMS = "sms";
 
 
+    public static final String MESSAGE_SEND = "send";
+
+    public static final String MESSAGE_RECEIVER= "receive";
+
     public String message;
     public String platfrom;
-    private int type;
+    public String type;
     public String time;
 
     // mail variables
@@ -36,7 +40,7 @@ public class SendedMessage implements Parcelable {
 
     }
 
-    public SendedMessage(String message, String platfrom, String time , int type) {
+    public SendedMessage(String message, String platfrom, String time , String type) {
         this.message = message;
         this.platfrom = platfrom;
         this.time = time;
@@ -46,7 +50,7 @@ public class SendedMessage implements Parcelable {
     /**
     * mail용
     * */
-    public SendedMessage(String subject, Date date, String contentType, Object body, int type) {
+    public SendedMessage(String subject, Date date, String contentType, Object body, String type) {
         this.message = subject; // 제목
         this.platfrom = "Email";
         this.time = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(date); // 받은 시간
@@ -73,37 +77,7 @@ public class SendedMessage implements Parcelable {
         }
     };
 
-    public String getMessage() {
-        return message;
-    }
 
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public String getPlatfrom() {
-        return platfrom;
-    }
-
-    public void setPlatfrom(String platfrom) {
-        this.platfrom = platfrom;
-    }
-
-    public int getType() {
-        return type;
-    }
-
-    public void setType(int type) {
-        this.type = type;
-    }
-
-    public String getTime() {
-        return time;
-    }
-
-    public void setTime(String time) {
-        this.time = time;
-    }
 
     @Override
     public String toString() {

@@ -34,11 +34,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     @Override
     public void onBindViewHolder(RecyclerViewAdapter.ViewHolder holder, int position) {
         SendedMessage msg = mData.get(position);
-        holder.tv_platformType.setText(msg.getPlatfrom());
-        holder.tv_sendedMessageContent.setText(msg.getMessage());
-        holder.tv_sendedTime.setText(msg.getTime());
-        holder.type = msg.getType();
-        if (holder.type == 0) {
+        holder.tv_platformType.setText(msg.platfrom);
+        holder.tv_sendedMessageContent.setText(msg.message);
+        holder.tv_sendedTime.setText(msg.time);
+        holder.type = msg.type;
+        if (holder.type == SendedMessage.MESSAGE_SEND) {
             holder.linear_layout_1.setBackgroundResource(R.drawable.outbox2);
         } else {
             holder.linear_layout_1.setBackgroundResource(R.drawable.inbox2);
@@ -77,7 +77,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView tv_platformType, tv_sendedMessageContent, tv_sendedTime;
         LinearLayout linear_layout_1;
-        int type;
+        String type;
 
         public ViewHolder(View itemView) {
             super(itemView);

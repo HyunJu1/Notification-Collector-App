@@ -17,7 +17,6 @@ import java.util.ArrayList;
 
 public class TgHelper {
 
-    private static final String SETS_PROFILE_ID = "profile";
     private static ArrayList<Client.ResultHandler> list = new ArrayList<>(2);
     private static final Object LOCK = new Object();
 
@@ -62,8 +61,8 @@ public class TgHelper {
                         // 보냄
                         break;
                     case INCOMING:
+                        // 받은메시지
                         String message = ((TdApi.MessageText) updateNewChat.message.content).text;
-                        // 받음
                         break;
                     default:
                         // 실패
@@ -103,34 +102,6 @@ public class TgHelper {
 
     public static void startUpdatesHandler() {
         TG.setUpdatesHandler(LoopUpdateHandler);
-    }
-
-    // 메세지 전송
-    public static void sendMessage(long chatId, String text) {
-        TdApi.InputMessageText inputMessageText = new TdApi.InputMessageText();
-        inputMessageText.text = text;
-        TdApi.SendMessage sendMessage = new TdApi.SendMessage();
-        sendMessage.chatId = chatId;
-        sendMessage.inputMessageContent = inputMessageText;
-        TgHelper.send(sendMessage);
-    }
-    // 메세지 전송
-    public static void sendMessage(long chatId, String text, TelegramChatManager.Callback callback) {
-        TdApi.InputMessageText inputMessageText = new TdApi.InputMessageText();
-        inputMessageText.text = text;
-        TdApi.SendMessage sendMessage = new TdApi.SendMessage();
-        sendMessage.chatId = chatId;
-        sendMessage.inputMessageContent = inputMessageText;
-        send(sendMessage, callback);
-    }
-    //파일 전송
-    public static void sendFile(long chatId, TdApi.InputFile file) {
-        TdApi.InputMessageDocument inputMessageText = new TdApi.InputMessageDocument();
-        inputMessageText.document = file;
-        TdApi.SendMessage sendMessage = new TdApi.SendMessage();
-        sendMessage.chatId = chatId;
-        sendMessage.inputMessageContent = inputMessageText;
-        TgHelper.send(sendMessage);
     }
 
     public static void send(final TdApi.TLFunction function) {
