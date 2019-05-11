@@ -1,16 +1,21 @@
 package com.example.hyunju.notification_collector;
 
 import android.app.Activity;
+
+import android.content.BroadcastReceiver;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.View;
@@ -25,8 +30,13 @@ import com.example.hyunju.notification_collector.models.SendedMessage;
 import com.example.hyunju.notification_collector.telegram.TgHelper;
 import com.example.hyunju.notification_collector.telegram.TgUtils;
 import com.example.hyunju.notification_collector.utils.FileUtils;
+
 import com.example.hyunju.notification_collector.utils.MatchMessenger;
+
+import com.example.hyunju.notification_collector.utils.ReadMail;
+
 import com.example.hyunju.notification_collector.utils.RecyclerViewAdapter;
+
 import com.example.hyunju.notification_collector.utils.SendFacebookMessage;
 import com.example.hyunju.notification_collector.utils.SendMail;
 import com.example.hyunju.notification_collector.utils.TelegramChatManager;
@@ -43,7 +53,6 @@ import java.util.List;
 
 public class ChattingActivity extends CollectorActivity implements View.OnClickListener, RecyclerViewAdapter.ItemClickListener {
 
-
     private static final int REQUEST_CODE = 6384;
 
     TextView textView_phone, textView_name;
@@ -58,8 +67,10 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
     private RecyclerView rv_recievdMsg;
 
     private RecyclerViewAdapter rv_adapter;
+
     private ArrayList<SendedMessage> sendedMessages = new ArrayList<>();
     private List<SendedMessage> receiveddMessages;
+
 
     private String formatDate;
     @Override
@@ -68,18 +79,10 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
 
         setContentView(R.layout.activity_chatting);
 
+        LocalBroadcastManager.getInstance(this).registerReceiver(onNotice, new IntentFilter("SMS"));
 
         textView_phone = (TextView) findViewById(R.id.textView_phone_num);
         textView_name = (TextView) findViewById(R.id.textView_name);
-
-
-//        senderNum = intent.getExtras().getString("senderNum");
-//        message = intent.getExtras().getString("message");
-//        time = intent.getExtras().getString("time");
-//
-//        Log.d("문자 수신 완료",senderNum+ message + time);
-
-
 
         textView_phone = view(R.id.textView_phone_num);
         textView_name = view(R.id.textView_name);
@@ -102,32 +105,70 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
 
         int numberOfColumns = 1;
         rv_sendedMsg = findViewById(R.id.rv_sendedMsg);
-        rv_recievdMsg = findViewById(R.id.rv_receivedMsg);
+       // rv_recievdMsg = findViewById(R.id.rv_receivedMsg);
 
-        rv_sendedMsg.setLayoutManager(new LinearLayoutManager(this));
-//        sendedMessages = new ArrayList<SendedMessage>();
+
         rv_adapter = new RecyclerViewAdapter();
         rv_adapter.setList(sendedMessages);
+
+        rv_sendedMsg.setLayoutManager(new GridLayoutManager(this, numberOfColumns));
+        sendedMessages = new ArrayList<SendedMessage>();
+
+        ArrayList<SendedMessage> mails = addReceiveMail(mContact.email);
+        if(mails != null) {
+            for (int index = 0; index < mails.size(); index++) {
+                sendedMessages.add(mails.get(index));
+            }
+        }
+
         rv_adapter.setClickListener(this);
         rv_sendedMsg.setAdapter(rv_adapter);
-
-
-//        String title = intent.getStringExtra("title");
-//        String text = intent.getStringExtra("text");
-//        String subText = intent.getStringExtra("subText");
-//
-            //TODO: 이부분해야함
-//        int numberOfColumns2 = 1;
-//        rv_recievdMsg.setLayoutManager(new GridLayoutManager(context, numberOfColumns2));
-//        receiveddMessages = new ArrayList<SendedMessage>();
-//        rv_adapter = new RecyclerViewAdapter(context, receiveddMessages);
-//        rv_adapter.setClickListener(this);
-//        rv_recievdMsg.setAdapter(rv_adapter);
-//
-//        SendedMessage sendedMessage = new SendedMessage(title, text,getTime());
-//        sendedMessages.add(sendedMessage);
-
     }
+
+    /**
+     * 해당 이메일에게 받은 메일 읽어오는 함수
+     * **/
+    private ArrayList<SendedMessage> addReceiveMail(String email) {
+        ArrayList<SendedMessage> mails = new ArrayList<>();;
+
+        if(email != null) {
+            ReadMail rm = new ReadMail();
+            try {
+                mails = rm.execute(email, "10").get();
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return mails;
+    }
+
+    private BroadcastReceiver onNotice= new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String senderNo = intent.getStringExtra("senderNo");
+            String message = intent.getStringExtra("message");
+            String receivedDate = intent.getStringExtra("receivedDate");
+
+            try {
+
+                SendedMessage model = new SendedMessage(message,"sms ",receivedDate,1);
+
+
+                    sendedMessages.add(model);
+                    rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
+
+/***
+ * type 변수 추가 -> 0이면 send, 1이면 receive
+ *
+ */
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
     public String getTime() {
         // 보낸 시각 표시
         long now = System.currentTimeMillis();
@@ -135,8 +176,6 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
         SimpleDateFormat sdfNow = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         formatDate = sdfNow.format(date);
         return formatDate;
-
-
     }
     /**
      * 버튼 두 개라서 조잡해서 여기다가 정리함
@@ -181,8 +220,8 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
                     SmsManager smsManager = SmsManager.getDefault();
                     smsManager.sendTextMessage(mContact.phonenum, null, text, null, null);
 
+                    SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_SMS,getTime(),0);
 
-                    SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_SMS,getTime());
                     sendedMessages.add(sendedMessage);
 //                    rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
 
@@ -202,7 +241,8 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
                             SendFacebookMessage sfm = new SendFacebookMessage(content, text);
                             sfm.execute();
 
-                            SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_FACEBOOK,getTime());
+                            SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_FACEBOOK,getTime(),0);
+
                             sendedMessages.add(sendedMessage);
                             rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
 
@@ -228,7 +268,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
                             public void onResult(Object result) {
                                 switch (TgHelper.sendState((TdApi.Message) result)){
                                     case BEINGSENT:
-                                        SendedMessage sendedMessage = new SendedMessage(text,SendedMessage.PLATFORM_TELEGRAM,getTime());
+                                        SendedMessage sendedMessage = new SendedMessage(text,SendedMessage.PLATFORM_TELEGRAM,getTime(),0);
                                         rv_adapter.addList(sendedMessage);
                                         break;
                                     case FAILED:
@@ -261,7 +301,8 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
                                 }
                                 sm.execute();
 
-                                SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_EMAIL,getTime());
+                                SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_EMAIL,getTime(),0);
+
                                 sendedMessages.add(sendedMessage);
                                 rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
 
@@ -318,6 +359,19 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
 
     @Override
     public void onItemClick(View view, int position) {
-       toast(rv_adapter.getItem(position).toString());
+
+        // 메일인 경우 클릭시 메일 상세페이지로 이동
+        if(rv_adapter.getItem(position).getPlatfrom().equals("Email")) {
+            Intent intent = new Intent(ChattingActivity.this, MailDetailActivity.class);
+
+            intent.putExtra("subject", rv_adapter.getItem(position).getMessage());
+            intent.putExtra("date", rv_adapter.getItem(position).getTime());
+            intent.putExtra("body", rv_adapter.getItem(position).getBody());
+            intent.putExtra("from", mContact.email);
+
+            startActivity(intent);
+        } else {
+            Toast.makeText(this, rv_adapter.getItem(position).toString(), Toast.LENGTH_SHORT).show();
+        }
     }
 }

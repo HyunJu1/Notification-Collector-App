@@ -1,6 +1,6 @@
 package org.drinkless.td.libcore.telegram;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import java.util.Arrays;
 
 /**

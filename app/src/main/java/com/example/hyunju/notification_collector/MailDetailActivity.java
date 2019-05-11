@@ -2,12 +2,9 @@ package com.example.hyunju.notification_collector;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.webkit.WebView;
 import android.widget.TextView;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class MailDetailActivity extends AppCompatActivity {
 
@@ -28,12 +25,11 @@ public class MailDetailActivity extends AppCompatActivity {
         webView = (WebView) findViewById(R.id.webView);
 
         Intent intent = getIntent();
-        SimpleDateFormat df = new SimpleDateFormat("yyyy년 MM월 dd일 HH:mm");
 
         textViewFrom.setText(intent.getExtras().getString("from"));
         textViewSubject.setText(intent.getExtras().getString("subject"));
 
-        textViewDate.setText(df.format((Date) intent.getSerializableExtra("date")));
+        textViewDate.setText(intent.getExtras().getString("date"));
         webView.loadData(intent.getExtras().getString("body"), "text/html", "UTF-8");
 
     }

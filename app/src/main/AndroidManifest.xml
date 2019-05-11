@@ -20,9 +20,13 @@
         android:roundIcon="@drawable/app_icon"
         android:supportsRtl="true"
 
+
         android:theme="@style/AppTheme.NoActionBar"
         tools:ignore="GoogleAppIndexingWarning">
         <activity android:name=".SplashActivity">
+
+
+
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -31,14 +35,30 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".ChattingActivity"
-            />
+        <activity android:name=".ChattingActivity" />
         <activity android:name=".telegram.AuthActivity" />
+        <activity android:name=".MailDetailActivity" />
+        <activity
+            android:name=".LockActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+
         <activity
             android:name=".MainActivity"
             android:windowSoftInputMode="adjustNothing" />
-        <activity android:name=".SendToGroupActivity" />
+        <activity
+            android:name=".SendToGroupActivity"
+            android:label="단체 메시지 전송"
+            android:parentActivityName=".MainActivity" />
+
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/action_settings"
+            android:parentActivityName=".MainActivity">
+
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
 
         <service
             android:name=".utils.NotificationListener"
@@ -56,11 +76,10 @@
             android:exported="true">
             <intent-filter android:priority="1">
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
-
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
-
         </receiver>
+
     </application>
 
 </manifest>

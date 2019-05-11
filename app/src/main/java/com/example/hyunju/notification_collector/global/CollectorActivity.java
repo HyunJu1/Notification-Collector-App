@@ -2,8 +2,7 @@ package com.example.hyunju.notification_collector.global;
 
 import android.content.Intent;
 import android.os.Handler;
-import android.support.annotation.IdRes;
-import android.support.v7.app.AppCompatActivity;
+
 import android.view.View;
 import android.widget.Toast;
 
@@ -18,6 +17,9 @@ import org.drinkless.td.libcore.telegram.Client;
 import org.drinkless.td.libcore.telegram.TdApi;
 
 import java.util.List;
+
+import androidx.annotation.IdRes;
+import androidx.appcompat.app.AppCompatActivity;
 
 public class CollectorActivity extends AppCompatActivity {
 

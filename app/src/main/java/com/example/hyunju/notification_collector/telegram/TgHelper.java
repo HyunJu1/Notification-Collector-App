@@ -2,7 +2,7 @@ package com.example.hyunju.notification_collector.telegram;
 
 import android.content.Context;
 import android.os.Handler;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.Log;
 import android.util.SparseArray;
 
