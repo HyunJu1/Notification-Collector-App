@@ -28,7 +28,6 @@ import com.example.hyunju.notification_collector.global.CollectorActivity;
 import com.example.hyunju.notification_collector.models.Contact;
 import com.example.hyunju.notification_collector.models.SendedMessage;
 import com.example.hyunju.notification_collector.telegram.TgHelper;
-import com.example.hyunju.notification_collector.telegram.TgUtils;
 import com.example.hyunju.notification_collector.utils.FileUtils;
 
 import com.example.hyunju.notification_collector.utils.MatchMessenger;
@@ -378,7 +377,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
     public void onItemClick(View view, int position) {
 
         // 메일인 경우 클릭시 메일 상세페이지로 이동
-        if(rv_adapter.getItem(position).platfrom.equals(SendedMessage.PLATFORM_EMAIL)) {
+        if(rv_adapter.getItem(position).platform.equals(SendedMessage.PLATFORM_EMAIL)) {
             Intent intent = new Intent(ChattingActivity.this, MailDetailActivity.class);
 
             intent.putExtra("subject", rv_adapter.getItem(position).message);

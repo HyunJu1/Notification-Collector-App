@@ -27,7 +27,7 @@ public class SendedMessage implements Parcelable {
     public static final String MESSAGE_RECEIVER= "receive";
 
     public String message;
-    public String platfrom;
+    public String platform;
     public String type;
     public String time;
 
@@ -36,13 +36,13 @@ public class SendedMessage implements Parcelable {
     private Object body; // 본문
 
 
-    public SendedMessage(){
+    public SendedMessage() {
 
     }
 
-    public SendedMessage(String message, String platfrom, String time , String type) {
+    public SendedMessage(String message, String platform, String time , String type) {
         this.message = message;
-        this.platfrom = platfrom;
+        this.platform = platform;
         this.time = time;
         this.type = type;
     }
@@ -52,7 +52,7 @@ public class SendedMessage implements Parcelable {
     * */
     public SendedMessage(String subject, Date date, String contentType, Object body, String type) {
         this.message = subject; // 제목
-        this.platfrom = "Email";
+        this.platform = "Email";
         this.time = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(date); // 받은 시간
         this.mailType = contentType; // 본문 타입(사진, html, text 다양함)
         this.body = body; // 본문
@@ -61,7 +61,7 @@ public class SendedMessage implements Parcelable {
 
     protected SendedMessage(Parcel in) {
         message = in.readString();
-        platfrom = in.readString();
+        platform = in.readString();
         time = in.readString();
     }
 
@@ -83,7 +83,7 @@ public class SendedMessage implements Parcelable {
     public String toString() {
         return "SendedMessage{" +
                 "message='" + message + '\'' +
-                ", platfrom='" + platfrom + '\'' +
+                ", platform='" + platform + '\'' +
                 ", time='" + time + '\'' +
                 '}';
     }
@@ -97,7 +97,7 @@ public class SendedMessage implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(message);
-        dest.writeString(platfrom);
+        dest.writeString(platform);
         dest.writeString(time);
 
     }

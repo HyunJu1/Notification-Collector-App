@@ -1,6 +1,5 @@
 package com.example.hyunju.notification_collector.utils;
 
-import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -15,7 +14,6 @@ import com.example.hyunju.notification_collector.R;
 import com.example.hyunju.notification_collector.models.SendedMessage;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
     private ArrayList<SendedMessage> mData = new ArrayList<>();
@@ -34,7 +32,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     @Override
     public void onBindViewHolder(RecyclerViewAdapter.ViewHolder holder, int position) {
         SendedMessage msg = mData.get(position);
-        holder.tv_platformType.setText(msg.platfrom);
+        holder.tv_platformType.setText(msg.platform);
         holder.tv_sendedMessageContent.setText(msg.message);
         holder.tv_sendedTime.setText(msg.time);
         holder.type = msg.type;
