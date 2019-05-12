@@ -18,7 +18,6 @@ public class GlobalApplication extends Application {
     public void onCreate() {
         super.onCreate();
         TgHelper.init(this);
-
 //        retrofitInit();
     }
 

@@ -18,6 +18,7 @@ import android.provider.Settings;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationManagerCompat;
+
 import android.text.Editable;
 import android.text.TextWatcher;
 
@@ -143,7 +144,6 @@ public class MainActivity extends Activity {
                 search(text);
             }
         });
-
 
         if (!NotificationManagerCompat.getEnabledListenerPackages(getApplicationContext()).contains(getPackageName())) {
             Intent intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
