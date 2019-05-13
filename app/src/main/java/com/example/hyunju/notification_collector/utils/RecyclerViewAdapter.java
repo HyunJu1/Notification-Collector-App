@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 
+import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,10 +16,17 @@ import com.example.hyunju.notification_collector.R;
 import com.example.hyunju.notification_collector.models.SendedMessage;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
-    private ArrayList<SendedMessage> mData = new ArrayList<>();
+    private List<SendedMessage> mData;
+    private LayoutInflater mInflater;
     private ItemClickListener mClickListener;
+
+    public RecyclerViewAdapter(Context context, List<SendedMessage> mData) {
+        this.mInflater = LayoutInflater.from(context);
+        this.mData = mData;
+    }
 
     public RecyclerViewAdapter() {
     }

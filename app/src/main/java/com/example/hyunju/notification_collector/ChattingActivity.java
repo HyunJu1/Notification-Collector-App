@@ -107,8 +107,8 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
        // rv_recievdMsg = findViewById(R.id.rv_receivedMsg);
 
 
-        rv_adapter = new RecyclerViewAdapter();
-        rv_adapter.setList(sendedMessages);
+//        rv_adapter = new RecyclerViewAdapter();
+//        rv_adapter.setList(sendedMessages);
 
         rv_sendedMsg.setLayoutManager(new GridLayoutManager(this, numberOfColumns));
         sendedMessages = new ArrayList<SendedMessage>();
@@ -120,6 +120,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
             }
         }
 
+        rv_adapter = new RecyclerViewAdapter(this, sendedMessages);
         rv_adapter.setClickListener(this);
         rv_sendedMsg.setAdapter(rv_adapter);
     }

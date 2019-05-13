@@ -108,6 +108,39 @@ public class SendedMessage implements Parcelable {
         }
     };
 
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public String getPlatfrom() {
+        return platform;
+    }
+
+    public void setPlatfrom(String platfrom) {
+        this.platform = platfrom;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
 
 
     @Override
