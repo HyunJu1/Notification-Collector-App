@@ -74,6 +74,8 @@ public class MainActivity extends Activity {
 
         startActivity(new Intent(this, AuthActivity.class));
 
+        mAdapter = new ContactsAdapter(MainActivity.this,
+                R.layout.layout_phonelist, getContactList());
 
         setContentView(R.layout.activity_main);
 
@@ -171,8 +173,7 @@ public class MainActivity extends Activity {
     }
 
     void initListView(){
-        mAdapter = new ContactsAdapter(MainActivity.this,
-                R.layout.layout_phonelist, getContactList());
+
 
         lv_contactlist.setAdapter(mAdapter);
         lv_contactlist
