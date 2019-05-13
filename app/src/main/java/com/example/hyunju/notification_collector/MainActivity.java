@@ -23,18 +23,14 @@ import android.text.Editable;
 import android.text.TextWatcher;
 
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
+
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RadioButton;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.hyunju.notification_collector.models.Contact;
@@ -45,7 +41,7 @@ import com.example.hyunju.notification_collector.utils.TelegramChatManager;
 
 import com.example.hyunju.notification_collector.utils.ContactsAdapter;
 
-import java.io.InputStream;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,20 +61,22 @@ public class MainActivity extends Activity {
     private Button btn_multi, btn_multi_send, btn_settings;
     private boolean isMultiMode = false;
     private ArrayList<Contact> contactGroup;
-    private List<Contact> mTotalList = new ArrayList<Contact>();
-
+    ArrayList<Contact> contactlist = new ArrayList<Contact>();
+    private List<Contact> list = new ArrayList<Contact>();
+    ContactsAdapter adapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
+        adapter = new ContactsAdapter(MainActivity.this,
+                R.layout.layout_phonelist, getContactList());
         startActivity(new Intent(this, AuthActivity.class));
 
-        mAdapter = new ContactsAdapter(MainActivity.this,
-                R.layout.layout_phonelist, getContactList());
 
         setContentView(R.layout.activity_main);
 
+        mAdapter = new ContactsAdapter(MainActivity.this,
+                R.layout.layout_phonelist, getContactList());
         lv_contactlist = findViewById(R.id.lv_contactlist);
 
         btnSearch = findViewById(R.id.btnSearch);
@@ -239,41 +237,33 @@ public class MainActivity extends Activity {
 
 
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if(mAdapter!=null){
-            mAdapter.setList(getContactList());
-        }
-
-    }
 
 
     // 검색을 수행하는 메소드
     public void search(String charText) {
+        contactlist.clear();
 
-        ArrayList<Contact> list = new ArrayList<>();
         if (charText.length() == 0) {
-            list.addAll(mTotalList);
+            contactlist.addAll(list);
         }
-        // 문자 입력을 할때..
-        else {
-            // 리스트의 모든 데이터를 검색한다.
-            for (int i = 0; i < mTotalList.size(); i++) {
-                // arraylist의 모든 데이터에 입력받은 단어(charText)가 포함되어 있으면 true를 반환한다.
-                if (mTotalList.get(i).name.toLowerCase().contains(charText)) {
-                    list.add(mTotalList.get(i));
+        else
+        {
+            for(int i = 0;i < list.size(); i++)
+            {
+                if (list.get(i).name.toLowerCase().contains(charText))
+                {
+                    contactlist.add(list.get(i));
                 }
             }
         }
-        mAdapter.setList(list);
+        adapter.notifyDataSetChanged();
     }
 
 
     private ArrayList<Contact> getContactList() {
 
         ArrayList<Contact> list = new ArrayList<>();
-        mTotalList.clear();
+        list.clear();
 
         String[] arrProjection = {
                 ContactsContract.Contacts._ID, // ID 열에 해당 하는 정보. 저장된 각 사용자는 고유의 ID를 가진다.
@@ -438,7 +428,7 @@ public class MainActivity extends Activity {
                clsOrgCursor.close();
 
               */
-                mTotalList.add(contact);
+                contactlist.add(contact);
                 list.add(contact);
 
             }
@@ -458,86 +448,5 @@ public class MainActivity extends Activity {
         return false;
     }
 
-    private class ContactsAdapter extends ArrayAdapter<Contact> {
-
-        private int resId;
-        private ArrayList<Contact> mList;
-        private LayoutInflater Inflater;
-        private Context context;
-
-        public ContactsAdapter(Context context, int textViewResourceId,
-                               List<Contact> objects) {
-            super(context, textViewResourceId, objects);
-            this.context = context;
-            resId = textViewResourceId;
-            mList = (ArrayList<Contact>) objects;
-            Inflater = (LayoutInflater) ((Activity) context)
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        }
-
-        void setList(ArrayList<Contact> list){
-            mList= list;
-            notifyDataSetChanged();
-        }
-
-        @Override
-        public int getCount() {
-            return mList.size();
-        }
-
-        @Override
-        public View getView(int position, View v, ViewGroup parent) {
-            ViewHolder holder;
-            if (v == null) {
-                v = Inflater.inflate(resId, null);
-                holder = new ViewHolder();
-                holder.tv_name = v.findViewById(R.id.tv_name);
-                holder.tv_phonenumber = v.findViewById(R.id.tv_phonenumber);
-                holder.iv_photoid = v.findViewById(R.id.iv_photo);
-                v.setTag(holder);
-            } else {
-                holder = (ViewHolder) v.getTag();
-            }
-
-            Contact acontact = mList.get(position);
-
-            if (acontact != null) {
-                holder.tv_name.setText(acontact.name);
-                holder.tv_phonenumber.setText(acontact.phonenum);
-
-                Bitmap bm = openPhoto(acontact.photoid);
-
-                if (bm != null) {
-                    holder.iv_photoid.setImageBitmap(bm);
-                } else {
-                    holder.iv_photoid.setImageDrawable(getResources()
-                            .getDrawable(R.drawable.user_icon));
-                }
-
-            }
-            return v;
-        }
-
-        private Bitmap openPhoto(long contactId) {
-            Uri contactUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI,
-                    contactId);
-            InputStream input = ContactsContract.Contacts
-                    .openContactPhotoInputStream(context.getContentResolver(),
-                            contactUri);
-
-            if (input != null) {
-                return BitmapFactory.decodeStream(input);
-            }
-
-            return null;
-        }
-
-        private class ViewHolder {
-            ImageView iv_photoid;
-            TextView tv_name;
-            TextView tv_phonenumber;
-        }
-
-    }
 
 }

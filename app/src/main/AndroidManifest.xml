@@ -24,9 +24,10 @@
         android:supportsRtl="true"
 
 
-        android:theme="@style/AppTheme.NoActionBar"
+        android:theme="@style/Theme.AppCompat.Light"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".SplashActivity">
+        <activity android:name=".SplashActivity"
+            android:theme="@style/AppTheme.NoActionBar">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -36,6 +37,7 @@
         </activity>
 
         <activity android:name=".ChattingActivity"
+            android:theme="@style/AppTheme.NoActionBar"
             android:parentActivityName=".MainActivity"/>
         <activity android:name=".telegram.AuthActivity" />
         <activity android:name=".MailDetailActivity" />
