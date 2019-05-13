@@ -63,12 +63,10 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
     private String path;
     private Button button_attachment;
     private RecyclerView rv_sendedMsg;
-    private RecyclerView rv_recievdMsg;
 
     private RecyclerViewAdapter rv_adapter;
 
     private ArrayList<SendedMessage> sendedMessages = new ArrayList<>();
-    private List<SendedMessage> receiveddMessages;
 
 
     private String formatDate;

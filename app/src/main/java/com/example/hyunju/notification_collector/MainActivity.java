@@ -52,8 +52,8 @@ public class MainActivity extends Activity {
     private ListView lv_contactlist;
 
 //    Contact mContact = new Contact();
-    ContactsAdapter mAdapter;
 
+    ContactsAdapter adapter;
     private RadioButton radioButton1;
     private ImageButton btnSearch;
 
@@ -63,19 +63,16 @@ public class MainActivity extends Activity {
     private ArrayList<Contact> contactGroup;
     ArrayList<Contact> contactlist = new ArrayList<Contact>();
     private List<Contact> list = new ArrayList<Contact>();
-    ContactsAdapter adapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        adapter = new ContactsAdapter(MainActivity.this,
-                R.layout.layout_phonelist, getContactList());
         startActivity(new Intent(this, AuthActivity.class));
 
 
         setContentView(R.layout.activity_main);
 
-        mAdapter = new ContactsAdapter(MainActivity.this,
+        adapter = new ContactsAdapter(MainActivity.this,
                 R.layout.layout_phonelist, getContactList());
         lv_contactlist = findViewById(R.id.lv_contactlist);
 
@@ -173,7 +170,7 @@ public class MainActivity extends Activity {
     void initListView(){
 
 
-        lv_contactlist.setAdapter(mAdapter);
+        lv_contactlist.setAdapter(adapter);
         lv_contactlist
                 .setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
@@ -228,7 +225,6 @@ public class MainActivity extends Activity {
                     }
 
                 }
-                initListView();
 
             }
 
@@ -241,6 +237,7 @@ public class MainActivity extends Activity {
 
     // 검색을 수행하는 메소드
     public void search(String charText) {
+
         contactlist.clear();
 
         if (charText.length() == 0) {
@@ -261,9 +258,6 @@ public class MainActivity extends Activity {
 
 
     private ArrayList<Contact> getContactList() {
-
-        ArrayList<Contact> list = new ArrayList<>();
-        list.clear();
 
         String[] arrProjection = {
                 ContactsContract.Contacts._ID, // ID 열에 해당 하는 정보. 저장된 각 사용자는 고유의 ID를 가진다.
@@ -436,7 +430,7 @@ public class MainActivity extends Activity {
         clsCursor.close();
 
 
-        return list;
+        return contactlist;
 
     }
 
