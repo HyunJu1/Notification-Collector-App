@@ -18,4 +18,20 @@
     <string name="pref_pw">비밀번호 설정</string>
     <string name="pref_pw_summ">어플을 시작할 때의 비밀번호를 설정합니다.</string>
     <!---->
+
+    <!--지문인식-->
+    <string name="biometric_title">잠금 해제</string>
+    <string name="biometric_description">지문을 입력해주세요.</string>
+    <string name="biometric_negative_button_text">취소</string>
+
+    <string name="biometric_error_sdk_not_supported">지원하지 않는 버전입니다.</string>
+    <string name="biometric_error_hardware_not_supported">해당 기기는 지문 인식을 지원하지 않습니다.</string>
+    <string name="biometric_error_fingerprint_not_available">지문이 등록되있지 않습니다.</string>
+    <string name="biometric_error_permission_not_granted">권한이 거부되었습니다.</string>
+    <string name="biometric_failure">지문이 일치하지 않습니다.</string>
+    <string name="biometric_cancelled">사용자가 인증을 취소하였습니다.</string>
+    <string name="biometric_success">지문이 확인되었습니다.</string>
+
+    <string name="biometric_failed">지문이 일치하지 않습니다. 지문을 다시 입력해주세요.</string>
+    <!---->
 </resources>
