@@ -378,7 +378,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
     public void onItemClick(View view, int position) {
 
         // 메일인 경우 클릭시 메일 상세페이지로 이동
-        if(rv_adapter.getItem(position).platform.equals(SendedMessage.PLATFORM_EMAIL)) {
+        if(rv_adapter.getItem(position).platform.equals("Email")) {
             Intent intent = new Intent(ChattingActivity.this, MailDetailActivity.class);
 
             intent.putExtra("subject", rv_adapter.getItem(position).message);
