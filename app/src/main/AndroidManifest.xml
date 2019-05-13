@@ -35,7 +35,8 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ChattingActivity" />
+        <activity android:name=".ChattingActivity"
+            android:parentActivityName=".MainActivity"/>
         <activity android:name=".telegram.AuthActivity" />
         <activity android:name=".MailDetailActivity" />
         <activity

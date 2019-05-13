@@ -34,11 +34,9 @@ public class SendedMessage implements Parcelable {
     // mail variables
     private String mailType; // 메일 본문 타입(사진, html, text 다양함)
     private Object body; // 본문
+    private String platfrom;
 
 
-    public SendedMessage() {
-
-    }
 
     public SendedMessage(String message, String platform, String time , String type) {
         this.message = message;
@@ -64,6 +62,39 @@ public class SendedMessage implements Parcelable {
         platform = in.readString();
         time = in.readString();
     }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public String getPlatfrom() {
+        return platfrom;
+    }
+
+    public void setPlatfrom(String platfrom) {
+        this.platfrom = platfrom;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
 
     public static final Creator<SendedMessage> CREATOR = new Creator<SendedMessage>() {
         @Override

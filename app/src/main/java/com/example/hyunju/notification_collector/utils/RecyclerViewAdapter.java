@@ -36,7 +36,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         holder.tv_sendedMessageContent.setText(msg.message);
         holder.tv_sendedTime.setText(msg.time);
         holder.type = msg.type;
-        if (holder.type == SendedMessage.MESSAGE_SEND) {
+        if (holder.type.equals(SendedMessage.MESSAGE_SEND)) {
             holder.linear_layout_1.setBackgroundResource(R.drawable.outbox2);
         } else {
             holder.linear_layout_1.setBackgroundResource(R.drawable.inbox2);
