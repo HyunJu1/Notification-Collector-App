@@ -132,7 +132,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
         if(email != null) {
             ReadMail rm = new ReadMail();
             try {
-                mails = rm.execute(email, "10").get();
+                mails = rm.execute(email, "0").get();
             } catch(Exception e) {
                 e.printStackTrace();
             }
