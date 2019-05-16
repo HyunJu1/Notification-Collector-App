@@ -9,8 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -51,10 +50,7 @@ public class MainActivity extends Activity {
 
     private ListView lv_contactlist;
 
-//    Contact mContact = new Contact();
-
     ContactsAdapter adapter;
-    private RadioButton radioButton1;
     private ImageButton btnSearch;
 
     private EditText edtSearch;
@@ -67,13 +63,14 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        startActivity(new Intent(this, AuthActivity.class));
 
 
         setContentView(R.layout.activity_main);
 
-        adapter = new ContactsAdapter(MainActivity.this,
-                R.layout.layout_phonelist, getContactList());
+        startActivity(new Intent(this, AuthActivity.class));
+
+
+
         lv_contactlist = findViewById(R.id.lv_contactlist);
 
         btnSearch = findViewById(R.id.btnSearch);
@@ -112,6 +109,12 @@ public class MainActivity extends Activity {
             }
         });
 
+        if (!NotificationManagerCompat.getEnabledListenerPackages(getApplicationContext()).contains(getPackageName())) {
+            Intent intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
+            startActivity(intent);
+        }
+
+        checkPermission();
         btn_settings = findViewById(R.id.btn_settings);
         btn_settings.setOnClickListener(new Button.OnClickListener() {
             @Override
@@ -142,12 +145,8 @@ public class MainActivity extends Activity {
             }
         });
 
-        if (!NotificationManagerCompat.getEnabledListenerPackages(getApplicationContext()).contains(getPackageName())) {
-            Intent intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
-            startActivity(intent);
-        }
 
-        checkPermission();
+
 
 
     }
@@ -163,12 +162,14 @@ public class MainActivity extends Activity {
             requestPermissions(new String[]{Manifest.permission.READ_CONTACTS, Manifest.permission.SEND_SMS, Manifest.permission.READ_PHONE_STATE, Manifest.permission.READ_EXTERNAL_STORAGE,
                     Manifest.permission.RECEIVE_SMS, Manifest.permission.READ_PHONE_STATE}, 1);
         } else {
-            initListView();
+           initListView();
+
         }
     }
 
     void initListView(){
-
+        adapter = new ContactsAdapter(MainActivity.this,
+                R.layout.layout_phonelist, getContactList());
 
         lv_contactlist.setAdapter(adapter);
         lv_contactlist
@@ -225,7 +226,6 @@ public class MainActivity extends Activity {
                     }
 
                 }
-
             }
 
         }
