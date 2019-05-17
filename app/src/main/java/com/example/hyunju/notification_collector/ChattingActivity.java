@@ -24,6 +24,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.hyunju.notification_collector.database.DataManager;
 import com.example.hyunju.notification_collector.global.CollectorActivity;
 import com.example.hyunju.notification_collector.models.Contact;
 import com.example.hyunju.notification_collector.models.SendedMessage;
@@ -52,6 +53,11 @@ import java.util.List;
 
 public class ChattingActivity extends CollectorActivity implements View.OnClickListener, RecyclerViewAdapter.ItemClickListener {
 
+    /**
+     *   DB 읽고쓰기
+     */
+    DataManager dm = new DataManager(ChattingActivity.this);
+
     private static final int REQUEST_CODE = 6384;
 
     TextView textView_phone, textView_name;
@@ -75,6 +81,8 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_chatting);
+
+
 
         LocalBroadcastManager.getInstance(this).registerReceiver(onNotice, new IntentFilter("SMS"));
 
@@ -102,11 +110,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
 
         int numberOfColumns = 1;
         rv_sendedMsg = findViewById(R.id.rv_sendedMsg);
-       // rv_recievdMsg = findViewById(R.id.rv_receivedMsg);
 
-
-//        rv_adapter = new RecyclerViewAdapter();
-//        rv_adapter.setList(sendedMessages);
 
         rv_sendedMsg.setLayoutManager(new GridLayoutManager(this, numberOfColumns));
         sendedMessages = new ArrayList<SendedMessage>();
@@ -218,10 +222,10 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
                     SmsManager smsManager = SmsManager.getDefault();
                     smsManager.sendTextMessage(mContact.phonenum, null, text, null, null);
 
-                    SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_SMS,getTime(),SendedMessage.MESSAGE_SEND);
+                    SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_SMS ,getTime(),SendedMessage.MESSAGE_SEND,mContact.phonenum);
 
+                    dm.smsSending(sendedMessage); // DB에 SMS관련 채팅 삽입
                     sendedMessages.add(sendedMessage);
-//                    rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
 
                     msgList.add(text);
                     Toast.makeText(ChattingActivity.this, "문자 전송 성공", Toast.LENGTH_SHORT).show();

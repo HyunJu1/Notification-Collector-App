@@ -11,7 +11,7 @@ public class UserDBHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("create table user (" +
-                " user_id Integer primary key," +
+                " user_id INTEGER PRIMARY KEY AUTOINCREMENT," +
                 " user_email Integer not null," +
                 " user_facebook_id TEXT "+
                 ");");

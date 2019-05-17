@@ -31,6 +31,9 @@ public class SendedMessage implements Parcelable {
     public String type;
     public String time;
 
+
+
+    public String recipent_phoneNum; // sms 에서 필요해서 새로 생성
     // mail variables
     private String mailType; // 메일 본문 타입(사진, html, text 다양함)
     private Object body; // 본문
@@ -46,6 +49,18 @@ public class SendedMessage implements Parcelable {
     }
 
     /**
+     * SMS용
+     */
+    public SendedMessage(String message, String platform, String time , String type,String recipent_phoneNum) {
+        this.message = message;
+        this.platform = platform;
+        this.time = time;
+        this.type = type;
+        this.recipent_phoneNum=recipent_phoneNum;
+    }
+
+
+    /**
     * mail용
     * */
     public SendedMessage(String subject, Date date, String contentType, Object body, String type) {
@@ -55,6 +70,7 @@ public class SendedMessage implements Parcelable {
         this.mailType = contentType; // 본문 타입(사진, html, text 다양함)
         this.body = body; // 본문
         this.type = type; // 타입
+
     }
 
     protected SendedMessage(Parcel in) {
@@ -94,7 +110,13 @@ public class SendedMessage implements Parcelable {
     public void setTime(String time) {
         this.time = time;
     }
+    public String getRecipent_phoneNum() {
+        return recipent_phoneNum;
+    }
 
+    public void setRecipent_phoneNum(String recipent_phoneNum) {
+        this.recipent_phoneNum = recipent_phoneNum;
+    }
 
     public static final Creator<SendedMessage> CREATOR = new Creator<SendedMessage>() {
         @Override
@@ -179,4 +201,5 @@ public class SendedMessage implements Parcelable {
         }
         return str;
     }
+
 }

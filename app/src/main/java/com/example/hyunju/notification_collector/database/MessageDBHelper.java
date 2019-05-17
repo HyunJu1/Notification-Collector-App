@@ -12,15 +12,15 @@ public class MessageDBHelper  extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("create table message(" +
-                " message_id Integer primary key," +
+                " message_id INTEGER PRIMARY KEY AUTOINCREMENT," +
                 " message_title TEXT ," +
                 " message_body TEXT ," +
-                " create_time DATE not null," +
+                " create_time TEXT not null," +
                 " creator_id TEXT ," +
-                " recipent_id TEXT ," +
+                " recipent_phpneNum TEXT ," +
                 " platform TEXT not null," +
                 " mailtype TEXT , " +
-                " type  Integer not null ," +
+                " type  TEXT not null ," +
                 " isReply  Integer " +
                 ");");
     }
