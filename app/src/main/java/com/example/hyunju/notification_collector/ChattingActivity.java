@@ -63,7 +63,7 @@ import java.util.List;
 public class ChattingActivity extends CollectorActivity implements View.OnClickListener, RecyclerViewAdapter.ItemClickListener {
     private static final int REQUEST_CODE = 6384;
     private final static String TAG = ChattingActivity.class.getName();
-    
+
     /**
      * DB 관련
      */
@@ -225,13 +225,15 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
             }
         }
 
-        try {
-            ContentResolver cr = getContentResolver();
-            CalendarHelper.pushAppointmentsToCalender(cr, person, e.getText().toString(), place, startDate);
-            Toast.makeText(getApplicationContext(), "일정이 등록되었습니다", Toast.LENGTH_SHORT).show();
-        } catch (Exception ex) {
-            Log.e(TAG, ex.toString());
-            Toast.makeText(getApplicationContext(), "일정 등록 실패", Toast.LENGTH_SHORT).show();
+        if (startDate != 0 && !place.equals("")) {
+            try {
+                ContentResolver cr = getContentResolver();
+                CalendarHelper.pushAppointmentsToCalender(cr, person, e.getText().toString(), place, startDate);
+                Toast.makeText(getApplicationContext(), "일정이 등록되었습니다", Toast.LENGTH_SHORT).show();
+            } catch (Exception ex) {
+                Log.e(TAG, ex.toString());
+                Toast.makeText(getApplicationContext(), "일정 등록 실패", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
