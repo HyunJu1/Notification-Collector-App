@@ -15,12 +15,12 @@ public class EmailConfig {
     // NAVER
     public static final String SEND_HOST = "smtp.naver.com";
     public static final String SEND_PORT = "465";
-    public static final String SEND_EMAIL ="NAVER_ID";
-    public static final String SEND_PASSWORD ="NAVER_PW";
+    public static final String SEND_EMAIL ="";
+    public static final String SEND_PASSWORD ="";
 
     public static final String READ_HOST = "imap.naver.com";
-    public static final String READ_EMAIL = "NAVER_ID";
-    public static final String READ_PASSWORD = "NAVER_PW";
+    public static final String READ_EMAIL = "";
+    public static final String READ_PASSWORD = "";
 
 
     // Daum

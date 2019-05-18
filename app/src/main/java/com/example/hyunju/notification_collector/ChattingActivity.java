@@ -4,10 +4,12 @@ import android.app.Activity;
 
 import android.content.BroadcastReceiver;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.net.Uri;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -22,13 +24,17 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.hyunju.notification_collector.database.DataManager;
 import com.example.hyunju.notification_collector.global.CollectorActivity;
 import com.example.hyunju.notification_collector.models.Contact;
+import com.example.hyunju.notification_collector.models.NotificationEvent;
 import com.example.hyunju.notification_collector.models.SendedMessage;
 import com.example.hyunju.notification_collector.telegram.TgHelper;
+import com.example.hyunju.notification_collector.utils.CalendarHelper;
 import com.example.hyunju.notification_collector.utils.FileUtils;
 
 import com.example.hyunju.notification_collector.utils.MatchMessenger;
@@ -42,18 +48,26 @@ import com.example.hyunju.notification_collector.utils.SendMail;
 import com.example.hyunju.notification_collector.utils.TelegramChatManager;
 
 import org.drinkless.td.libcore.telegram.TdApi;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 //import android.app.AlertDialog;
 public class ChattingActivity extends CollectorActivity implements View.OnClickListener, RecyclerViewAdapter.ItemClickListener {
-
     private static final int REQUEST_CODE = 6384;
+    private final static String TAG = ChattingActivity.class.getName();
 
+    /**
+     * DB 관련
+     */
+    DataManager dm = new DataManager(ChattingActivity.this);
     TextView textView_phone, textView_name;
     EditText editText;
     Button button;
@@ -70,11 +84,41 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
 
 
     private String formatDate;
+
+
+    private BroadcastReceiver onNotice = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String senderNo = intent.getStringExtra("senderNo");
+            String message = intent.getStringExtra("message");
+            String receivedDate = intent.getStringExtra("receivedDate");
+
+            try {
+
+                SendedMessage sendedMessage = new SendedMessage(message, SendedMessage.PLATFORM_SMS, receivedDate, SendedMessage.MESSAGE_RECEIVER, senderNo);
+
+                dm.smsInsert(sendedMessage); // DB에 SMS관련 채팅 삽입
+
+
+                SendedMessage model = new SendedMessage(message, "sms ", receivedDate, SendedMessage.MESSAGE_RECEIVER);
+
+
+                sendedMessages.add(model);
+                rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_chatting);
+
 
         LocalBroadcastManager.getInstance(this).registerReceiver(onNotice, new IntentFilter("SMS"));
 
@@ -84,9 +128,31 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
         textView_phone = view(R.id.textView_phone_num);
         textView_name = view(R.id.textView_name);
 
-        mContact =  getIntent().getParcelableExtra("contact");
+        mContact = getIntent().getParcelableExtra("contact");
         mContact.phonenum = mContact.phonenum.replaceAll("-", "");
 
+        /**
+         * DB관련 . 불러오는것까진 완료. 이제 adapter 에 적용시켜야하는데 이거 관련해서 어떻게 해야할지?
+         */
+        Cursor cursor = dm.smsReader(mContact.phonenum);
+        try {
+            if (cursor != null) {
+                cursor.moveToFirst();
+
+                Log.d("DB관련", "COUNT = " + cursor.getCount());
+                while (cursor.moveToNext()) {
+                    String message_body = cursor.getString(cursor.getColumnIndex("message_body"));
+                    String create_time = cursor.getString(cursor.getColumnIndex("create_time"));
+                    String platform = cursor.getString(cursor.getColumnIndex("platform"));
+                    String recipent_phoneNum = cursor.getString(cursor.getColumnIndex("recipent_phoneNum"));
+                    String type = cursor.getString(cursor.getColumnIndex("type"));
+                    Log.d("db불러오기", message_body + create_time + platform + recipent_phoneNum + type);
+                }
+
+            }
+        } finally {
+            cursor.close();
+        }
 
 
         textView_phone.setText(mContact.phonenum);
@@ -102,17 +168,13 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
 
         int numberOfColumns = 1;
         rv_sendedMsg = findViewById(R.id.rv_sendedMsg);
-       // rv_recievdMsg = findViewById(R.id.rv_receivedMsg);
 
-
-//        rv_adapter = new RecyclerViewAdapter();
-//        rv_adapter.setList(sendedMessages);
 
         rv_sendedMsg.setLayoutManager(new GridLayoutManager(this, numberOfColumns));
         sendedMessages = new ArrayList<SendedMessage>();
 
         ArrayList<SendedMessage> mails = addReceiveMail(mContact.email);
-        if(mails != null) {
+        if (mails != null) {
             for (int index = 0; index < mails.size(); index++) {
                 sendedMessages.add(mails.get(index));
             }
@@ -123,49 +185,81 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
         rv_sendedMsg.setAdapter(rv_adapter);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onNotificationEvent(NotificationEvent e) {
+        String person = e.getTitle();
+
+        long startDate = 0;
+        String place = "";
+        String[] messageWord = e.getText().toString().split("\\s+");
+        for (String msg : messageWord) {
+            // date
+            if (startDate == 0) {
+                String onlyNumberRegex = "\\d+";
+                String s = msg.charAt(0) + "";
+                if (s.matches(onlyNumberRegex) && msg.contains("일")) {
+                    Calendar beginTime = Calendar.getInstance();
+                    int year = beginTime.get(Calendar.YEAR);
+                    int month = beginTime.get(Calendar.MONTH);
+                    int date = (msg.length() == 2 ?
+                            Integer.parseInt(msg.charAt(0) + "") : Integer.parseInt(msg.charAt(0) + "" + msg.charAt(1))
+                    );
+                    beginTime.set(year, month, date);
+                    startDate = beginTime.getTimeInMillis();
+                } else if (msg.equals("내일")) {
+                    startDate = System.currentTimeMillis() + 1000 * 60 * 60 * 24;
+                } else {
+                    startDate = System.currentTimeMillis();
+                }
+            }
+
+            // place
+            if (place.equals("") && msg.contains("에서")) {
+                place += msg.substring(0, msg.length() - 2);
+            }
+        }
+
+        if (startDate != 0 && !place.equals("")) {
+            try {
+                ContentResolver cr = getContentResolver();
+                CalendarHelper.pushAppointmentsToCalender(cr, person, e.getText().toString(), place, startDate);
+                Toast.makeText(getApplicationContext(), "일정이 등록되었습니다", Toast.LENGTH_SHORT).show();
+            } catch (Exception ex) {
+                Log.e(TAG, ex.toString());
+                Toast.makeText(getApplicationContext(), "일정 등록 실패", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
+    }
+
     /**
      * 해당 이메일에게 받은 메일 읽어오는 함수
-     * **/
+     **/
     private ArrayList<SendedMessage> addReceiveMail(String email) {
-        ArrayList<SendedMessage> mails = new ArrayList<>();;
+        ArrayList<SendedMessage> mails = new ArrayList<>();
+        ;
 
-        if(email != null) {
+        if (email != null) {
             ReadMail rm = new ReadMail();
             try {
                 mails = rm.execute(email, "0").get();
-            } catch(Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
         return mails;
     }
-
-    private BroadcastReceiver onNotice= new BroadcastReceiver() {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String senderNo = intent.getStringExtra("senderNo");
-            String message = intent.getStringExtra("message");
-            String receivedDate = intent.getStringExtra("receivedDate");
-
-            try {
-
-                SendedMessage model = new SendedMessage(message,"sms ",receivedDate,SendedMessage.MESSAGE_RECEIVER);
-
-
-                    sendedMessages.add(model);
-                    rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
-
-/***
- * type 변수 추가 -> 0이면 send, 1이면 receive
- *
- */
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    };
 
     public String getTime() {
         // 보낸 시각 표시
@@ -175,17 +269,17 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
         formatDate = sdfNow.format(date);
         return formatDate;
     }
+
     /**
      * 버튼 두 개라서 조잡해서 여기다가 정리함
-
-     * **/
+     **/
     @Override
     public void onClick(View v) {
-        if(v == button) {
+        if (v == button) {
             Dialog();
         }
 
-        if(v == button_attachment) {
+        if (v == button_attachment) {
             performFileSearch();
         }
     }
@@ -198,12 +292,12 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
         listItems.add("페이스북");
 
         // 텔레그램 사용유저만
-        if(MatchMessenger.getInstance().getMessengerInfo(mContact.phonenum).telegram) {
+        if (MatchMessenger.getInstance().getMessengerInfo(mContact.phonenum).telegram) {
             listItems.add("텔레그램");
         }
 
         // 이메일 주소 있을때만 보여지게
-        if(MatchMessenger.getInstance().getMessengerInfo(mContact.phonenum).eMail) {
+        if (MatchMessenger.getInstance().getMessengerInfo(mContact.phonenum).eMail) {
             listItems.add("이메일");
         }
         final CharSequence[] items = listItems.toArray(new String[listItems.size()]);
@@ -218,10 +312,10 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
                     SmsManager smsManager = SmsManager.getDefault();
                     smsManager.sendTextMessage(mContact.phonenum, null, text, null, null);
 
-                    SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_SMS,getTime(),SendedMessage.MESSAGE_SEND);
+                    SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_SMS, getTime(), SendedMessage.MESSAGE_SEND, mContact.phonenum);
 
+                    dm.smsInsert(sendedMessage); // DB에 SMS관련 채팅 삽입
                     sendedMessages.add(sendedMessage);
-//                    rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
 
                     msgList.add(text);
                     Toast.makeText(ChattingActivity.this, "문자 전송 성공", Toast.LENGTH_SHORT).show();
@@ -239,7 +333,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
                             SendFacebookMessage sfm = new SendFacebookMessage(content, text);
                             sfm.execute();
 
-                            SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_FACEBOOK,getTime(),SendedMessage.MESSAGE_SEND);
+                            SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_FACEBOOK, getTime(), SendedMessage.MESSAGE_SEND);
 
                             sendedMessages.add(sendedMessage);
                             rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
@@ -260,8 +354,8 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
 
                 } else if ("텔레그램".equals(listItems.get(pos))) { // telegram
                     long chatId = TelegramChatManager.getInstance().getChatId(mContact.phonenum);
-                    if(chatId!= TelegramChatManager.EXTRA_EMPTY_CHAT_ID) {
-                        if(path != null) {
+                    if (chatId != TelegramChatManager.EXTRA_EMPTY_CHAT_ID) {
+                        if (path != null) {
                             TelegramChatManager.getInstance().sendFile(chatId, text, new TdApi.InputFileLocal(path), new TelegramChatManager.Callback() {
                                 @Override
                                 public void onResult(Object result) {
@@ -276,7 +370,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
                                     }
                                 }
                             });
-                        }else {
+                        } else {
                             TelegramChatManager.getInstance().sendMessage(chatId, text, new TelegramChatManager.Callback() {
                                 @Override
                                 public void onResult(Object result) {
@@ -295,8 +389,8 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
                     } else {
                         toast("잘못된 텔레그램 메신저 사용자입니다.");
                     }
-                } else if("이메일".equals(listItems.get(pos))) { // 이메일 부분
-                    if(mContact.email != null) { // 사용자 이메일이 저장되어있는 경우
+                } else if ("이메일".equals(listItems.get(pos))) { // 이메일 부분
+                    if (mContact.email != null) { // 사용자 이메일이 저장되어있는 경우
                         AlertDialog.Builder mail_builder = new AlertDialog.Builder(ChattingActivity.this); // 이메일 제목 받는 dialog
 
                         mail_builder.setTitle("메일 제목을 입력해주세요");
@@ -308,7 +402,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
                             public void onClick(DialogInterface dialog, int which) {
                                 String subject = editText_subject.getText().toString();
                                 SendMail sm;
-                                if(path != null) {
+                                if (path != null) {
 
                                     sm = new SendMail(ChattingActivity.this, mContact.email, subject, text, path);
                                 } else {
@@ -316,7 +410,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
                                 }
                                 sm.execute();
 
-                                SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_EMAIL,getTime(),SendedMessage.MESSAGE_SEND);
+                                SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_EMAIL, getTime(), SendedMessage.MESSAGE_SEND);
 
                                 sendedMessages.add(sendedMessage);
                                 rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
@@ -351,7 +445,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
 
     /**
      * 폰 내부의 external storage 접근하는 함수
-     * **/
+     **/
     private void performFileSearch() {
         Intent target = FileUtils.createGetContentIntent();
         Intent intent = Intent.createChooser(target, "Lorem ipsum");
@@ -360,11 +454,11 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
 
     /**
      * 첨부파일 선택 후 해당 파일의 path 가져오는 함수
-     * **/
+     **/
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            if(data != null) {
+        if (requestCode == REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            if (data != null) {
                 final Uri uri = data.getData();
                 path = FileUtils.getPath(this, uri);
                 Log.e("path", path);

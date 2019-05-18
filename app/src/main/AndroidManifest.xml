@@ -15,6 +15,9 @@
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <uses-permission android:name="android.permission.USE_FINGERPRINT" />
 
+    <uses-permission android:name="android.permission.READ_CALENDAR" />
+    <uses-permission android:name="android.permission.WRITE_CALENDAR" />
+
     <application
         android:name=".global.GlobalApplication"
         android:allowBackup="true"
@@ -38,7 +41,7 @@
 
         <activity android:name=".ChattingActivity"
             android:theme="@style/AppTheme.NoActionBar"
-            android:parentActivityName=".MainActivity"/>
+     />
         <activity android:name=".telegram.AuthActivity" />
         <activity android:name=".MailDetailActivity" />
         <activity
