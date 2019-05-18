@@ -4,6 +4,7 @@ import android.app.Activity;
 
 import android.content.BroadcastReceiver;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -29,8 +30,10 @@ import android.widget.Toast;
 import com.example.hyunju.notification_collector.database.DataManager;
 import com.example.hyunju.notification_collector.global.CollectorActivity;
 import com.example.hyunju.notification_collector.models.Contact;
+import com.example.hyunju.notification_collector.models.NotificationEvent;
 import com.example.hyunju.notification_collector.models.SendedMessage;
 import com.example.hyunju.notification_collector.telegram.TgHelper;
+import com.example.hyunju.notification_collector.utils.CalendarHelper;
 import com.example.hyunju.notification_collector.utils.FileUtils;
 
 import com.example.hyunju.notification_collector.utils.MatchMessenger;
@@ -44,9 +47,13 @@ import com.example.hyunju.notification_collector.utils.SendMail;
 import com.example.hyunju.notification_collector.utils.TelegramChatManager;
 
 import org.drinkless.td.libcore.telegram.TdApi;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -55,6 +62,8 @@ import java.util.List;
 
 public class ChattingActivity extends CollectorActivity implements View.OnClickListener, RecyclerViewAdapter.ItemClickListener {
     private static final int REQUEST_CODE = 6384;
+    private final static String TAG = ChattingActivity.class.getName();
+    
     /**
      * DB 관련
      */
@@ -174,6 +183,62 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
         rv_adapter = new RecyclerViewAdapter(this, sendedMessages);
         rv_adapter.setClickListener(this);
         rv_sendedMsg.setAdapter(rv_adapter);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onNotificationEvent(NotificationEvent e) {
+        String person = e.getTitle();
+
+        long startDate = 0;
+        String place = "";
+        String[] messageWord = e.getText().toString().split("\\s+");
+        for (String msg : messageWord) {
+            // date
+            if (startDate == 0) {
+                String onlyNumberRegex = "\\d+";
+                String s = msg.charAt(0) + "";
+                if (s.matches(onlyNumberRegex) && msg.contains("일")) {
+                    Calendar beginTime = Calendar.getInstance();
+                    int year = beginTime.get(Calendar.YEAR);
+                    int month = beginTime.get(Calendar.MONTH);
+                    int date = (msg.length() == 2 ?
+                            Integer.parseInt(msg.charAt(0) + "") : Integer.parseInt(msg.charAt(0) + "" + msg.charAt(1))
+                    );
+                    beginTime.set(year, month, date);
+                    startDate = beginTime.getTimeInMillis();
+                } else if (msg.equals("내일")) {
+                    startDate = System.currentTimeMillis() + 1000 * 60 * 60 * 24;
+                } else {
+                    startDate = System.currentTimeMillis();
+                }
+            }
+
+            // place
+            if (place.equals("") && msg.contains("에서")) {
+                place += msg.substring(0, msg.length() - 2);
+            }
+        }
+
+        try {
+            ContentResolver cr = getContentResolver();
+            CalendarHelper.pushAppointmentsToCalender(cr, person, e.getText().toString(), place, startDate);
+            Toast.makeText(getApplicationContext(), "일정이 등록되었습니다", Toast.LENGTH_SHORT).show();
+        } catch (Exception ex) {
+            Log.e(TAG, ex.toString());
+            Toast.makeText(getApplicationContext(), "일정 등록 실패", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
     }
 
     /**
