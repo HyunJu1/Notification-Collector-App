@@ -248,7 +248,6 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
      **/
     private ArrayList<SendedMessage> addReceiveMail(String email) {
         ArrayList<SendedMessage> mails = new ArrayList<>();
-        ;
 
         if (email != null) {
             ReadMail rm = new ReadMail();
@@ -460,8 +459,10 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
         if (requestCode == REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             if (data != null) {
                 final Uri uri = data.getData();
+                Log.e("test", uri.toString());
                 path = FileUtils.getPath(this, uri);
-                Log.e("path", path);
+//                Log.e("path", path);
+                if(path == null) path = uri.toString();
             }
         }
     }
@@ -478,6 +479,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
 
             Intent intent = new Intent(this, MailDetailActivity.class);
 
+
 //            Toast.makeText(this, rv_adapter.getItem(position).get(), Toast.LENGTH_SHORT).show();
 
 //            Bundle bundle = new Bundle();
@@ -485,6 +487,8 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
 //            intent.putExtras(bundle);
 
             intent.putExtra("mail", (Parcelable) rv_adapter.getItem(position));
+
+//            intent.putStringArrayListExtra("str", rv_adapter.getItem(position).getAttachment_str());
 
 //            intent.putExtra("subject", rv_adapter.getItem(position).message);
 //            intent.putExtra("date", rv_adapter.getItem(position).time);

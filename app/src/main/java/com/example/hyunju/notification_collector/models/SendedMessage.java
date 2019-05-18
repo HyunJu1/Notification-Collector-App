@@ -49,8 +49,8 @@ public class SendedMessage implements Parcelable {
     private Object body; // 본문
     private String body_str;
     private String platfrom;
-    private ArrayList<String> attachment_str;
-    private ArrayList<MimeBodyPart> attachment_mimebodypart;
+    private ArrayList<String> attachment_str = new ArrayList<String>();
+    private ArrayList<MimeBodyPart> attachment_mimebodypart = new ArrayList<MimeBodyPart>();
 
 
 
@@ -69,7 +69,7 @@ public class SendedMessage implements Parcelable {
         this.platform = platform;
         this.time = time;
         this.type = type;
-        this.recipent_phoneNum=recipent_phoneNum;
+        this.recipent_phoneNum = recipent_phoneNum;
     }
 
 
@@ -95,6 +95,8 @@ public class SendedMessage implements Parcelable {
         if(in.dataAvail() > 0) {
             mailType = in.readString();
             body_str = in.readString();
+            attachment_str = in.createStringArrayList();
+//            attachment_mimebodypart = in.create
         }
     }
 
@@ -135,6 +137,14 @@ public class SendedMessage implements Parcelable {
 
     public void setRecipent_phoneNum(String recipent_phoneNum) {
         this.recipent_phoneNum = recipent_phoneNum;
+    }
+
+    public ArrayList<String> getAttachment_str() {
+        return attachment_str;
+    }
+
+    public ArrayList<MimeBodyPart> getAttachment_mimebodypart() {
+        return attachment_mimebodypart;
     }
 
     public static final Creator<SendedMessage> CREATOR = new Creator<SendedMessage>() {
@@ -178,6 +188,8 @@ public class SendedMessage implements Parcelable {
 
             body_str = getBody();
             dest.writeString(body_str);
+            dest.writeStringList(attachment_str);
+            dest.writeList(attachment_mimebodypart);
         }
     }
 
@@ -190,13 +202,28 @@ public class SendedMessage implements Parcelable {
      * **/
     public String getBody() {
         String str = "";
+        Log.e("mail!!", mailType);
         if(mailType.contains("multipart")) {
+            Log.e("test", "!!!!!!");
             // 이 타입은 첨부파일 없는지 확인해봐야됨 -> 있음
             if(mailType.contains("multipart/MIXED") || mailType.contains("multipart/mixed")) {
                 MimeMultipart mimeMultipart = (MimeMultipart) body;
+                Multipart multipart = (Multipart) body;
                 try {
+                    for (int i = 0; i < multipart.getCount(); i++) {
+                        MimeBodyPart part = (MimeBodyPart) multipart.getBodyPart(i);
+                        if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
+                            String filename = part.getFileName();
+                            attachment_str.add(MimeUtility.decodeText(filename));
+                            attachment_mimebodypart.add(part);
+                        }
+                    }
+
                     for (int i = 0; i < mimeMultipart.getCount(); i++) {
                         BodyPart part = mimeMultipart.getBodyPart(i);
+                        if(part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
+                            String filename = part.getFileName();
+                        }
                         str = part.getContent().toString();
                     }
                 } catch (Exception e) {
@@ -211,9 +238,8 @@ public class SendedMessage implements Parcelable {
                             String attachFiles = "";
                             Multipart multipart = (Multipart) body;
                             try {
-                                int numberOfParts = multipart.getCount();
-                                for (int partCount = 0; partCount < numberOfParts; partCount++) {
-                                    MimeBodyPart part = (MimeBodyPart) multipart.getBodyPart(partCount);
+                                for (int i = 0; i < multipart.getCount(); i++) {
+                                    MimeBodyPart part = (MimeBodyPart) multipart.getBodyPart(i);
                                     if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
                                         String filename = part.getFileName();
                                         attachFiles += filename + ", ";
