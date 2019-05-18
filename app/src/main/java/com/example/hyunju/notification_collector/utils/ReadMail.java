@@ -21,6 +21,7 @@ public class ReadMail extends AsyncTask<String, Void, ArrayList<SendedMessage>> 
     private Session session;
     private Store store;
     private IMAPFolder folder;
+    private String from;
     private String subject;
     private ArrayList<SendedMessage> list;
 
@@ -51,9 +52,16 @@ public class ReadMail extends AsyncTask<String, Void, ArrayList<SendedMessage>> 
                 totalMessages = folder.getMessageCount();
                 int start_num = messages.length - 1 - Integer.parseInt(strings[1]);
                 for(int i = start_num; i > (start_num - 10 >= 0? start_num - 10 : 0); i--) {
+                    Log.e("test", String.valueOf(start_num - 10 >= 0? start_num - 10 : 0));
+                    Log.e("number", String.valueOf(i));
+                    Log.e("total", String.valueOf(messages.length));
                     Message msg = messages[i];
-                    String from = msg.getFrom()[0].toString().split("<")[1];
-//                    msg.getFrom()[0].toString().split("<")[1].substring(0, msg.getFrom()[0].toString().split("<")[1].length()-1))
+                    Log.e("here", "??");
+                    if(msg.getFrom()[0].toString().contains("<")) {
+                        from = msg.getFrom()[0].toString().split("<")[1];
+                    } else {
+                        from = msg.getFrom()[0].toString().split("@")[0];
+                    }
                     Log.e("email", "s : " + msg.getSubject());
                     Log.e("???",strings[0]);
                     Log.e("???", from.substring(0, from.length() - 1));

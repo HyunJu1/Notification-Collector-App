@@ -9,13 +9,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
-import android.os.Bundle;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.View;
@@ -42,14 +43,13 @@ import com.example.hyunju.notification_collector.utils.TelegramChatManager;
 
 import org.drinkless.td.libcore.telegram.TdApi;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 //import android.app.AlertDialog;
-
-
 public class ChattingActivity extends CollectorActivity implements View.OnClickListener, RecyclerViewAdapter.ItemClickListener {
 
     private static final int REQUEST_CODE = 6384;
@@ -377,14 +377,28 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
 
         // 메일인 경우 클릭시 메일 상세페이지로 이동
         if(rv_adapter.getItem(position).platform.equals("Email")) {
-            Intent intent = new Intent(ChattingActivity.this, MailDetailActivity.class);
 
-            intent.putExtra("subject", rv_adapter.getItem(position).message);
-            intent.putExtra("date", rv_adapter.getItem(position).time);
-            intent.putExtra("body", rv_adapter.getItem(position).getBody());
-            intent.putExtra("from", mContact.email);
+            Log.e("test", rv_adapter.getItem(position).getType());
+            Log.e("test", rv_adapter.getItem(position).getTime());
+            Log.e("test", rv_adapter.getItem(position).getMessage());
+
+            Intent intent = new Intent(this, MailDetailActivity.class);
+
+//            Toast.makeText(this, rv_adapter.getItem(position).get(), Toast.LENGTH_SHORT).show();
+
+//            Bundle bundle = new Bundle();
+//            bundle.putSerializable("mail", rv_adapter.getItem(position));
+//            intent.putExtras(bundle);
+
+            intent.putExtra("mail", (Parcelable) rv_adapter.getItem(position));
+
+//            intent.putExtra("subject", rv_adapter.getItem(position).message);
+//            intent.putExtra("date", rv_adapter.getItem(position).time);
+//            intent.putExtra("body", rv_adapter.getItem(position).getBody());
+//            intent.putExtra("from", mContact.email);
 
             startActivity(intent);
+//            startActivity(new Intent(getApplicationContext(), MailDetailActivity.class).putExtra("mail", (Serializable) rv_adapter.getItem(position)));
         } else {
             Toast.makeText(this, rv_adapter.getItem(position).toString(), Toast.LENGTH_SHORT).show();
         }
