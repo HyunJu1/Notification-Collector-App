@@ -29,7 +29,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.RadioButton;
 import android.widget.Toast;
 
 import com.example.hyunju.notification_collector.models.Contact;
@@ -48,27 +47,24 @@ import java.util.List;
 
 public class MainActivity extends Activity {
 
-    private ListView lv_contactlist;
-
     ContactsAdapter adapter;
+    ArrayList<Contact> contactlist = new ArrayList<Contact>();
+    private ListView lv_contactlist;
     private ImageButton btnSearch;
-
     private EditText edtSearch;
     private Button btn_multi, btn_multi_send, btn_settings;
     private boolean isMultiMode = false;
     private ArrayList<Contact> contactGroup;
-    ArrayList<Contact> contactlist = new ArrayList<Contact>();
     private List<Contact> list = new ArrayList<Contact>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
 
-
         setContentView(R.layout.activity_main);
 
         startActivity(new Intent(this, AuthActivity.class));
-
 
 
         lv_contactlist = findViewById(R.id.lv_contactlist);
@@ -146,28 +142,25 @@ public class MainActivity extends Activity {
         });
 
 
-
-
-
     }
 
-    void checkPermission(){
+    void checkPermission() {
         if (checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED ||
                 checkSelfPermission(Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED ||
                 checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED ||
                 checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
                 checkSelfPermission(Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED ||
                 checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED
-        ) {
+                ) {
             requestPermissions(new String[]{Manifest.permission.READ_CONTACTS, Manifest.permission.SEND_SMS, Manifest.permission.READ_PHONE_STATE, Manifest.permission.READ_EXTERNAL_STORAGE,
                     Manifest.permission.RECEIVE_SMS, Manifest.permission.READ_PHONE_STATE}, 1);
         } else {
-           initListView();
+            initListView();
 
         }
     }
 
-    void initListView(){
+    void initListView() {
         adapter = new ContactsAdapter(MainActivity.this,
                 R.layout.layout_phonelist, getContactList());
 
@@ -232,9 +225,6 @@ public class MainActivity extends Activity {
     }
 
 
-
-
-
     // 검색을 수행하는 메소드
     public void search(String charText) {
 
@@ -242,13 +232,9 @@ public class MainActivity extends Activity {
 
         if (charText.length() == 0) {
             contactlist.addAll(list);
-        }
-        else
-        {
-            for(int i = 0;i < list.size(); i++)
-            {
-                if (list.get(i).name.toLowerCase().contains(charText))
-                {
+        } else {
+            for (int i = 0; i < list.size(); i++) {
+                if (list.get(i).name.toLowerCase().contains(charText)) {
                     contactlist.add(list.get(i));
                 }
             }
@@ -286,7 +272,7 @@ public class MainActivity extends Activity {
                 // Log.d("Unity", "연락처 사용자 ID : " + clsCursor.getString(0));
                 Log.d("Unity", "연락처 사용자 이름 : " + clsCursor.getString(1));
                 //mContact.setPhotoid(Long.parseLong(clsCursor.getString( 0 )));
-                Contact contact =  new Contact();
+                Contact contact = new Contact();
                 contact.name = (clsCursor.getString(1));
                 // phone number에 접근하는 Cursor
                 Cursor clsPhoneCursor = MainActivity.this.getContentResolver().query(
@@ -435,8 +421,8 @@ public class MainActivity extends Activity {
     }
 
 
-    boolean checkEmail(String str){
-        if(str != null && !str.equals("")){
+    boolean checkEmail(String str) {
+        if (str != null && !str.equals("")) {
             return str.contains("@");
         }
         return false;

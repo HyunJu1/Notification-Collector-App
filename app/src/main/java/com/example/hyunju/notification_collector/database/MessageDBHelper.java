@@ -17,7 +17,7 @@ public class MessageDBHelper  extends SQLiteOpenHelper {
                 " message_body TEXT ," +
                 " create_time TEXT not null," +
                 " creator_id TEXT ," +
-                " recipent_phpneNum TEXT ," +
+                " recipent_phoneNum TEXT ," +
                 " platform TEXT not null," +
                 " mailtype TEXT , " +
                 " type  TEXT not null ," +

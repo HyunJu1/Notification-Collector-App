@@ -2,6 +2,7 @@ package com.example.hyunju.notification_collector.database;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
@@ -34,13 +35,19 @@ public class DataManager {
         cv.put("create_time",sendedMessage.getTime());
         cv.put("platform",sendedMessage.PLATFORM_SMS);
         cv.put("type",sendedMessage.getType());
-        cv.put("recipent_phpneNum",sendedMessage.getRecipent_phoneNum());
+        cv.put("recipent_phoneNum",sendedMessage.getRecipent_phoneNum());
         messageDB.insert("message",null,cv);
         Log.d("DBDB", "성공적으로 데이터 삽입");
 
     }
 
 
-
+    public Cursor smsReader(String phonenum) {
+        SQLiteDatabase messageDB = messageDBHelper.getReadableDatabase();
+        String selectQuery = "SELECT * FROM message where recipent_phoneNum= '"+ phonenum+"'"; // 따옴 표
+        Cursor cursor = messageDB.rawQuery(selectQuery, null);
+        Log.d("cursor개수", String.valueOf(cursor.getCount()));
+        return cursor;
+    }
 }
 
