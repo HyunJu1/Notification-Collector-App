@@ -27,7 +27,7 @@ public class DataManager {
      */
 
 
-    public void smsSending(SendedMessage sendedMessage) {
+    public void smsInsert(SendedMessage sendedMessage) {
         SQLiteDatabase messageDB = messageDBHelper.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put("message_body",sendedMessage.getMessage()); // sms 에선 메세지를 body에 저장

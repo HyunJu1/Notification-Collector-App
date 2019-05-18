@@ -154,6 +154,11 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
 
             try {
 
+                SendedMessage sendedMessage = new SendedMessage(message, SendedMessage.PLATFORM_SMS ,receivedDate,SendedMessage.MESSAGE_RECEIVER,senderNo);
+
+                dm.smsInsert(sendedMessage); // DB에 SMS관련 채팅 삽입
+
+
                 SendedMessage model = new SendedMessage(message,"sms ",receivedDate,SendedMessage.MESSAGE_RECEIVER);
 
 
@@ -224,7 +229,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
 
                     SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_SMS ,getTime(),SendedMessage.MESSAGE_SEND,mContact.phonenum);
 
-                    dm.smsSending(sendedMessage); // DB에 SMS관련 채팅 삽입
+                    dm.smsInsert(sendedMessage); // DB에 SMS관련 채팅 삽입
                     sendedMessages.add(sendedMessage);
 
                     msgList.add(text);
