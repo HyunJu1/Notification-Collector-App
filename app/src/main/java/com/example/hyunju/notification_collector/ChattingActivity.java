@@ -94,22 +94,18 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
             String message = intent.getStringExtra("message");
             String receivedDate = intent.getStringExtra("receivedDate");
 
-            try {
 
-                SendedMessage sendedMessage = new SendedMessage(message, SendedMessage.PLATFORM_SMS, receivedDate, SendedMessage.MESSAGE_RECEIVER, senderNo);
+            SendedMessage sendedMessage = new SendedMessage(message, SendedMessage.PLATFORM_SMS, receivedDate, SendedMessage.MESSAGE_RECEIVER, senderNo);
 
-                dm.smsInsert(sendedMessage); // DB에 SMS관련 채팅 삽입
-
-
-                SendedMessage model = new SendedMessage(message, "sms ", receivedDate, SendedMessage.MESSAGE_RECEIVER);
+            dm.smsInsert(sendedMessage); // DB에 SMS관련 채팅 삽입
 
 
-                sendedMessages.add(model);
-                rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
+            SendedMessage model = new SendedMessage(message, "sms ", receivedDate, SendedMessage.MESSAGE_RECEIVER);
 
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+
+            sendedMessages.add(model);
+            rv_adapter.notifyItemChanged(sendedMessages.size() - 1);
+
         }
     };
 
@@ -130,29 +126,6 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
 
         mContact = getIntent().getParcelableExtra("contact");
         mContact.phonenum = mContact.phonenum.replaceAll("-", "");
-
-        /**
-         * DB관련 . 불러오는것까진 완료. 이제 adapter 에 적용시켜야하는데 이거 관련해서 어떻게 해야할지?
-         */
-        Cursor cursor = dm.smsReader(mContact.phonenum);
-        try {
-            if (cursor != null) {
-                cursor.moveToFirst();
-
-                Log.d("DB관련", "COUNT = " + cursor.getCount());
-                while (cursor.moveToNext()) {
-                    String message_body = cursor.getString(cursor.getColumnIndex("message_body"));
-                    String create_time = cursor.getString(cursor.getColumnIndex("create_time"));
-                    String platform = cursor.getString(cursor.getColumnIndex("platform"));
-                    String recipent_phoneNum = cursor.getString(cursor.getColumnIndex("recipent_phoneNum"));
-                    String type = cursor.getString(cursor.getColumnIndex("type"));
-                    Log.d("db불러오기", message_body + create_time + platform + recipent_phoneNum + type);
-                }
-
-            }
-        } finally {
-            cursor.close();
-        }
 
 
         textView_phone.setText(mContact.phonenum);
@@ -180,9 +153,39 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
             }
         }
 
+        /**
+         * DB관련 .
+         */
+        Cursor cursor = dm.smsReader(mContact.phonenum);
+        try {
+            if (cursor != null) {
+                cursor.moveToFirst();
+
+                Log.d("DB관련", "COUNT = " + cursor.getCount());
+                while (cursor.moveToNext()) {
+                    String message_body = cursor.getString(cursor.getColumnIndex("message_body"));
+                    String create_time = cursor.getString(cursor.getColumnIndex("create_time"));
+                    String platform = cursor.getString(cursor.getColumnIndex("platform"));
+                    String recipent_phoneNum = cursor.getString(cursor.getColumnIndex("recipent_phoneNum"));
+                    String type = cursor.getString(cursor.getColumnIndex("type"));
+                    Log.d("db불러오기", message_body + create_time + platform + recipent_phoneNum + type);
+
+
+                    SendedMessage model = new SendedMessage(message_body, platform, create_time, type);
+
+
+                    sendedMessages.add(model);
+                    //rv_adapter.notifyDataSetChanged();
+                }
+
+            }
+        } finally {
+            cursor.close();
+        }
         rv_adapter = new RecyclerViewAdapter(this, sendedMessages);
         rv_adapter.setClickListener(this);
         rv_sendedMsg.setAdapter(rv_adapter);
+
     }
 
     @Override
@@ -314,6 +317,8 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
                     SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_SMS, getTime(), SendedMessage.MESSAGE_SEND, mContact.phonenum);
 
                     dm.smsInsert(sendedMessage); // DB에 SMS관련 채팅 삽입
+
+
                     sendedMessages.add(sendedMessage);
 
                     msgList.add(text);
