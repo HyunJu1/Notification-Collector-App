@@ -33,6 +33,20 @@
             android:layout_marginLeft="20sp"
             android:layout_marginTop="5sp"
             android:layout_marginBottom="5sp"/>
+        
+        <LinearLayout
+            android:id="@+id/layout_attachment"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="20sp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textViewAttachmentTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="첨부파일" />
+        </LinearLayout>
 
         <WebView
             android:id="@+id/webView"
@@ -43,5 +57,6 @@
             android:layout_alignParentStart="true"
             android:layout_marginLeft="20sp"
             android:layout_marginRight="20sp"/>
+        
     </LinearLayout>
 </ScrollView>

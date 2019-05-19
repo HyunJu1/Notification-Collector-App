@@ -10,16 +10,19 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 
 public class FileUtils {
     private FileUtils() {}
 
     static final String TAG = "FileUtils";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     public static final String MIME_TYPE_AUDIO = "audio/*";
     public static final String MIME_TYPE_TEXT = "text/*";
@@ -97,16 +100,19 @@ public class FileUtils {
                 if ("primary".equalsIgnoreCase(type)) {
                     return Environment.getExternalStorageDirectory() + "/" + split[1];
                 }
-            }
-            else if (isDownloadsDocument(uri)) {
-
+            } else if(isDownloadsDocument(uri)) {
                 final String id = DocumentsContract.getDocumentId(uri);
-                final Uri contentUri = ContentUris.withAppendedId(
-                        Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
+                Uri contentUri;
+
+                try {
+                     contentUri = ContentUris.withAppendedId(
+                            Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
+                } catch(NumberFormatException e) {
+                     contentUri = Uri.parse("content://downloads/public_downloads" + id);
+                }
 
                 return getDataColumn(context, contentUri, null, null);
-            }
-            else if (isMediaDocument(uri)) {
+            } else if(isMediaDocument(uri)) {
                 final String docId = DocumentsContract.getDocumentId(uri);
                 final String[] split = docId.split(":");
                 final String type = split[0];
@@ -126,16 +132,48 @@ public class FileUtils {
                 };
 
                 return getDataColumn(context, contentUri, selection, selectionArgs);
+            } else if(isGoogleDriveUri(uri)) {
+                Cursor returnCursor = context.getContentResolver().query(uri, null, null, null, null);
+
+                int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
+                returnCursor.moveToFirst();
+                String name = (returnCursor.getString(nameIndex));
+                String size = (Long.toString(returnCursor.getLong(sizeIndex)));
+                File file = new File(context.getCacheDir(), name);
+                try {
+                    InputStream inputStream = context.getContentResolver().openInputStream(uri);
+                    FileOutputStream outputStream = new FileOutputStream(file);
+                    int read = 0;
+                    int maxBufferSize = 1 * 1024 * 1024;
+                    int bytesAvailable = inputStream.available();
+
+                    //int bufferSize = 1024;
+                    int bufferSize = Math.min(bytesAvailable, maxBufferSize);
+
+                    final byte[] buffers = new byte[bufferSize];
+                    while ((read = inputStream.read(buffers)) != -1) {
+                        outputStream.write(buffers, 0, read);
+                    }
+                    Log.e("File Size", "Size " + file.length());
+                    inputStream.close();
+                    outputStream.close();
+                    Log.e("File Path", "Path " + file.getPath());
+                    Log.e("File Size", "Size " + file.length());
+                } catch (Exception e) {
+                    Log.e("Exception", e.getMessage());
+                }
+                return file.getPath();
             }
-        }
-        else if ("content".equalsIgnoreCase(uri.getScheme())) {
+        } else if("content".equalsIgnoreCase(uri.getScheme())) {
+            Log.e("test", "this?????");
 
             if (isGooglePhotosUri(uri))
                 return uri.getLastPathSegment();
 
             return getDataColumn(context, uri, null, null);
-        }
-        else if ("file".equalsIgnoreCase(uri.getScheme())) {
+        } else if ("file".equalsIgnoreCase(uri.getScheme())) {
+            Log.e("test", "thi??s???");
             return uri.getPath();
         }
 
@@ -163,6 +201,11 @@ public class FileUtils {
 
     public static boolean isGooglePhotosUri(Uri uri) {
         return "com.google.android.apps.photos.content".equals(uri.getAuthority());
+    }
+
+    public static boolean isGoogleDriveUri(Uri uri) {
+        return "com.google.android.apps.docs.storage".equals(uri.getAuthority()) ||
+                "com.google.android.apps.docs.storage.legacy".equals(uri.getAuthority());
     }
 
     public static String getDataColumn(Context context, Uri uri, String selection,

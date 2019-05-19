@@ -4,19 +4,21 @@ import android.app.Activity;
 
 import android.content.BroadcastReceiver;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Bundle;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.View;
@@ -29,8 +31,10 @@ import android.widget.Toast;
 import com.example.hyunju.notification_collector.database.DataManager;
 import com.example.hyunju.notification_collector.global.CollectorActivity;
 import com.example.hyunju.notification_collector.models.Contact;
+import com.example.hyunju.notification_collector.models.NotificationEvent;
 import com.example.hyunju.notification_collector.models.SendedMessage;
 import com.example.hyunju.notification_collector.telegram.TgHelper;
+import com.example.hyunju.notification_collector.utils.CalendarHelper;
 import com.example.hyunju.notification_collector.utils.FileUtils;
 
 import com.example.hyunju.notification_collector.utils.MatchMessenger;
@@ -44,17 +48,22 @@ import com.example.hyunju.notification_collector.utils.SendMail;
 import com.example.hyunju.notification_collector.utils.TelegramChatManager;
 
 import org.drinkless.td.libcore.telegram.TdApi;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 //import android.app.AlertDialog;
-
-
 public class ChattingActivity extends CollectorActivity implements View.OnClickListener, RecyclerViewAdapter.ItemClickListener {
     private static final int REQUEST_CODE = 6384;
+    private final static String TAG = ChattingActivity.class.getName();
+
     /**
      * DB 관련
      */
@@ -179,12 +188,69 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
 
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onNotificationEvent(NotificationEvent e) {
+        String person = e.getTitle();
+
+        long startDate = 0;
+        String place = "";
+        String[] messageWord = e.getText().toString().split("\\s+");
+        for (String msg : messageWord) {
+            // date
+            if (startDate == 0) {
+                String onlyNumberRegex = "\\d+";
+                String s = msg.charAt(0) + "";
+                if (s.matches(onlyNumberRegex) && msg.contains("일")) {
+                    Calendar beginTime = Calendar.getInstance();
+                    int year = beginTime.get(Calendar.YEAR);
+                    int month = beginTime.get(Calendar.MONTH);
+                    int date = (msg.length() == 2 ?
+                            Integer.parseInt(msg.charAt(0) + "") : Integer.parseInt(msg.charAt(0) + "" + msg.charAt(1))
+                    );
+                    beginTime.set(year, month, date);
+                    startDate = beginTime.getTimeInMillis();
+                } else if (msg.equals("내일")) {
+                    startDate = System.currentTimeMillis() + 1000 * 60 * 60 * 24;
+                } else {
+                    startDate = System.currentTimeMillis();
+                }
+            }
+
+            // place
+            if (place.equals("") && msg.contains("에서")) {
+                place += msg.substring(0, msg.length() - 2);
+            }
+        }
+
+        if (startDate != 0 && !place.equals("")) {
+            try {
+                ContentResolver cr = getContentResolver();
+                CalendarHelper.pushAppointmentsToCalender(cr, person, e.getText().toString(), place, startDate);
+                Toast.makeText(getApplicationContext(), "일정이 등록되었습니다", Toast.LENGTH_SHORT).show();
+            } catch (Exception ex) {
+                Log.e(TAG, ex.toString());
+                Toast.makeText(getApplicationContext(), "일정 등록 실패", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
+    }
+
     /**
      * 해당 이메일에게 받은 메일 읽어오는 함수
      **/
     private ArrayList<SendedMessage> addReceiveMail(String email) {
         ArrayList<SendedMessage> mails = new ArrayList<>();
-        ;
 
         if (email != null) {
             ReadMail rm = new ReadMail();
@@ -398,8 +464,10 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
         if (requestCode == REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             if (data != null) {
                 final Uri uri = data.getData();
+                Log.e("test", uri.toString());
                 path = FileUtils.getPath(this, uri);
-                Log.e("path", path);
+//                Log.e("path", path);
+                if(path == null) path = uri.toString();
             }
         }
     }
@@ -408,15 +476,32 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
     public void onItemClick(View view, int position) {
 
         // 메일인 경우 클릭시 메일 상세페이지로 이동
-        if (rv_adapter.getItem(position).platform.equals("Email")) {
-            Intent intent = new Intent(ChattingActivity.this, MailDetailActivity.class);
+        if(rv_adapter.getItem(position).platform.equals("Email")) {
 
-            intent.putExtra("subject", rv_adapter.getItem(position).message);
-            intent.putExtra("date", rv_adapter.getItem(position).time);
-            intent.putExtra("body", rv_adapter.getItem(position).getBody());
-            intent.putExtra("from", mContact.email);
+            Log.e("test", rv_adapter.getItem(position).getType());
+            Log.e("test", rv_adapter.getItem(position).getTime());
+            Log.e("test", rv_adapter.getItem(position).getMessage());
+
+            Intent intent = new Intent(this, MailDetailActivity.class);
+
+
+//            Toast.makeText(this, rv_adapter.getItem(position).get(), Toast.LENGTH_SHORT).show();
+
+//            Bundle bundle = new Bundle();
+//            bundle.putSerializable("mail", rv_adapter.getItem(position));
+//            intent.putExtras(bundle);
+
+            intent.putExtra("mail", (Parcelable) rv_adapter.getItem(position));
+
+//            intent.putStringArrayListExtra("str", rv_adapter.getItem(position).getAttachment_str());
+
+//            intent.putExtra("subject", rv_adapter.getItem(position).message);
+//            intent.putExtra("date", rv_adapter.getItem(position).time);
+//            intent.putExtra("body", rv_adapter.getItem(position).getBody());
+//            intent.putExtra("from", mContact.email);
 
             startActivity(intent);
+//            startActivity(new Intent(getApplicationContext(), MailDetailActivity.class).putExtra("mail", (Serializable) rv_adapter.getItem(position)));
         } else {
             Toast.makeText(this, rv_adapter.getItem(position).toString(), Toast.LENGTH_SHORT).show();
         }
