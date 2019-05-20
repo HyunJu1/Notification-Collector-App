@@ -322,9 +322,24 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
                 if ("문자".equals(listItems.get(pos))) { // 문자
 
                     if (path != null) {
-                        SmsManager smsManager = SmsManager.getDefault();
-                        Log.d("uriuri", String.valueOf(uri));
-                        smsManager.sendMultimediaMessage(getApplicationContext(),uri,mContact.phonenum,null,null);
+
+                        try{
+                            /**
+                             * 이미지 첨부하는 경우.
+                             * 일단 intent 사용하였지만 사용하지 않는 방향으로 추후 수정 예정
+                             */
+                            Intent sendIntent = new Intent(Intent.ACTION_SEND);
+                            sendIntent.putExtra("address", mContact.phonenum);
+                            sendIntent.putExtra("subject", "MMS Test");
+                            sendIntent.putExtra("sms_body", text);
+                            sendIntent.setType("image/*");
+                            sendIntent.putExtra(Intent.EXTRA_STREAM, uri);
+                            startActivity(Intent.createChooser(sendIntent, getResources().getString(R.string.app_name)));
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+
+
                     } else {
                         SmsManager smsManager = SmsManager.getDefault();
 
