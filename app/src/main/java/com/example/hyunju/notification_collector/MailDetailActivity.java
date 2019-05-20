@@ -47,17 +47,10 @@ public class MailDetailActivity extends AppCompatActivity {
 
         SendedMessage mail = (SendedMessage) intent.getParcelableExtra("mail");
 
-//        attachment_str = intent.getStringArrayListExtra("str");
-
-//        Log.e("attachment_str size", String.valueOf(attachment_str.size()));
-//        if(attachment_str.size() > 0) {
-//
-//        }
-//        Log.e("test", mail.type);
-//        Log.e("test", mail.getMessage());
-//        Log.e("test", mail.getTime());
         attachment_str = mail.getAttachment_str();
         Log.e("attachment", String.valueOf(attachment_str.size()));
+//        attachment_mimebodypart = mail.getAttachment_mimebodypart();
+//        Log.e("attachment_mim", String.valueOf(attachment_mimebodypart.size()));
 
         if(attachment_str != null && attachment_str.size() > 0) {
             for(int i = 0; i < attachment_str.size(); i++) {
@@ -83,12 +76,6 @@ public class MailDetailActivity extends AppCompatActivity {
         textViewDate.setText(mail.getTime());
         webView.loadData(mail.getBody_str(), "text/html", "UTF-8");
 
-
-
-//        textViewSubject.setText(intent.getExtras().getString("subject"));
-//
-//        textViewDate.setText(intent.getExtras().getString("date"));
-//        webView.loadData(intent.getExtras().getString("body"), "text/html", "UTF-8");
 
     }
 }
