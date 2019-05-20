@@ -1,5 +1,6 @@
 package com.example.hyunju.notification_collector;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 
 import android.content.BroadcastReceiver;
@@ -20,10 +21,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.telephony.SmsManager;
+
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -63,7 +66,7 @@ import java.util.List;
 public class ChattingActivity extends CollectorActivity implements View.OnClickListener, RecyclerViewAdapter.ItemClickListener {
     private static final int REQUEST_CODE = 6384;
     private final static String TAG = ChattingActivity.class.getName();
-
+    Uri uri;
     /**
      * DB 관련
      */
@@ -76,6 +79,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
 
     private String path;
     private Button button_attachment;
+    private ImageButton backButton;
     private RecyclerView rv_sendedMsg;
 
     private RecyclerViewAdapter rv_adapter;
@@ -109,6 +113,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
         }
     };
 
+    @SuppressLint("WrongViewCast")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -120,6 +125,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
 
         textView_phone = (TextView) findViewById(R.id.textView_phone_num);
         textView_name = (TextView) findViewById(R.id.textView_name);
+        backButton=(ImageButton)findViewById(R.id.backButton);
 
         textView_phone = view(R.id.textView_phone_num);
         textView_name = view(R.id.textView_name);
@@ -137,7 +143,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
 
         button.setOnClickListener(this);
         button_attachment.setOnClickListener(this);
-
+        backButton.setOnClickListener(this);
 
         int numberOfColumns = 1;
         rv_sendedMsg = findViewById(R.id.rv_sendedMsg);
@@ -284,6 +290,9 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
         if (v == button_attachment) {
             performFileSearch();
         }
+        if (v==backButton){
+            onBackPressed();
+        }
     }
 
     public void Dialog() {
@@ -308,11 +317,21 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
         builder.setTitle("전송 수단을 선택하시오");
         builder.setItems(items, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int pos) {
-                final String text = editText.getText().toString();  // editText의 text 받아온 변수
+                final String text = editText.getText().toString();  // editText의 text 받아s온 변수
 
                 if ("문자".equals(listItems.get(pos))) { // 문자
-                    SmsManager smsManager = SmsManager.getDefault();
-                    smsManager.sendTextMessage(mContact.phonenum, null, text, null, null);
+
+                    if (path != null) {
+                        SmsManager smsManager = SmsManager.getDefault();
+                        Log.d("uriuri", String.valueOf(uri));
+                        smsManager.sendMultimediaMessage(getApplicationContext(),uri,mContact.phonenum,null,null);
+                    } else {
+                        SmsManager smsManager = SmsManager.getDefault();
+
+                        smsManager.sendTextMessage(mContact.phonenum, null, text, null, null);
+
+                    }
+
 
                     SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_SMS, getTime(), SendedMessage.MESSAGE_SEND, mContact.phonenum);
 
@@ -463,7 +482,8 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             if (data != null) {
-                final Uri uri = data.getData();
+                //final Uri uri = data.getData();
+                uri = data.getData();
                 Log.e("test", uri.toString());
                 path = FileUtils.getPath(this, uri);
 //                Log.e("path", path);
