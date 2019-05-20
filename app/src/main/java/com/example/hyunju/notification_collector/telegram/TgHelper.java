@@ -6,6 +6,8 @@ import androidx.annotation.Nullable;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.example.hyunju.notification_collector.global.GlobalApplication;
+import com.example.hyunju.notification_collector.models.SendedMessage;
 import com.example.hyunju.notification_collector.utils.TelegramChatManager;
 import com.example.hyunju.notification_collector.utils.TelegramChatManager.MessageState;
 
@@ -13,7 +15,9 @@ import org.drinkless.td.libcore.telegram.Client;
 import org.drinkless.td.libcore.telegram.TG;
 import org.drinkless.td.libcore.telegram.TdApi;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class TgHelper {
 
@@ -24,9 +28,13 @@ public class TgHelper {
 
     public static SparseArray<TdApi.User> users = new SparseArray<>();
 
+    private static TelegramChatManager.Callback<SendedMessage> mMessageCallback;
+
+
     private static String getCacheDir(Context c) {
         return c.getCacheDir().getAbsolutePath();
     }
+
 
     public static void init(Context c) {
         TG.setFileLogEnabled(false);
@@ -41,6 +49,10 @@ public class TgHelper {
         return TG.getClientInstance();
     }
 
+    public static void setMessageCallback(TelegramChatManager.Callback<SendedMessage> callback){
+        mMessageCallback = callback;
+    }
+
     private final static Client.ResultHandler LoopUpdateHandler = new Client.ResultHandler() {
         @Override
         public void onResult(TdApi.TLObject object) {
@@ -51,18 +63,40 @@ public class TgHelper {
             if (object.getConstructor() == TdApi.UpdateUser.CONSTRUCTOR) {
                 updateUser((TdApi.UpdateUser) object);
             } else if (object.getConstructor() == TdApi.UpdateNewMessage.CONSTRUCTOR) {
-                TdApi.UpdateNewMessage updateNewChat = (TdApi.UpdateNewMessage) object;
+               final TdApi.UpdateNewMessage updateNewChat = (TdApi.UpdateNewMessage) object;
 
                 switch (sendState((updateNewChat).message)) {
                     case SUCCESS:
-                        // 보냄
+                        // 보냄((TdApi.MessagePhoto) (updateNewChat.message.content)).photo.sizes
                         break;
                     case BEINGSENT:
                         // 보냄
                         break;
                     case INCOMING:
                         // 받은메시지
-                        String message = ((TdApi.MessageText) updateNewChat.message.content).text;
+                        if(mMessageCallback!=null) {
+                            SendedMessage sendedMessage = new SendedMessage();
+                            if((updateNewChat.message.content) instanceof TdApi.MessageText) {
+                                sendedMessage.message = ((TdApi.MessageText) updateNewChat.message.content).text;
+
+                            }else if((updateNewChat.message.content) instanceof TdApi.MessagePhoto){
+                                System.out.println("!!@!!!");
+                                int size = ((TdApi.MessagePhoto) (updateNewChat.message.content)).photo.sizes.length;
+                              TdApi.PhotoSize photo =  ((TdApi.MessagePhoto) (updateNewChat.message.content)).photo.sizes[size-1];
+//                              sendedMessage.file = photo.photo;
+                                sendedMessage.message = "사진을 받았습니다.";
+
+//                                File file  =
+                            } else if((updateNewChat.message.content) instanceof TdApi.MessageContent){
+                                sendedMessage.message = "첨부파일이 있습니다.";
+                            } else {
+                                sendedMessage.message = "Error";
+                            }
+                            sendedMessage.time = new Date(System.currentTimeMillis()).toString();
+                            sendedMessage.platform = SendedMessage.PLATFORM_TELEGRAM;
+                            sendedMessage.type = SendedMessage.MESSAGE_RECEIVER;
+                            mMessageCallback.onResult(sendedMessage);
+                        }
                         break;
                     default:
                         // 실패

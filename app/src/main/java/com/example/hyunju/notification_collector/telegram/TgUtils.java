@@ -50,7 +50,7 @@ public class TgUtils {
 
 
     // 이름으로 텔레그램 연락처 검색
-    public void getTelegramContact(String name, final TelegramChatManager.Callback<TdApi.Users> callback) {
+    public static void getTelegramContact(String name, final TelegramChatManager.Callback<TdApi.Users> callback) {
         TgHelper.send(new TdApi.SearchContacts(name, 200), new Client.ResultHandler() {
             @Override
             public void onResult(TdApi.TLObject object) {

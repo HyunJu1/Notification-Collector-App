@@ -24,7 +24,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,7 +51,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -67,7 +65,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
     /**
      * DB 관련
      */
-    DataManager dm = new DataManager(ChattingActivity.this);
+    DataManager mDataManager = new DataManager(ChattingActivity.this);
     TextView textView_phone, textView_name;
     EditText editText;
     Button button;
@@ -97,10 +95,10 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
 
             SendedMessage sendedMessage = new SendedMessage(message, SendedMessage.PLATFORM_SMS, receivedDate, SendedMessage.MESSAGE_RECEIVER, senderNo);
 
-            dm.smsInsert(sendedMessage); // DB에 SMS관련 채팅 삽입
+            mDataManager.smsInsert(sendedMessage); // DB에 SMS관련 채팅 삽입
 
 
-            SendedMessage model = new SendedMessage(message, "sms ", receivedDate, SendedMessage.MESSAGE_RECEIVER);
+            SendedMessage model = new SendedMessage(message, SendedMessage.PLATFORM_SMS, receivedDate, SendedMessage.MESSAGE_RECEIVER);
 
 
             sendedMessages.add(model);
@@ -127,6 +125,16 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
         mContact = getIntent().getParcelableExtra("contact");
         mContact.phonenum = mContact.phonenum.replaceAll("-", "");
 
+        // 텔레그램 메시지 수신 콜백인터페이스 등록
+        TgHelper.setMessageCallback(new TelegramChatManager.Callback<SendedMessage>() {
+            @Override
+            public void onResult(SendedMessage result) {
+                // 메시지 수신
+                result.recipent_phoneNum = mContact.phonenum;
+                mDataManager.smsInsert(result);
+                rv_adapter.addList(result);
+            }
+        });
 
         textView_phone.setText(mContact.phonenum);
         textView_name.setText(mContact.name);
@@ -156,7 +164,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
         /**
          * DB관련 .
          */
-        Cursor cursor = dm.smsReader(mContact.phonenum);
+        Cursor cursor = mDataManager.smsReader(mContact.phonenum);
         try {
             if (cursor != null) {
                 cursor.moveToFirst();
@@ -316,7 +324,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
 
                     SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_SMS, getTime(), SendedMessage.MESSAGE_SEND, mContact.phonenum);
 
-                    dm.smsInsert(sendedMessage); // DB에 SMS관련 채팅 삽입
+                    mDataManager.smsInsert(sendedMessage); // DB에 SMS관련 채팅 삽입
 
 
                     sendedMessages.add(sendedMessage);

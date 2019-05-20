@@ -34,11 +34,14 @@ import android.widget.Toast;
 import com.example.hyunju.notification_collector.models.Contact;
 
 import com.example.hyunju.notification_collector.telegram.AuthActivity;
+import com.example.hyunju.notification_collector.telegram.TgUtils;
 import com.example.hyunju.notification_collector.utils.MatchMessenger;
 import com.example.hyunju.notification_collector.utils.TelegramChatManager;
 
 import com.example.hyunju.notification_collector.utils.ContactsAdapter;
 
+
+import org.drinkless.td.libcore.telegram.TdApi;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -185,6 +188,8 @@ public class MainActivity extends Activity {
                             contactGroup.add(phonenumber);
                             Toast.makeText(getApplicationContext(), phonenumber.name + " 추가", Toast.LENGTH_SHORT).show();
                         } else {
+                           MatchMessenger.getInstance().setUseTelegram(phonenumber.phonenum,
+                                   TelegramChatManager.getInstance().isChattingUser(phonenumber.phonenum));
                             Intent intent = new Intent(MainActivity.this, ChattingActivity.class);
                             intent.putExtra("contact", phonenumber);
                             startActivity(intent);

@@ -14,11 +14,18 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class GlobalApplication extends Application {
     public static NetworkService service;
 
+    static GlobalApplication mApplication;
+
     @Override
     public void onCreate() {
         super.onCreate();
         TgHelper.init(this);
+        mApplication = this;
 //        retrofitInit();
+    }
+
+    public static GlobalApplication getInstance(){
+        return mApplication;
     }
 
     private static void retrofitInit() {

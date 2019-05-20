@@ -43,6 +43,7 @@ public class SendedMessage implements Parcelable {
     public String platform;
     public String type;
     public String time;
+    public File file;
 
 
 
@@ -59,6 +60,8 @@ public class SendedMessage implements Parcelable {
     private int test_size = 0;
 
 
+    public SendedMessage(){
+    }
 
     public SendedMessage(String message, String platform, String time , String type) {
         this.message = message;
@@ -107,6 +110,18 @@ public class SendedMessage implements Parcelable {
         }
     }
 
+    public static final Creator<SendedMessage> CREATOR = new Creator<SendedMessage>() {
+        @Override
+        public SendedMessage createFromParcel(Parcel in) {
+            return new SendedMessage(in);
+        }
+
+        @Override
+        public SendedMessage[] newArray(int size) {
+            return new SendedMessage[size];
+        }
+    };
+
     public String getMessage() {
         return message;
     }
@@ -154,17 +169,6 @@ public class SendedMessage implements Parcelable {
         return attachment_mimebodypart;
     }
 
-    public static final Creator<SendedMessage> CREATOR = new Creator<SendedMessage>() {
-        @Override
-        public SendedMessage createFromParcel(Parcel in) {
-            return new SendedMessage(in);
-        }
-
-        @Override
-        public SendedMessage[] newArray(int size) {
-            return new SendedMessage[size];
-        }
-    };
 
 
 
@@ -178,28 +182,6 @@ public class SendedMessage implements Parcelable {
     }
 
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(message);
-        dest.writeString(platform);
-        dest.writeString(time);
-
-        // mail
-        if(platform.equals("Email")) {
-            dest.writeString(mailType);
-
-            body_str = getBody();
-            dest.writeString(body_str);
-            dest.writeStringList(attachment_str);
-//            dest.writeList(attachment_mimebodypart);
-//            dest.writeArray(test);
-        }
-    }
 
     public String getBody_str() {
         return body_str;
@@ -389,5 +371,24 @@ public class SendedMessage implements Parcelable {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(message);
+        dest.writeString(platform);
+        dest.writeString(type);
+        dest.writeString(time);
+        dest.writeString(recipent_phoneNum);
+        dest.writeString(mailType);
+        dest.writeString(body_str);
+        dest.writeString(platfrom);
+        dest.writeStringList(attachment_str);
+        dest.writeInt(test_size);
     }
 }
