@@ -59,6 +59,14 @@ public class TgUtils {
         });
     }
 
+    public static String getChatPhoneNum(int userId){
+        TdApi.User user = TgHelper.users.get(userId);
+        if(user==null){
+            return user.phoneNumber.replaceFirst("82","0");
+        }
+        return "";
+    }
+
     // 텔래그렘 사용자 정보
     public static TdApi.User getUser(int userId) {
         TdApi.User user = TgHelper.users.get(userId);
@@ -85,3 +93,4 @@ public class TgUtils {
         return null;
     }
 }
+//

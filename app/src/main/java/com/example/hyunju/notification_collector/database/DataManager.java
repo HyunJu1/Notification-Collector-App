@@ -31,11 +31,11 @@ public class DataManager {
     public void smsInsert(SendedMessage sendedMessage) {
         SQLiteDatabase messageDB = messageDBHelper.getWritableDatabase();
         ContentValues cv = new ContentValues();
-        cv.put("message_body",sendedMessage.getMessage()); // sms 에선 메세지를 body에 저장
-        cv.put("create_time",sendedMessage.getTime());
-        cv.put("platform",sendedMessage.PLATFORM_SMS);
-        cv.put("type",sendedMessage.getType());
-        cv.put("recipent_phoneNum",sendedMessage.getRecipent_phoneNum());
+        cv.put("message_body",sendedMessage.message); // sms 에선 메세지를 body에 저장
+        cv.put("create_time",sendedMessage.time);
+        cv.put("platform",sendedMessage.platform);
+        cv.put("type",sendedMessage.type);
+        cv.put("recipent_phoneNum",sendedMessage.recipent_phoneNum);
         messageDB.insert("message",null,cv);
         Log.d("DBDB", "성공적으로 데이터 삽입");
 

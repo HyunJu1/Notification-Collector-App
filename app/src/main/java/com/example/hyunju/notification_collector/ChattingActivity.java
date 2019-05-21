@@ -129,10 +129,13 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
         TgHelper.setMessageCallback(new TelegramChatManager.Callback<SendedMessage>() {
             @Override
             public void onResult(SendedMessage result) {
-                // 메시지 수신
-                result.recipent_phoneNum = mContact.phonenum;
+                // 메시지 수신시 DB에 저장
                 mDataManager.smsInsert(result);
-                rv_adapter.addList(result);
+
+                // 현재 채팅하는 폰번호와 동일하면 리스트에 추가
+                if(result.recipent_phoneNum.equals(mContact.phonenum)){
+                    rv_adapter.addList(result);
+                }
             }
         });
 
