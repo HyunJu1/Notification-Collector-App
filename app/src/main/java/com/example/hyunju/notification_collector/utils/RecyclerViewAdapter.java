@@ -5,17 +5,22 @@ import androidx.recyclerview.widget.RecyclerView;
 
 
 import android.content.Context;
+import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.hyunju.notification_collector.ChattingActivity;
+import com.example.hyunju.notification_collector.MailDetailActivity;
 import com.example.hyunju.notification_collector.R;
 import com.example.hyunju.notification_collector.models.SendedMessage;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
@@ -41,6 +46,31 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     @Override
     public void onBindViewHolder(RecyclerViewAdapter.ViewHolder holder, int position) {
         SendedMessage msg = mData.get(position);
+
+        ArrayList<String> test = new ArrayList<String>(
+                Arrays.asList("첨부파일1", "첨부파일2", "첨부파일3")
+        );
+        // mail attachment
+//        if(msg.getAttachment_str() != null && msg.getAttachment_str().size() > 0) {
+        if(test != null && test.size() > 0) {
+            for(int i = 0; i < test.size(); i++) {
+//            for(int i = 0; i < msg.getAttachment_str().size(); i++) {
+                final TextView textViewAttachment = new TextView(holder.layout_attachment.getContext());
+                textViewAttachment.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+                textViewAttachment.setPadding(20, 10, 0, 0);
+                textViewAttachment.setTextColor(Color.parseColor("#7580c1"));
+                textViewAttachment.setText(test.get(i));
+//                textViewAttachment.setText(msg.getAttachment_str().get(i));
+                textViewAttachment.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+//                        Toast.makeText(holder.layout_attachment.getContext(), String.valueOf(i), Toast.LENGTH_LONG).show();
+                    }
+                });
+                holder.layout_attachment.addView(textViewAttachment);
+            }
+        }
+
         holder.tv_platformType.setText(msg.platform);
         holder.tv_sendedMessageContent.setText(msg.message);
         holder.tv_sendedTime.setText(msg.time);
@@ -84,6 +114,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView tv_platformType, tv_sendedMessageContent, tv_sendedTime;
         LinearLayout linear_layout_1;
+        LinearLayout layout_attachment;
         String type;
 
         public ViewHolder(View itemView) {
@@ -96,6 +127,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             tv_sendedMessageContent = itemView.findViewById(R.id.tv_sendedMessageContent);
 
             tv_sendedTime = itemView.findViewById(R.id.tv_sendedTime);
+
+            layout_attachment = itemView.findViewById(R.id.layout_attachment);
 
             itemView.setOnClickListener(this);
         }
