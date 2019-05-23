@@ -41,6 +41,9 @@ public class MailDetailActivity extends AppCompatActivity {
         textViewDate = (TextView) findViewById(R.id.textViewDate);
         layoutAttachment = (LinearLayout) findViewById(R.id.layout_attachment);
 
+        layoutAttachment.removeAllViews();
+
+
         webView = (WebView) findViewById(R.id.webView);
 
         Intent intent = getIntent();

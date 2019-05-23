@@ -101,7 +101,7 @@ public class SendedMessage implements Parcelable {
         time = in.readString();
 
         // mail
-        if(in.dataAvail() > 0) {
+        if((in.dataAvail() > 0) && (platform.equals("Email"))) {
             mailType = in.readString();
             body_str = in.readString();
             attachment_str = in.createStringArrayList();
@@ -205,6 +205,7 @@ public class SendedMessage implements Parcelable {
                         if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
                             String filename = part.getFileName();
                             attachment_str.add(MimeUtility.decodeText(filename));
+                            Log.e("mail", MimeUtility.decodeText(filename));
 //                            attachment_mimebodypart.add(part);
 //                            test[test_size++] = part;
 
@@ -382,13 +383,16 @@ public class SendedMessage implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(message);
         dest.writeString(platform);
-        dest.writeString(type);
+//        dest.writeString(type);
         dest.writeString(time);
-        dest.writeString(recipent_phoneNum);
-        dest.writeString(mailType);
-        dest.writeString(body_str);
-        dest.writeString(platfrom);
-        dest.writeStringList(attachment_str);
-        dest.writeInt(test_size);
+//        dest.writeString(recipent_phoneNum);
+        if(platform.equals("Email")) {
+            dest.writeString(mailType);
+            body_str = getBody();
+            dest.writeString(body_str);
+            dest.writeStringList(attachment_str);
+        }
+
+//        dest.writeInt(test_size);
     }
 }
