@@ -193,6 +193,7 @@ public class SendedMessage implements Parcelable {
     public String getBody() {
         String str = "";
         Log.e("mail!!", mailType);
+        attachment_str.clear();
         if(mailType.contains("multipart")) {
             Log.e("test", "!!!!!!");
             // 이 타입은 첨부파일 없는지 확인해봐야됨 -> 있음
