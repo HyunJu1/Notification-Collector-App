@@ -92,7 +92,15 @@ public class SendedMessage implements Parcelable {
         this.mailType = contentType; // 본문 타입(사진, html, text 다양함)
         this.body = body; // 본문
         this.type = type; // 타입
+    }
 
+    public SendedMessage(String subject, String time, String body_str, ArrayList<String> attachment_str, String type) {
+        this.message = subject;
+        this.platform = "Email";
+        this.time = time;
+        this.body_str = body_str;
+        this.attachment_str = attachment_str;
+        this.type = type;
     }
 
     protected SendedMessage(Parcel in) {
@@ -389,7 +397,7 @@ public class SendedMessage implements Parcelable {
 //        dest.writeString(recipent_phoneNum);
         if(platform.equals("Email")) {
             dest.writeString(mailType);
-            body_str = getBody();
+//            body_str = getBody();
             dest.writeString(body_str);
             dest.writeStringList(attachment_str);
         }

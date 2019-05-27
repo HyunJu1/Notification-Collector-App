@@ -160,7 +160,9 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
         ArrayList<SendedMessage> mails = addReceiveMail(mContact.email);
         if (mails != null) {
             for (int index = 0; index < mails.size(); index++) {
-                sendedMessages.add(mails.get(index));
+                SendedMessage mail = mails.get(index);
+                mail.getBody();
+                sendedMessages.add(new SendedMessage(mail.getMessage(), mail.getTime(), mail.getBody_str(), mail.getAttachment_str(), mail.getType()));
             }
         }
 

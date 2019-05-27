@@ -51,16 +51,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 Arrays.asList("첨부파일1", "첨부파일2", "첨부파일3")
         );
         // mail attachment
-//        if(msg.getAttachment_str() != null && msg.getAttachment_str().size() > 0) {
-        if(test != null && test.size() > 0) {
-            for(int i = 0; i < test.size(); i++) {
-//            for(int i = 0; i < msg.getAttachment_str().size(); i++) {
+        if(msg.getAttachment_str() != null && msg.getAttachment_str().size() > 0) {
+            for(int i = 0; i < msg.getAttachment_str().size(); i++) {
                 final TextView textViewAttachment = new TextView(holder.layout_attachment.getContext());
                 textViewAttachment.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
                 textViewAttachment.setPadding(20, 10, 0, 0);
                 textViewAttachment.setTextColor(Color.parseColor("#7580c1"));
-                textViewAttachment.setText(test.get(i));
-//                textViewAttachment.setText(msg.getAttachment_str().get(i));
+                textViewAttachment.setText(msg.getAttachment_str().get(i));
                 textViewAttachment.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
