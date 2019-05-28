@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -67,6 +68,7 @@ public class GroupMessageDialogFragment extends DialogFragment {
                         );
                         GlobalApplication.sendedMessageInMultiMode.add(message);
                         EventBus.getDefault().post(new ChangeGlobalStateEvent(false));
+                        Toast.makeText(getContext(), "메세지를 성공적으로 발신했습니다.", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .setNegativeButton("cancel", new DialogInterface.OnClickListener() {

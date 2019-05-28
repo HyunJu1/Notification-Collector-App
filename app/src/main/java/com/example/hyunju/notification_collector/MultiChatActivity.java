@@ -18,6 +18,7 @@ import com.example.hyunju.notification_collector.global.GlobalApplication;
 import com.example.hyunju.notification_collector.models.Contact;
 import com.example.hyunju.notification_collector.models.SendedMessage;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -77,10 +78,14 @@ public class MultiChatActivity extends AppCompatActivity {
             tv_multi_chat_people.setText(getNames(i));
 
             TextView tv_multi_chat_datetime = view.findViewById(R.id.tv_multi_chat_datetime);
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-            Date date = new Date(GlobalApplication.sendedMessageInMultiMode.get(i).time);
-            String formattedDatetime = sdf.format(date);
-            tv_multi_chat_datetime.setText(formattedDatetime);
+            SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
+            try {
+                Date parsedDateTime = sdf.parse(GlobalApplication.sendedMessageInMultiMode.get(i).time);
+                tv_multi_chat_datetime.setText(parsedDateTime.toString());
+            } catch (ParseException e) {
+                e.printStackTrace();
+                tv_multi_chat_datetime.setText("");
+            }
 
             TextView tv_multi_chat_msg = view.findViewById(R.id.tv_multi_chat_msg);
             tv_multi_chat_msg.setText(GlobalApplication.sendedMessageInMultiMode.get(i).message);

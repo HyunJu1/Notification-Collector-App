@@ -162,6 +162,12 @@ public class MainActivity extends AppCompatActivity {
         EventBus.getDefault().register(this);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        EventBus.getDefault().post(new ChangeGlobalStateEvent(false));
+    }
+
     @Subscribe
     public void onChangeGlobalStateEvent(ChangeGlobalStateEvent e) {
         GlobalApplication.isMultiMode = e.isMultiMode();
