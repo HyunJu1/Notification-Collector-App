@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -18,6 +19,7 @@ import android.provider.Settings;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 
@@ -63,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
     private ListView lv_contactlist;
     private ImageButton btnSearch;
     private EditText edtSearch;
-    private Button btn_multi, btn_multi_send, btn_settings;
+    private Button btn_multi, btn_settings;
     private List<Contact> list = new ArrayList<Contact>();
 
     private static final String TAG = MainActivity.class.getName();
@@ -83,17 +85,21 @@ public class MainActivity extends AppCompatActivity {
         btnSearch = findViewById(R.id.btnSearch);
         edtSearch = findViewById(R.id.editSearch);
 
-        btn_multi_send = findViewById(R.id.btn_multi_send);
-
         btn_multi = findViewById(R.id.btn_multi);
         btn_multi.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
-                GlobalApplication.isMultiMode = !GlobalApplication.isMultiMode;
-                if (!GlobalApplication.isMultiMode) {
-                    GlobalApplication.selectedContactsInMultiMode = new ArrayList<>();
+                if (GlobalApplication.isMultiMode) {
+                    if (GlobalApplication.selectedContactsInMultiMode.size() != 0) {
+                        GroupMessageDialogFragment groupMessageDialogFragment = new GroupMessageDialogFragment();
+                        FragmentManager fragmentManager = getSupportFragmentManager();
+                        groupMessageDialogFragment.show(fragmentManager, TAG);
+                    } else {
+                        EventBus.getDefault().post(new ChangeGlobalStateEvent(false));
+                    }
+                } else {
+                    EventBus.getDefault().post(new ChangeGlobalStateEvent(true));
                 }
-                btn_multi_send.setVisibility(GlobalApplication.isMultiMode ? View.VISIBLE : View.INVISIBLE);
             }
         });
 
@@ -101,19 +107,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 edtSearch.setVisibility(View.VISIBLE);
-            }
-        });
-        btn_multi_send.setOnClickListener(new Button.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (GlobalApplication.selectedContactsInMultiMode.size() == 0) {
-                    return;
-                }
-                GlobalApplication.isMultiMode = false;
-
-                GroupMessageDialogFragment groupMessageDialogFragment = new GroupMessageDialogFragment();
-                FragmentManager fragmentManager = getSupportFragmentManager();
-                groupMessageDialogFragment.show(fragmentManager, TAG);
             }
         });
 
@@ -163,7 +156,8 @@ public class MainActivity extends AppCompatActivity {
     @Subscribe
     public void onChangeGlobalStateEvent(ChangeGlobalStateEvent e) {
         GlobalApplication.isMultiMode = e.isMultiMode();
-        btn_multi_send.setVisibility(e.isMultiMode() ? View.VISIBLE : View.INVISIBLE);
+        btn_multi.setText(GlobalApplication.isMultiMode ? "SEND" : "MULTI");
+        btn_multi.setTextColor(GlobalApplication.isMultiMode ? Color.WHITE : Color.BLACK);
         if (!e.isMultiMode()) {
             GlobalApplication.selectedContactsInMultiMode = new ArrayList<>();
         }
