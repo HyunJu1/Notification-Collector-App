@@ -4,6 +4,7 @@ import android.app.Application;
 
 import com.example.hyunju.notification_collector.models.Contact;
 import com.example.hyunju.notification_collector.models.NotificationEvent;
+import com.example.hyunju.notification_collector.models.SendedMessage;
 import com.example.hyunju.notification_collector.telegram.TgHelper;
 import com.example.hyunju.notification_collector.utils.NetworkService;
 
@@ -21,7 +22,7 @@ public class GlobalApplication extends Application {
     static GlobalApplication mApplication;
 
     public static boolean isMultiMode = false;
-    public static List<NotificationEvent> sendedMessageInMultiMode = new ArrayList<>();
+    public static List<SendedMessage> sendedMessageInMultiMode = new ArrayList<>();
     public static List<NotificationEvent> receivedMessageInMultiMode = new ArrayList<>();
     public static ArrayList<Contact> selectedContactsInMultiMode = new ArrayList<>();
 

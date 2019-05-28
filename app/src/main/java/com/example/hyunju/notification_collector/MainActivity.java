@@ -16,7 +16,10 @@ import android.provider.ContactsContract;
 import android.provider.Settings;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
 
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -32,10 +35,12 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.hyunju.notification_collector.global.GlobalApplication;
+import com.example.hyunju.notification_collector.models.ChangeGlobalStateEvent;
 import com.example.hyunju.notification_collector.models.Contact;
 
 import com.example.hyunju.notification_collector.telegram.AuthActivity;
 import com.example.hyunju.notification_collector.telegram.TgUtils;
+import com.example.hyunju.notification_collector.utils.GroupMessageDialogFragment;
 import com.example.hyunju.notification_collector.utils.MatchMessenger;
 import com.example.hyunju.notification_collector.utils.TelegramChatManager;
 
@@ -43,13 +48,15 @@ import com.example.hyunju.notification_collector.utils.ContactsAdapter;
 
 
 import org.drinkless.td.libcore.telegram.TdApi;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.List;
 
 //import android.app.AlertDialog;
 
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
 
     ContactsAdapter adapter;
     ArrayList<Contact> contactlist = new ArrayList<Contact>();
@@ -102,12 +109,11 @@ public class MainActivity extends Activity {
                 if (GlobalApplication.selectedContactsInMultiMode.size() == 0) {
                     return;
                 }
-
                 GlobalApplication.isMultiMode = false;
 
-                Intent intent = new Intent(MainActivity.this, SendToGroupActivity.class);
-                intent.putExtra("contacts", GlobalApplication.selectedContactsInMultiMode);
-                startActivity(intent);
+                GroupMessageDialogFragment groupMessageDialogFragment = new GroupMessageDialogFragment();
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                groupMessageDialogFragment.show(fragmentManager, TAG);
             }
         });
 
@@ -149,9 +155,24 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        btn_multi_send.setVisibility(GlobalApplication.isMultiMode ? View.VISIBLE : View.INVISIBLE);
+    protected void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Subscribe
+    public void onChangeGlobalStateEvent(ChangeGlobalStateEvent e) {
+        GlobalApplication.isMultiMode = e.isMultiMode();
+        btn_multi_send.setVisibility(e.isMultiMode() ? View.VISIBLE : View.INVISIBLE);
+        if (!e.isMultiMode()) {
+            GlobalApplication.selectedContactsInMultiMode = new ArrayList<>();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
     }
 
     void checkPermission() {
