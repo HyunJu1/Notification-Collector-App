@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
     private ListView lv_contactlist;
     private ImageButton btnSearch;
     private EditText edtSearch;
-    private Button btn_multi, btn_settings;
+    private Button btn_multi, btn_multi_chats, btn_settings;
     private List<Contact> list = new ArrayList<Contact>();
 
     private static final String TAG = MainActivity.class.getName();
@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (GlobalApplication.isMultiMode) {
-                    if (GlobalApplication.selectedContactsInMultiMode.size() != 0) {
+                    if (GlobalApplication.selectedContactsInMultiMode.size() > 1) {
                         GroupMessageDialogFragment groupMessageDialogFragment = new GroupMessageDialogFragment();
                         FragmentManager fragmentManager = getSupportFragmentManager();
                         groupMessageDialogFragment.show(fragmentManager, TAG);
@@ -100,6 +100,15 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     EventBus.getDefault().post(new ChangeGlobalStateEvent(true));
                 }
+            }
+        });
+
+        btn_multi_chats = findViewById(R.id.btn_multi_chats);
+        btn_multi_chats.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, MultiChatActivity.class);
+                startActivity(intent);
             }
         });
 
