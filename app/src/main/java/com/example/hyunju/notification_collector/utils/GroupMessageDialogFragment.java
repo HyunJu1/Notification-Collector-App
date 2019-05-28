@@ -64,6 +64,7 @@ public class GroupMessageDialogFragment extends DialogFragment {
                             );
                             GlobalApplication.sendedMessageInMultiMode.add(message);
                         }
+                        EventBus.getDefault().post(new ChangeGlobalStateEvent(false));
                     }
                 })
                 .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
