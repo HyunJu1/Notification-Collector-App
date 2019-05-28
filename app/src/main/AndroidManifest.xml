@@ -54,10 +54,6 @@
         <activity
             android:name=".MainActivity"
             android:windowSoftInputMode="adjustNothing" />
-        <activity
-            android:name=".SendToGroupActivity"
-            android:label="단체 메시지 전송"
-            android:parentActivityName=".MainActivity" />
 
         <activity
             android:name=".SettingsActivity"

@@ -24,7 +24,6 @@ import com.example.hyunju.notification_collector.models.SendedMessage;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.ArrayList;
 import java.util.Date;
 
 public class GroupMessageDialogFragment extends DialogFragment {
