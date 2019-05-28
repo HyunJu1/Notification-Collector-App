@@ -17,6 +17,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.hyunju.notification_collector.global.GlobalApplication;
 import com.example.hyunju.notification_collector.models.Contact;
 import com.example.hyunju.notification_collector.models.NotificationEvent;
 
@@ -77,6 +78,7 @@ public class SendToGroupActivity extends AppCompatActivity {
         });
 
         contacts = (ArrayList<Contact>) getIntent().getSerializableExtra("contacts");
+        GlobalApplication.selectedContactsInMultiMode = new ArrayList<>();
         didSend = new ArrayList<>();
         for (int i = 0; i < contacts.size(); i++) {
             didSend.add(false);

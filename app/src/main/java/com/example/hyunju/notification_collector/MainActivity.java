@@ -31,6 +31,7 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.hyunju.notification_collector.global.GlobalApplication;
 import com.example.hyunju.notification_collector.models.Contact;
 
 import com.example.hyunju.notification_collector.telegram.AuthActivity;
@@ -56,9 +57,9 @@ public class MainActivity extends Activity {
     private ImageButton btnSearch;
     private EditText edtSearch;
     private Button btn_multi, btn_multi_send, btn_settings;
-    private boolean isMultiMode = false;
-    private ArrayList<Contact> contactGroup;
     private List<Contact> list = new ArrayList<Contact>();
+
+    private static final String TAG = MainActivity.class.getName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,13 +82,13 @@ public class MainActivity extends Activity {
         btn_multi.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                isMultiMode = !isMultiMode;
-                btn_multi_send.setVisibility(isMultiMode ? View.VISIBLE : View.INVISIBLE);
+                GlobalApplication.isMultiMode = !GlobalApplication.isMultiMode;
+                if (!GlobalApplication.isMultiMode) {
+                    GlobalApplication.selectedContactsInMultiMode = new ArrayList<>();
+                }
+                btn_multi_send.setVisibility(GlobalApplication.isMultiMode ? View.VISIBLE : View.INVISIBLE);
             }
         });
-        contactGroup = new ArrayList<>();
-
 
         btnSearch.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -98,12 +99,14 @@ public class MainActivity extends Activity {
         btn_multi_send.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (contactGroup.size() == 0) {
+                if (GlobalApplication.selectedContactsInMultiMode.size() == 0) {
                     return;
                 }
 
+                GlobalApplication.isMultiMode = false;
+
                 Intent intent = new Intent(MainActivity.this, SendToGroupActivity.class);
-                intent.putExtra("contacts", contactGroup);
+                intent.putExtra("contacts", GlobalApplication.selectedContactsInMultiMode);
                 startActivity(intent);
             }
         });
@@ -143,8 +146,12 @@ public class MainActivity extends Activity {
                 search(text);
             }
         });
+    }
 
-
+    @Override
+    protected void onResume() {
+        super.onResume();
+        btn_multi_send.setVisibility(GlobalApplication.isMultiMode ? View.VISIBLE : View.INVISIBLE);
     }
 
     void checkPermission() {
@@ -183,9 +190,8 @@ public class MainActivity extends Activity {
                             return;
                         }
 
-                        if (isMultiMode) {
-
-                            contactGroup.add(phonenumber);
+                        if (GlobalApplication.isMultiMode) {
+                            GlobalApplication.selectedContactsInMultiMode.add(phonenumber);
                             Toast.makeText(getApplicationContext(), phonenumber.name + " 추가", Toast.LENGTH_SHORT).show();
                         } else {
                            MatchMessenger.getInstance().setUseTelegram(phonenumber.phonenum,
