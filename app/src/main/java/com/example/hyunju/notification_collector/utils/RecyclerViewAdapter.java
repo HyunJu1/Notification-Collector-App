@@ -46,10 +46,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     @Override
     public void onBindViewHolder(RecyclerViewAdapter.ViewHolder holder, int position) {
         SendedMessage msg = mData.get(position);
-
-        ArrayList<String> test = new ArrayList<String>(
-                Arrays.asList("첨부파일1", "첨부파일2", "첨부파일3")
-        );
+        
         // mail attachment
         if(msg.getAttachment_str() != null && msg.getAttachment_str().size() > 0) {
             for(int i = 0; i < msg.getAttachment_str().size(); i++) {

@@ -162,7 +162,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
             for (int index = 0; index < mails.size(); index++) {
                 SendedMessage mail = mails.get(index);
                 mail.getBody();
-                sendedMessages.add(new SendedMessage(mail.getMessage(), mail.getTime(), mail.getBody_str(), mail.getAttachment_str(), mail.getType()));
+                sendedMessages.add(new SendedMessage(mail.getMessage(), mail.getTime(), mail.getBody_str(), mail.getAttachment_str(), mail.getType(), getApplicationContext()));
             }
         }
 
@@ -266,7 +266,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
         ArrayList<SendedMessage> mails = new ArrayList<>();
 
         if (email != null) {
-            ReadMail rm = new ReadMail();
+            ReadMail rm = new ReadMail(getApplicationContext());
             try {
                 mails = rm.execute(email, "0").get();
             } catch (Exception e) {

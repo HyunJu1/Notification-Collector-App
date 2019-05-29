@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.StrictMode;
 import android.util.Log;
 
 import java.io.BufferedInputStream;
@@ -45,7 +46,7 @@ public class SendedMessage implements Parcelable {
     public String time;
     public File file;
 
-
+    public Context context;
 
     public String recipent_phoneNum; // sms 에서 필요해서 새로 생성
     // mail variables
@@ -85,22 +86,24 @@ public class SendedMessage implements Parcelable {
     /**
     * mail용
     * */
-    public SendedMessage(String subject, Date date, String contentType, Object body, String type) {
+    public SendedMessage(String subject, Date date, String contentType, Object body, String type, Context context) {
         this.message = subject; // 제목
         this.platform = "Email";
         this.time = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(date); // 받은 시간
         this.mailType = contentType; // 본문 타입(사진, html, text 다양함)
         this.body = body; // 본문
         this.type = type; // 타입
+        this.context = context;
     }
 
-    public SendedMessage(String subject, String time, String body_str, ArrayList<String> attachment_str, String type) {
+    public SendedMessage(String subject, String time, String body_str, ArrayList<String> attachment_str, String type, Context context) {
         this.message = subject;
         this.platform = "Email";
         this.time = time;
         this.body_str = body_str;
         this.attachment_str = attachment_str;
         this.type = type;
+        this.context = context;
     }
 
     protected SendedMessage(Parcel in) {
@@ -200,10 +203,8 @@ public class SendedMessage implements Parcelable {
      * **/
     public String getBody() {
         String str = "";
-        Log.e("mail!!", mailType);
         attachment_str.clear();
         if(mailType.contains("multipart")) {
-            Log.e("test", "!!!!!!");
             // 이 타입은 첨부파일 없는지 확인해봐야됨 -> 있음
             if(mailType.contains("multipart/MIXED") || mailType.contains("multipart/mixed")) {
                 MimeMultipart mimeMultipart = (MimeMultipart) body;
@@ -214,41 +215,14 @@ public class SendedMessage implements Parcelable {
                         if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
                             String filename = part.getFileName();
                             attachment_str.add(MimeUtility.decodeText(filename));
-                            Log.e("mail", MimeUtility.decodeText(filename));
-//                            attachment_mimebodypart.add(part);
-//                            test[test_size++] = part;
 
-//                            part.saveFile("/data/data/com.example.hyunju.notification_collector/cache/" + filename);
+                            String filepath = context.getFilesDir().getPath().toString() + "/" + MimeUtility.decodeText(filename);
 
-//                            part.saveFile("/data/user/0/com.example.hyunju.notification_collector/cache/" + filename);
-
-//                            part.saveFile(Environment.getDownloadCacheDirectory() + "/" + filename);
-//                            part.saveFile(Environment.getExternalStorageDirectory() + "/" + filename);
-//                            InputStream inputStream = part.getInputStream();
-//                            FileOutputStream fileOutputStream = new FileOutputStream()
-
-//                            DataHandler dataHandler = part.getDataHandler();
-//                            String path = part.getFileName();
-//                            String[] str_arr = path.split("/");
-//                            String filename = MimeUtility.decodeText(str_arr[str_arr.length - 1]);
-//
-//                            String filePath = "/data/user/0/com.example.hyunju.notification_collector/cache/";
-//                            File saveFile = new File(filePath + filename);
-//                            int cnt = 0;
-//                            while(saveFile.exists()) {
-//                                saveFile = new File(filePath + cnt + "_" + filename);
-//                            }
-//
-//                            BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(saveFile));
-//                            byte[] buff = new byte[2048];
-//                            InputStream inputStream = part.getInputStream();
-//                            int ret = 0;
-//                            while((ret = inputStream.read(buff)) > 0) {
-//                                bufferedOutputStream.write(buff, 0, ret);
-//                            }
-//
-//                            bufferedOutputStream.close();
-//                            inputStream.close();
+                            if(android.os.Build.VERSION.SDK_INT > 9) {
+                                StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+                                StrictMode.setThreadPolicy(policy);
+                            }
+                            part.saveFile(filepath);
                         }
                     }
 
@@ -277,14 +251,14 @@ public class SendedMessage implements Parcelable {
                                 for (int i = 0; i < multipart.getCount(); i++) {
                                     MimeBodyPart part = (MimeBodyPart) multipart.getBodyPart(i);
                                     if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
-                                        String filename = part.getFileName();
+                                        String filename = MimeUtility.decodeText(part.getFileName());
                                         attachFiles += filename + ", ";
                                         attachment_str.add(MimeUtility.decodeText(filename));
 //                                        attachment_mimebodypart.add(part);
 //                                        part.saveFile(context.getCacheDir());
 //                                        test[test_size++] = part;
 
-//                                        part.saveFile(MimeUtility.decodeText(filename));
+                                        part.saveFile("./" + filename);
                                     }
                                     str = part.getContent().toString();
                                 }
