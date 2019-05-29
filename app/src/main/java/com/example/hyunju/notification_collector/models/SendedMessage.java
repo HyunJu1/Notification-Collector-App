@@ -10,6 +10,9 @@ import android.os.Parcelable;
 import android.os.StrictMode;
 import android.util.Log;
 
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -51,15 +54,13 @@ public class SendedMessage implements Parcelable {
     public String recipent_phoneNum; // sms 에서 필요해서 새로 생성
     private ArrayList<Contact> recipientContacts;
     // mail variables
+    private Boolean isDownload;
     private String mailType; // 메일 본문 타입(사진, html, text 다양함)
     private Object body; // 본문
     private String body_str;
     private String platfrom;
     private ArrayList<String> attachment_str = new ArrayList<String>();
     private ArrayList<MimeBodyPart> attachment_mimebodypart = new ArrayList<MimeBodyPart>();
-    private ArrayList<File> attachment_file = new ArrayList<File>();
-    private Object[] test = new Object[100];
-    private int test_size = 0;
 
 
     public SendedMessage(){
@@ -101,6 +102,7 @@ public class SendedMessage implements Parcelable {
         this.body = body; // 본문
         this.type = type; // 타입
         this.context = context;
+        this.isDownload = false;
     }
 
     public SendedMessage(String subject, String time, String body_str, ArrayList<String> attachment_str, String type, Context context) {
@@ -111,6 +113,7 @@ public class SendedMessage implements Parcelable {
         this.attachment_str = attachment_str;
         this.type = type;
         this.context = context;
+
     }
 
     protected SendedMessage(Parcel in) {
@@ -265,12 +268,16 @@ public class SendedMessage implements Parcelable {
                                     if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
                                         String filename = MimeUtility.decodeText(part.getFileName());
                                         attachFiles += filename + ", ";
-                                        attachment_str.add(MimeUtility.decodeText(filename));
-//                                        attachment_mimebodypart.add(part);
-//                                        part.saveFile(context.getCacheDir());
-//                                        test[test_size++] = part;
+                                        attachment_str.add(filename);
+                                        String filepath = context.getFilesDir().getPath().toString() + "/" + filename;
 
-                                        part.saveFile("./" + filename);
+                                        if(android.os.Build.VERSION.SDK_INT > 9) {
+                                            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+                                            StrictMode.setThreadPolicy(policy);
+                                        }
+
+                                        part.saveFile(filepath);
+
                                     }
                                     str = part.getContent().toString();
                                 }
@@ -301,65 +308,6 @@ public class SendedMessage implements Parcelable {
         }
         return str;
     }
-
-//    public void saveFile(int idx) {
-//        try {
-//            attachment_mimebodypart.get(idx).saveFile(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+ attachment_str.get(idx));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } catch (MessagingException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-//    public File saveTempFile(Context context, String url) {
-//        File file;
-//        try {
-//            String fileName = Uri.parse(url).getLastPathSegment();
-//            file = File.createTempFile(fileName, null, context.getCacheDir());
-//
-//            return file;
-//        } catch (Exception e) {
-//
-//        }
-//
-//        return null;
-//    }
-//
-//    protected void saveFile(final String fileName, final InputStream in) throws IOException {
-//        final File file = new File(fileName);
-//        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
-//            @Override
-//            protected Void doInBackground(Void... voids) {
-//                try {
-//                    if (!file.exists()) {
-//                        OutputStream out = null;
-//                        out = new BufferedOutputStream(new FileOutputStream(file));
-//                        InputStream in2 = new BufferedInputStream(in);
-//                        byte[] buf = new byte[64 * 1024];
-//                        int len;
-//                        while ((len = in2.read(buf)) > 0) {
-//                            out.write(buf, 0, len);
-//                        }
-//                        if (in2 != null) {
-//                            in2.close();
-//                        }
-//                        if (out != null) {
-//                            out.close();
-//                        }
-//                    } else {
-//                        String e = "Fail to save file. The " + fileName + " already exists.";
-//                        Log.e("error", e);
-//                        throw new IOException(e);
-//                    }
-//                } catch (Exception e) {
-//
-//                }
-//
-//                return null;
-//            }
-//        };
-//    }
 
     public boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();

@@ -45,6 +45,9 @@ import com.example.hyunju.notification_collector.utils.RecyclerViewAdapter;
 import com.example.hyunju.notification_collector.utils.SendFacebookMessage;
 import com.example.hyunju.notification_collector.utils.SendMail;
 import com.example.hyunju.notification_collector.utils.TelegramChatManager;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import org.drinkless.td.libcore.telegram.TdApi;
 import org.greenrobot.eventbus.EventBus;
@@ -82,6 +85,9 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
 
 
     private String formatDate;
+
+    // firebase
+    private StorageReference mStorageRef;
 
 
     private BroadcastReceiver onNotice = new BroadcastReceiver() {
@@ -199,6 +205,8 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
         rv_adapter.setClickListener(this);
         rv_sendedMsg.setAdapter(rv_adapter);
 
+//        FirebaseApp.initializeApp(this);
+        mStorageRef = FirebaseStorage.getInstance().getReference();
     }
 
     @Override
