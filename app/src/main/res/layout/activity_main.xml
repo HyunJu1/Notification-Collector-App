@@ -58,21 +58,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:backgroundTint="@color/colorPrimary"
-            android:text="multi" />
+            android:text="multi"
+            android:layout_marginRight="5dp"/>
 
         <Button
-            android:id="@+id/btn_multi_send"
-            android:layout_width="wrap_content"
+            android:id="@+id/btn_multi_chats"
+            android:layout_width="50dp"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/colorAccent"
-
-            android:text="send"
-            android:visibility="invisible" />
+            android:background="@drawable/chat"
+            android:layout_marginRight="5dp"/>
 
         <Button
             android:id="@+id/btn_settings"
             android:layout_width="60dp"
-
             android:layout_height="wrap_content"
             android:background="@drawable/settings_icon" />
 

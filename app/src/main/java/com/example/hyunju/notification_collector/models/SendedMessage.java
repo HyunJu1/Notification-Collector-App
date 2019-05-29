@@ -49,6 +49,7 @@ public class SendedMessage implements Parcelable {
     public Context context;
 
     public String recipent_phoneNum; // sms 에서 필요해서 새로 생성
+    private ArrayList<Contact> recipientContacts;
     // mail variables
     private String mailType; // 메일 본문 타입(사진, html, text 다양함)
     private Object body; // 본문
@@ -82,6 +83,12 @@ public class SendedMessage implements Parcelable {
         this.recipent_phoneNum = recipent_phoneNum;
     }
 
+    public SendedMessage(String message, String platform, String time, ArrayList<Contact> recipientContacts) {
+        this.message = message;
+        this.platform = platform;
+        this.time = time;
+        this.recipientContacts = recipientContacts;
+    }
 
     /**
     * mail용
@@ -180,8 +187,13 @@ public class SendedMessage implements Parcelable {
         return attachment_mimebodypart;
     }
 
+    public ArrayList<Contact> getRecipientContacts() {
+        return recipientContacts;
+    }
 
-
+    public void setRecipientContacts(ArrayList<Contact> recipientContacts) {
+        this.recipientContacts = recipientContacts;
+    }
 
     @Override
     public String toString() {

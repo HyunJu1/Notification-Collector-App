@@ -10,13 +10,18 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
 
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -31,10 +36,13 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.hyunju.notification_collector.global.GlobalApplication;
+import com.example.hyunju.notification_collector.models.ChangeGlobalStateEvent;
 import com.example.hyunju.notification_collector.models.Contact;
 
 import com.example.hyunju.notification_collector.telegram.AuthActivity;
 import com.example.hyunju.notification_collector.telegram.TgUtils;
+import com.example.hyunju.notification_collector.utils.GroupMessageDialogFragment;
 import com.example.hyunju.notification_collector.utils.MatchMessenger;
 import com.example.hyunju.notification_collector.utils.TelegramChatManager;
 
@@ -42,23 +50,25 @@ import com.example.hyunju.notification_collector.utils.ContactsAdapter;
 
 
 import org.drinkless.td.libcore.telegram.TdApi;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.List;
 
 //import android.app.AlertDialog;
 
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
 
     ContactsAdapter adapter;
     ArrayList<Contact> contactlist = new ArrayList<Contact>();
     private ListView lv_contactlist;
     private ImageButton btnSearch;
     private EditText edtSearch;
-    private Button btn_multi, btn_multi_send, btn_settings;
-    private boolean isMultiMode = false;
-    private ArrayList<Contact> contactGroup;
+    private Button btn_multi, btn_multi_chats, btn_settings;
     private List<Contact> list = new ArrayList<Contact>();
+
+    private static final String TAG = MainActivity.class.getName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,36 +85,37 @@ public class MainActivity extends Activity {
         btnSearch = findViewById(R.id.btnSearch);
         edtSearch = findViewById(R.id.editSearch);
 
-        btn_multi_send = findViewById(R.id.btn_multi_send);
-
         btn_multi = findViewById(R.id.btn_multi);
         btn_multi.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                isMultiMode = !isMultiMode;
-                btn_multi_send.setVisibility(isMultiMode ? View.VISIBLE : View.INVISIBLE);
+                if (GlobalApplication.isMultiMode) {
+                    if (GlobalApplication.selectedContactsInMultiMode.size() > 1) {
+                        GroupMessageDialogFragment groupMessageDialogFragment = new GroupMessageDialogFragment();
+                        FragmentManager fragmentManager = getSupportFragmentManager();
+                        groupMessageDialogFragment.show(fragmentManager, TAG);
+                    } else {
+                        EventBus.getDefault().post(new ChangeGlobalStateEvent(false));
+                    }
+                } else {
+                    EventBus.getDefault().post(new ChangeGlobalStateEvent(true));
+                }
             }
         });
-        contactGroup = new ArrayList<>();
 
+        btn_multi_chats = findViewById(R.id.btn_multi_chats);
+        btn_multi_chats.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, MultiChatActivity.class);
+                startActivity(intent);
+            }
+        });
 
         btnSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 edtSearch.setVisibility(View.VISIBLE);
-            }
-        });
-        btn_multi_send.setOnClickListener(new Button.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (contactGroup.size() == 0) {
-                    return;
-                }
-
-                Intent intent = new Intent(MainActivity.this, SendToGroupActivity.class);
-                intent.putExtra("contacts", contactGroup);
-                startActivity(intent);
             }
         });
 
@@ -143,8 +154,34 @@ public class MainActivity extends Activity {
                 search(text);
             }
         });
+    }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        EventBus.getDefault().post(new ChangeGlobalStateEvent(false));
+    }
+
+    @Subscribe
+    public void onChangeGlobalStateEvent(ChangeGlobalStateEvent e) {
+        GlobalApplication.isMultiMode = e.isMultiMode();
+        btn_multi.setText(GlobalApplication.isMultiMode ? "SEND" : "MULTI");
+        btn_multi.setTextColor(GlobalApplication.isMultiMode ? Color.WHITE : Color.BLACK);
+        if (!e.isMultiMode()) {
+            GlobalApplication.selectedContactsInMultiMode = new ArrayList<>();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
     }
 
     void checkPermission() {
@@ -183,9 +220,8 @@ public class MainActivity extends Activity {
                             return;
                         }
 
-                        if (isMultiMode) {
-
-                            contactGroup.add(phonenumber);
+                        if (GlobalApplication.isMultiMode) {
+                            GlobalApplication.selectedContactsInMultiMode.add(phonenumber);
                             Toast.makeText(getApplicationContext(), phonenumber.name + " 추가", Toast.LENGTH_SHORT).show();
                         } else {
                            MatchMessenger.getInstance().setUseTelegram(phonenumber.phonenum,
