@@ -385,14 +385,18 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
                             TelegramChatManager.getInstance().sendFile(chatId, text, new TdApi.InputFileLocal(path), new TelegramChatManager.Callback() {
                                 @Override
                                 public void onResult(Object result) {
-                                    switch (TgHelper.sendState((TdApi.Message) result)) {
-                                        case BEINGSENT:
-                                            SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_TELEGRAM, getTime(), SendedMessage.MESSAGE_SEND);
-                                            rv_adapter.addList(sendedMessage);
-                                            break;
-                                        case FAILED:
-                                            toast("전송실패");
-                                            break;
+                                    if(result instanceof TdApi.Message) {
+                                        switch (TgHelper.sendState((TdApi.Message) result)) {
+                                            case BEINGSENT:
+                                                SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_TELEGRAM, getTime(), SendedMessage.MESSAGE_SEND);
+                                                rv_adapter.addList(sendedMessage);
+                                                break;
+                                            case FAILED:
+                                                toast("전송실패");
+                                                break;
+                                        }
+                                    }else{
+                                        toast("전송실패 " + ((TdApi.Error)result).message);
                                     }
                                 }
                             });
@@ -400,14 +404,19 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
                             TelegramChatManager.getInstance().sendMessage(chatId, text, new TelegramChatManager.Callback() {
                                 @Override
                                 public void onResult(Object result) {
-                                    switch (TgHelper.sendState((TdApi.Message) result)) {
-                                        case BEINGSENT:
-                                            SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_TELEGRAM, getTime(), SendedMessage.MESSAGE_SEND);
-                                            rv_adapter.addList(sendedMessage);
-                                            break;
-                                        case FAILED:
-                                            toast("전송실패");
-                                            break;
+                                    if(result instanceof TdApi.Message) {
+
+                                        switch (TgHelper.sendState((TdApi.Message) result)) {
+                                            case BEINGSENT:
+                                                SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_TELEGRAM, getTime(), SendedMessage.MESSAGE_SEND);
+                                                rv_adapter.addList(sendedMessage);
+                                                break;
+                                            case FAILED:
+                                                toast("전송실패");
+                                                break;
+                                        }
+                                    } else {
+                                        toast("전송실패 " + ((TdApi.Error)result).message);
                                     }
                                 }
                             });
@@ -489,9 +498,8 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
                 Log.e("test", uri.toString());
                 path = FileUtils.getPath(this, uri);
 //                Log.e("path", path);
-                if(new File(path).exists()){ // 파일의 위치가 정확해서 파일이 존재할때
+                if(!new File(path).exists()){ // 파일의 위치가 정확해서 파일이 존재할때
                     path = uri.toString();
-                } else {
                     toast("파일위치를 찾을수 없습니다.");
                 }
 
