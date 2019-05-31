@@ -1,9 +1,9 @@
 {
   "project_info": {
-    "project_number": "",
-    "firebase_url": "",
-    "project_id": "",
-    "storage_bucket": ""
+    "project_number": "938859713813",
+    "firebase_url": "https://notification-collector-app.firebaseio.com",
+    "project_id": "notification-collector-app",
+    "storage_bucket": "notification-collector-app.appspot.com"
   },
   "client": [
     {
@@ -15,20 +15,20 @@
       },
       "oauth_client": [
         {
-          "client_id": "",
+          "client_id": "938859713813-b7pf52od6vlqlkhe0n0p2v4830f30m7v.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": ""
+          "current_key": "AIzaSyApxp-_a_AwlfZZzTyfAVZWA498MpHITeA"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "",
+              "client_id": "938859713813-b7pf52od6vlqlkhe0n0p2v4830f30m7v.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

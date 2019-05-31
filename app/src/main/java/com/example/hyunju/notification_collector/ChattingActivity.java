@@ -54,6 +54,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -205,7 +206,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
         rv_adapter.setClickListener(this);
         rv_sendedMsg.setAdapter(rv_adapter);
 
-//        FirebaseApp.initializeApp(this);
+        FirebaseApp.initializeApp(this);
         mStorageRef = FirebaseStorage.getInstance().getReference();
     }
 
@@ -488,7 +489,12 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
                 Log.e("test", uri.toString());
                 path = FileUtils.getPath(this, uri);
 //                Log.e("path", path);
-                if(path == null) path = uri.toString();
+                if(new File(path).exists()){ // 파일의 위치가 정확해서 파일이 존재할때
+                    path = uri.toString();
+                } else {
+                    toast("파일위치를 찾을수 없습니다.");
+                }
+
             }
         }
     }
