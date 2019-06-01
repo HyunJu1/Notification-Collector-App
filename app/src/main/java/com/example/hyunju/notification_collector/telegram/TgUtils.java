@@ -59,9 +59,9 @@ public class TgUtils {
         });
     }
 
-    public static String getChatPhoneNum(int userId){
-        TdApi.User user = TgHelper.users.get(userId);
-        if(user==null){
+    public static String getChatPhoneNum(long userId){
+        TdApi.User user = TgHelper.users.get((int)userId);
+        if(user!=null){
             return user.phoneNumber.replaceFirst("82","0");
         }
         return "";

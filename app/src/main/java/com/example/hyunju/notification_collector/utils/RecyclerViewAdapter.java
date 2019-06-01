@@ -8,6 +8,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.net.Uri;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -82,8 +83,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         holder.type = msg.type;
         if (holder.type.equals(SendedMessage.MESSAGE_SEND)) {
             holder.linear_layout_1.setBackgroundResource(R.drawable.outbox2);
+            ((LinearLayout)holder.itemView).setGravity(Gravity.RIGHT);
         } else {
             holder.linear_layout_1.setBackgroundResource(R.drawable.inbox2);
+            ((LinearLayout)holder.itemView).setGravity(Gravity.LEFT);
         }
     }
 

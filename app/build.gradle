@@ -55,7 +55,9 @@ dependencies {
     //--- settings screen
     implementation 'androidx.preference:preference:1.0.0-beta01'
     implementation 'androidx.annotation:annotation:1.0.2'
-    //---
+    //--- firebase
+    implementation 'com.google.firebase:firebase-core:16.0.8'
+    implementation 'com.google.firebase:firebase-storage:16.1.0'
 
     //--- firebase
     implementation 'com.google.firebase:firebase-core:16.0.9'

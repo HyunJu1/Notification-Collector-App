@@ -47,7 +47,7 @@ public class SendedMessage implements Parcelable {
     public String platform;
     public String type;
     public String time;
-    public File file;
+    public File file;       // 메시지에 첨부된 파일
 
     public Context context;
 
