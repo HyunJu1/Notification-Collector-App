@@ -1,4 +1,4 @@
-package com.example.hyunju.notification_collector.utils;
+package com.example.hyunju.notification_collector.global;
 
 public class Globals {
     private static Globals instance = new Globals();
@@ -11,17 +11,17 @@ public class Globals {
         Globals.instance = instance;
     }
 
-    private String firebase_path;
+    private String filename;
 
     private Globals() {
 
     }
 
-    public String getFirebase_path() {
-        return firebase_path;
+    public String getFilename() {
+        return filename;
     }
 
-    public void setFirebase_path(String firebase_path) {
-        this.firebase_path = firebase_path;
+    public void setFilename(String filename) {
+        this.filename = filename;
     }
 }
