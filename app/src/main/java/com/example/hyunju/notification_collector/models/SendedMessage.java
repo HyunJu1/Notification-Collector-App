@@ -7,7 +7,11 @@ import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.StrictMode;
 import android.util.Log;
+
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -43,22 +47,24 @@ public class SendedMessage implements Parcelable {
     public String platform;
     public String type;
     public String time;
+    public File file;       // 메시지에 첨부된 파일
 
-
+    public Context context;
 
     public String recipent_phoneNum; // sms 에서 필요해서 새로 생성
+    private ArrayList<Contact> recipientContacts;
     // mail variables
+    private Boolean isDownload;
     private String mailType; // 메일 본문 타입(사진, html, text 다양함)
     private Object body; // 본문
     private String body_str;
     private String platfrom;
     private ArrayList<String> attachment_str = new ArrayList<String>();
     private ArrayList<MimeBodyPart> attachment_mimebodypart = new ArrayList<MimeBodyPart>();
-    private ArrayList<File> attachment_file = new ArrayList<File>();
-    private Object[] test = new Object[100];
-    private int test_size = 0;
 
 
+    public SendedMessage(){
+    }
 
     public SendedMessage(String message, String platform, String time , String type) {
         this.message = message;
@@ -78,17 +84,35 @@ public class SendedMessage implements Parcelable {
         this.recipent_phoneNum = recipent_phoneNum;
     }
 
+    public SendedMessage(String message, String platform, String time, ArrayList<Contact> recipientContacts) {
+        this.message = message;
+        this.platform = platform;
+        this.time = time;
+        this.recipientContacts = recipientContacts;
+    }
 
     /**
     * mail용
     * */
-    public SendedMessage(String subject, Date date, String contentType, Object body, String type) {
+    public SendedMessage(String subject, Date date, String contentType, Object body, String type, Context context) {
         this.message = subject; // 제목
         this.platform = "Email";
         this.time = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(date); // 받은 시간
         this.mailType = contentType; // 본문 타입(사진, html, text 다양함)
         this.body = body; // 본문
         this.type = type; // 타입
+        this.context = context;
+        this.isDownload = false;
+    }
+
+    public SendedMessage(String subject, String time, String body_str, ArrayList<String> attachment_str, String type, Context context) {
+        this.message = subject;
+        this.platform = "Email";
+        this.time = time;
+        this.body_str = body_str;
+        this.attachment_str = attachment_str;
+        this.type = type;
+        this.context = context;
 
     }
 
@@ -98,7 +122,7 @@ public class SendedMessage implements Parcelable {
         time = in.readString();
 
         // mail
-        if(in.dataAvail() > 0) {
+        if((in.dataAvail() > 0) && (platform.equals("Email"))) {
             mailType = in.readString();
             body_str = in.readString();
             attachment_str = in.createStringArrayList();
@@ -106,6 +130,18 @@ public class SendedMessage implements Parcelable {
 //            test = (Object[]) in.readArray(Object[].class.getClassLoader());
         }
     }
+
+    public static final Creator<SendedMessage> CREATOR = new Creator<SendedMessage>() {
+        @Override
+        public SendedMessage createFromParcel(Parcel in) {
+            return new SendedMessage(in);
+        }
+
+        @Override
+        public SendedMessage[] newArray(int size) {
+            return new SendedMessage[size];
+        }
+    };
 
     public String getMessage() {
         return message;
@@ -154,19 +190,13 @@ public class SendedMessage implements Parcelable {
         return attachment_mimebodypart;
     }
 
-    public static final Creator<SendedMessage> CREATOR = new Creator<SendedMessage>() {
-        @Override
-        public SendedMessage createFromParcel(Parcel in) {
-            return new SendedMessage(in);
-        }
+    public ArrayList<Contact> getRecipientContacts() {
+        return recipientContacts;
+    }
 
-        @Override
-        public SendedMessage[] newArray(int size) {
-            return new SendedMessage[size];
-        }
-    };
-
-
+    public void setRecipientContacts(ArrayList<Contact> recipientContacts) {
+        this.recipientContacts = recipientContacts;
+    }
 
     @Override
     public String toString() {
@@ -178,28 +208,6 @@ public class SendedMessage implements Parcelable {
     }
 
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(message);
-        dest.writeString(platform);
-        dest.writeString(time);
-
-        // mail
-        if(platform.equals("Email")) {
-            dest.writeString(mailType);
-
-            body_str = getBody();
-            dest.writeString(body_str);
-            dest.writeStringList(attachment_str);
-//            dest.writeList(attachment_mimebodypart);
-//            dest.writeArray(test);
-        }
-    }
 
     public String getBody_str() {
         return body_str;
@@ -210,9 +218,8 @@ public class SendedMessage implements Parcelable {
      * **/
     public String getBody() {
         String str = "";
-        Log.e("mail!!", mailType);
+        attachment_str.clear();
         if(mailType.contains("multipart")) {
-            Log.e("test", "!!!!!!");
             // 이 타입은 첨부파일 없는지 확인해봐야됨 -> 있음
             if(mailType.contains("multipart/MIXED") || mailType.contains("multipart/mixed")) {
                 MimeMultipart mimeMultipart = (MimeMultipart) body;
@@ -223,40 +230,14 @@ public class SendedMessage implements Parcelable {
                         if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
                             String filename = part.getFileName();
                             attachment_str.add(MimeUtility.decodeText(filename));
-//                            attachment_mimebodypart.add(part);
-//                            test[test_size++] = part;
 
-//                            part.saveFile("/data/data/com.example.hyunju.notification_collector/cache/" + filename);
+                            String filepath = context.getFilesDir().getPath().toString() + "/" + MimeUtility.decodeText(filename);
 
-//                            part.saveFile("/data/user/0/com.example.hyunju.notification_collector/cache/" + filename);
-
-//                            part.saveFile(Environment.getDownloadCacheDirectory() + "/" + filename);
-//                            part.saveFile(Environment.getExternalStorageDirectory() + "/" + filename);
-//                            InputStream inputStream = part.getInputStream();
-//                            FileOutputStream fileOutputStream = new FileOutputStream()
-
-//                            DataHandler dataHandler = part.getDataHandler();
-//                            String path = part.getFileName();
-//                            String[] str_arr = path.split("/");
-//                            String filename = MimeUtility.decodeText(str_arr[str_arr.length - 1]);
-//
-//                            String filePath = "/data/user/0/com.example.hyunju.notification_collector/cache/";
-//                            File saveFile = new File(filePath + filename);
-//                            int cnt = 0;
-//                            while(saveFile.exists()) {
-//                                saveFile = new File(filePath + cnt + "_" + filename);
-//                            }
-//
-//                            BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(saveFile));
-//                            byte[] buff = new byte[2048];
-//                            InputStream inputStream = part.getInputStream();
-//                            int ret = 0;
-//                            while((ret = inputStream.read(buff)) > 0) {
-//                                bufferedOutputStream.write(buff, 0, ret);
-//                            }
-//
-//                            bufferedOutputStream.close();
-//                            inputStream.close();
+                            if(android.os.Build.VERSION.SDK_INT > 9) {
+                                StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+                                StrictMode.setThreadPolicy(policy);
+                            }
+                            part.saveFile(filepath);
                         }
                     }
 
@@ -285,14 +266,18 @@ public class SendedMessage implements Parcelable {
                                 for (int i = 0; i < multipart.getCount(); i++) {
                                     MimeBodyPart part = (MimeBodyPart) multipart.getBodyPart(i);
                                     if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
-                                        String filename = part.getFileName();
+                                        String filename = MimeUtility.decodeText(part.getFileName());
                                         attachFiles += filename + ", ";
-                                        attachment_str.add(MimeUtility.decodeText(filename));
-//                                        attachment_mimebodypart.add(part);
-//                                        part.saveFile(context.getCacheDir());
-//                                        test[test_size++] = part;
+                                        attachment_str.add(filename);
+                                        String filepath = context.getFilesDir().getPath().toString() + "/" + filename;
 
-//                                        part.saveFile(MimeUtility.decodeText(filename));
+                                        if(android.os.Build.VERSION.SDK_INT > 9) {
+                                            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+                                            StrictMode.setThreadPolicy(policy);
+                                        }
+
+                                        part.saveFile(filepath);
+
                                     }
                                     str = part.getContent().toString();
                                 }
@@ -324,70 +309,33 @@ public class SendedMessage implements Parcelable {
         return str;
     }
 
-//    public void saveFile(int idx) {
-//        try {
-//            attachment_mimebodypart.get(idx).saveFile(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+ attachment_str.get(idx));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } catch (MessagingException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-//    public File saveTempFile(Context context, String url) {
-//        File file;
-//        try {
-//            String fileName = Uri.parse(url).getLastPathSegment();
-//            file = File.createTempFile(fileName, null, context.getCacheDir());
-//
-//            return file;
-//        } catch (Exception e) {
-//
-//        }
-//
-//        return null;
-//    }
-//
-//    protected void saveFile(final String fileName, final InputStream in) throws IOException {
-//        final File file = new File(fileName);
-//        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
-//            @Override
-//            protected Void doInBackground(Void... voids) {
-//                try {
-//                    if (!file.exists()) {
-//                        OutputStream out = null;
-//                        out = new BufferedOutputStream(new FileOutputStream(file));
-//                        InputStream in2 = new BufferedInputStream(in);
-//                        byte[] buf = new byte[64 * 1024];
-//                        int len;
-//                        while ((len = in2.read(buf)) > 0) {
-//                            out.write(buf, 0, len);
-//                        }
-//                        if (in2 != null) {
-//                            in2.close();
-//                        }
-//                        if (out != null) {
-//                            out.close();
-//                        }
-//                    } else {
-//                        String e = "Fail to save file. The " + fileName + " already exists.";
-//                        Log.e("error", e);
-//                        throw new IOException(e);
-//                    }
-//                } catch (Exception e) {
-//
-//                }
-//
-//                return null;
-//            }
-//        };
-//    }
-
     public boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
         if(Environment.MEDIA_MOUNTED.equals(state)) {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(message);
+        dest.writeString(platform);
+//        dest.writeString(type);
+        dest.writeString(time);
+//        dest.writeString(recipent_phoneNum);
+        if(platform.equals("Email")) {
+            dest.writeString(mailType);
+//            body_str = getBody();
+            dest.writeString(body_str);
+            dest.writeStringList(attachment_str);
+        }
+
+//        dest.writeInt(test_size);
     }
 }

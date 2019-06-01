@@ -50,13 +50,21 @@ public class TgUtils {
 
 
     // 이름으로 텔레그램 연락처 검색
-    public void getTelegramContact(String name, final TelegramChatManager.Callback<TdApi.Users> callback) {
+    public static void getTelegramContact(String name, final TelegramChatManager.Callback<TdApi.Users> callback) {
         TgHelper.send(new TdApi.SearchContacts(name, 200), new Client.ResultHandler() {
             @Override
             public void onResult(TdApi.TLObject object) {
                 callback.onResult((TdApi.Users) object);
             }
         });
+    }
+
+    public static String getChatPhoneNum(long userId){
+        TdApi.User user = TgHelper.users.get((int)userId);
+        if(user!=null){
+            return user.phoneNumber.replaceFirst("82","0");
+        }
+        return "";
     }
 
     // 텔래그렘 사용자 정보
@@ -85,3 +93,4 @@ public class TgUtils {
         return null;
     }
 }
+//

@@ -1,6 +1,5 @@
 package com.example.hyunju.notification_collector;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 
 import android.content.BroadcastReceiver;
@@ -21,13 +20,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.telephony.SmsManager;
-
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -49,13 +45,16 @@ import com.example.hyunju.notification_collector.utils.RecyclerViewAdapter;
 import com.example.hyunju.notification_collector.utils.SendFacebookMessage;
 import com.example.hyunju.notification_collector.utils.SendMail;
 import com.example.hyunju.notification_collector.utils.TelegramChatManager;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import org.drinkless.td.libcore.telegram.TdApi;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.io.Serializable;
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -66,11 +65,11 @@ import java.util.List;
 public class ChattingActivity extends CollectorActivity implements View.OnClickListener, RecyclerViewAdapter.ItemClickListener {
     private static final int REQUEST_CODE = 6384;
     private final static String TAG = ChattingActivity.class.getName();
-    Uri uri;
+
     /**
      * DB 관련
      */
-    DataManager dm = new DataManager(ChattingActivity.this);
+    DataManager mDataManager = new DataManager(ChattingActivity.this);
     TextView textView_phone, textView_name;
     EditText editText;
     Button button;
@@ -79,7 +78,6 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
 
     private String path;
     private Button button_attachment;
-    private ImageButton backButton;
     private RecyclerView rv_sendedMsg;
 
     private RecyclerViewAdapter rv_adapter;
@@ -88,6 +86,9 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
 
 
     private String formatDate;
+
+    // firebase
+    private StorageReference mStorageRef;
 
 
     private BroadcastReceiver onNotice = new BroadcastReceiver() {
@@ -101,10 +102,10 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
 
             SendedMessage sendedMessage = new SendedMessage(message, SendedMessage.PLATFORM_SMS, receivedDate, SendedMessage.MESSAGE_RECEIVER, senderNo);
 
-            dm.smsInsert(sendedMessage); // DB에 SMS관련 채팅 삽입
+            mDataManager.smsInsert(sendedMessage); // DB에 SMS관련 채팅 삽입
 
 
-            SendedMessage model = new SendedMessage(message, "sms ", receivedDate, SendedMessage.MESSAGE_RECEIVER);
+            SendedMessage model = new SendedMessage(message, SendedMessage.PLATFORM_SMS, receivedDate, SendedMessage.MESSAGE_RECEIVER);
 
 
             sendedMessages.add(model);
@@ -113,7 +114,6 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
         }
     };
 
-    @SuppressLint("WrongViewCast")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -125,7 +125,6 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
 
         textView_phone = (TextView) findViewById(R.id.textView_phone_num);
         textView_name = (TextView) findViewById(R.id.textView_name);
-        backButton=(ImageButton)findViewById(R.id.backButton);
 
         textView_phone = view(R.id.textView_phone_num);
         textView_name = view(R.id.textView_name);
@@ -133,6 +132,23 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
         mContact = getIntent().getParcelableExtra("contact");
         mContact.phonenum = mContact.phonenum.replaceAll("-", "");
 
+        // 텔레그램 메시지 수신 콜백인터페이스 등록
+        TgHelper.setMessageCallback(new TelegramChatManager.Callback<SendedMessage>() {
+            @Override
+            public void onResult(SendedMessage result) {
+                // 메시지 수신시 DB에 저장
+                mDataManager.smsInsert(result);
+
+                if(result.file!=null){
+                    //TODO : 메시지 수신시 파이어베이스 저장 (파이어베이스 구현시 result.file 을 전송)
+                }
+
+                // 현재 채팅하는 폰번호와 동일하면 리스트에 추가
+                if(result.recipent_phoneNum.equals(mContact.phonenum)){
+                    rv_adapter.addList(result);
+                }
+            }
+        });
 
         textView_phone.setText(mContact.phonenum);
         textView_name.setText(mContact.name);
@@ -143,7 +159,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
 
         button.setOnClickListener(this);
         button_attachment.setOnClickListener(this);
-        backButton.setOnClickListener(this);
+
 
         int numberOfColumns = 1;
         rv_sendedMsg = findViewById(R.id.rv_sendedMsg);
@@ -155,14 +171,16 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
         ArrayList<SendedMessage> mails = addReceiveMail(mContact.email);
         if (mails != null) {
             for (int index = 0; index < mails.size(); index++) {
-                sendedMessages.add(mails.get(index));
+                SendedMessage mail = mails.get(index);
+                mail.getBody();
+                sendedMessages.add(new SendedMessage(mail.getMessage(), mail.getTime(), mail.getBody_str(), mail.getAttachment_str(), mail.getType(), getApplicationContext()));
             }
         }
 
         /**
          * DB관련 .
          */
-        Cursor cursor = dm.smsReader(mContact.phonenum);
+        Cursor cursor = mDataManager.smsReader(mContact.phonenum);
         try {
             if (cursor != null) {
                 cursor.moveToFirst();
@@ -192,6 +210,8 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
         rv_adapter.setClickListener(this);
         rv_sendedMsg.setAdapter(rv_adapter);
 
+        FirebaseApp.initializeApp(this);
+        mStorageRef = FirebaseStorage.getInstance().getReference();
     }
 
     @Override
@@ -259,7 +279,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
         ArrayList<SendedMessage> mails = new ArrayList<>();
 
         if (email != null) {
-            ReadMail rm = new ReadMail();
+            ReadMail rm = new ReadMail(getApplicationContext());
             try {
                 mails = rm.execute(email, "0").get();
             } catch (Exception e) {
@@ -290,9 +310,6 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
         if (v == button_attachment) {
             performFileSearch();
         }
-        if (v==backButton){
-            onBackPressed();
-        }
     }
 
     public void Dialog() {
@@ -317,40 +334,15 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
         builder.setTitle("전송 수단을 선택하시오");
         builder.setItems(items, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int pos) {
-                final String text = editText.getText().toString();  // editText의 text 받아s온 변수
+                final String text = editText.getText().toString();  // editText의 text 받아온 변수
 
                 if ("문자".equals(listItems.get(pos))) { // 문자
-
-                    if (path != null) {
-
-                        try{
-                            /**
-                             * 이미지 첨부하는 경우.
-                             * 일단 intent 사용하였지만 사용하지 않는 방향으로 추후 수정 예정
-                             */
-                            Intent sendIntent = new Intent(Intent.ACTION_SEND);
-                            sendIntent.putExtra("address", mContact.phonenum);
-                            sendIntent.putExtra("subject", "MMS Test");
-                            sendIntent.putExtra("sms_body", text);
-                            sendIntent.setType("image/*");
-                            sendIntent.putExtra(Intent.EXTRA_STREAM, uri);
-                            startActivity(Intent.createChooser(sendIntent, getResources().getString(R.string.app_name)));
-                        }catch (Exception e){
-                            e.printStackTrace();
-                        }
-
-
-                    } else {
-                        SmsManager smsManager = SmsManager.getDefault();
-
-                        smsManager.sendTextMessage(mContact.phonenum, null, text, null, null);
-
-                    }
-
+                    SmsManager smsManager = SmsManager.getDefault();
+                    smsManager.sendTextMessage(mContact.phonenum, null, text, null, null);
 
                     SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_SMS, getTime(), SendedMessage.MESSAGE_SEND, mContact.phonenum);
 
-                    dm.smsInsert(sendedMessage); // DB에 SMS관련 채팅 삽입
+                    mDataManager.smsInsert(sendedMessage); // DB에 SMS관련 채팅 삽입
 
                     sendedMessages.add(sendedMessage);
 
@@ -396,14 +388,19 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
                             TelegramChatManager.getInstance().sendFile(chatId, text, new TdApi.InputFileLocal(path), new TelegramChatManager.Callback() {
                                 @Override
                                 public void onResult(Object result) {
-                                    switch (TgHelper.sendState((TdApi.Message) result)) {
-                                        case BEINGSENT:
-                                            SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_TELEGRAM, getTime(), SendedMessage.MESSAGE_SEND);
-                                            rv_adapter.addList(sendedMessage);
-                                            break;
-                                        case FAILED:
-                                            toast("전송실패");
-                                            break;
+                                    if(result instanceof TdApi.Message) {
+                                        switch (TgHelper.sendState((TdApi.Message) result)) {
+                                            case BEINGSENT:
+                                                SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_TELEGRAM, getTime(), SendedMessage.MESSAGE_SEND);
+                                                sendedMessage.file = new File(path);
+                                                rv_adapter.addList(sendedMessage);
+                                                break;
+                                            case FAILED:
+                                                toast("전송실패");
+                                                break;
+                                        }
+                                    }else{
+                                        toast("전송실패 " + ((TdApi.Error)result).message);
                                     }
                                 }
                             });
@@ -411,14 +408,19 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
                             TelegramChatManager.getInstance().sendMessage(chatId, text, new TelegramChatManager.Callback() {
                                 @Override
                                 public void onResult(Object result) {
-                                    switch (TgHelper.sendState((TdApi.Message) result)) {
-                                        case BEINGSENT:
-                                            SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_TELEGRAM, getTime(), SendedMessage.MESSAGE_SEND);
-                                            rv_adapter.addList(sendedMessage);
-                                            break;
-                                        case FAILED:
-                                            toast("전송실패");
-                                            break;
+                                    if(result instanceof TdApi.Message) {
+
+                                        switch (TgHelper.sendState((TdApi.Message) result)) {
+                                            case BEINGSENT:
+                                                SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_TELEGRAM, getTime(), SendedMessage.MESSAGE_SEND);
+                                                rv_adapter.addList(sendedMessage);
+                                                break;
+                                            case FAILED:
+                                                toast("전송실패");
+                                                break;
+                                        }
+                                    } else {
+                                        toast("전송실패 " + ((TdApi.Error)result).message);
                                     }
                                 }
                             });
@@ -496,12 +498,15 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             if (data != null) {
-                //final Uri uri = data.getData();
-                uri = data.getData();
+                final Uri uri = data.getData();
                 Log.e("test", uri.toString());
                 path = FileUtils.getPath(this, uri);
 //                Log.e("path", path);
-                if(path == null) path = uri.toString();
+                if(!new File(path).exists()){ // 파일의 위치가 정확해서 파일이 존재할때
+                    path = uri.toString();
+                    toast("파일위치를 찾을수 없습니다.");
+                }
+
             }
         }
     }

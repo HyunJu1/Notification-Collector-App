@@ -111,7 +111,7 @@ public class FileUtils {
                      contentUri = Uri.parse("content://downloads/public_downloads" + id);
                 }
 
-                return contentUri.getPath();
+                return getDataColumn(context, contentUri, null, null);
 //                return getDataColumn(context, contentUri, null, null);
             } else if(isMediaDocument(uri)) {
                 final String docId = DocumentsContract.getDocumentId(uri);
