@@ -4,16 +4,20 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.net.Uri;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.hyunju.notification_collector.ChattingActivity;
 import com.example.hyunju.notification_collector.R;
 import com.example.hyunju.notification_collector.global.GlobalApplication;
 import com.example.hyunju.notification_collector.models.SendedMessage;
@@ -65,7 +69,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     @Override
                     public void onClick(View v) {
                         uploadFile(filename);
-//                        Toast.makeText(holder.layout_attachment.getContext(), String.valueOf(i), Toast.LENGTH_LONG).show();
                     }
                 });
                 holder.layout_attachment.addView(textViewAttachment);
@@ -93,7 +96,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 @Override
                 public void onClick(View v) {
                     uploadFile(getItem(position).file);
-//                        Toast.makeText(holder.layout_attachment.getContext(), String.valueOf(i), Toast.LENGTH_LONG).show();
                 }
             });
             holder.layout_attachment.addView(textViewAttachment);
@@ -159,28 +161,32 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     public void uploadFile(final String filename) {
-        final ProgressDialog progressDialog = new ProgressDialog(GlobalApplication.getInstance());
-        progressDialog.setTitle("잠시만 기다려주세요");
-        progressDialog.show();
-        
         FirebaseStorage storage = FirebaseStorage.getInstance();
         final StorageReference storageReference = storage.getReferenceFromUrl("gs://notification-collector-app.appspot.com").child("files/" + filename);
         storageReference.putFile(Uri.fromFile(new File(GlobalApplication.getInstance().getFilesDir().getPath().toString() + "/" + filename)))
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        GlobalApplication.filename = filename;
+                        storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                Log.e("test", "onSuccess: uri= "+ uri.toString());
+                                GlobalApplication.filepath = uri.toString();
+                                GlobalApplication.filename = filename;
+                                Toast.makeText(GlobalApplication.getInstance(), filename + "을 전달하고 싶은 사용자에게 메세지를 전송하세요", Toast.LENGTH_LONG).show();
+                            }
+                        });
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-
                     }
                 })
                 .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                        Toast.makeText(GlobalApplication.getInstance(), "잠시만 기다려주세요.", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -192,7 +198,15 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        GlobalApplication.filename = file.getName();
+                        storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                Log.e("test", "onSuccess: uri= "+ uri.toString());
+                                GlobalApplication.filepath = uri.toString();
+                                GlobalApplication.filename = file.getName();
+                                Toast.makeText(GlobalApplication.getInstance(), file.getName() + "을 전달하고 싶은 사용자에게 메세지를 전송하세요", Toast.LENGTH_LONG).show();
+                            }
+                        });
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -204,6 +218,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                        Toast.makeText(GlobalApplication.getInstance(), "잠시만 기다려주세요.", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
