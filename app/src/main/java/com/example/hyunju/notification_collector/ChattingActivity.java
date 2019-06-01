@@ -393,6 +393,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
                                         switch (TgHelper.sendState((TdApi.Message) result)) {
                                             case BEINGSENT:
                                                 SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_TELEGRAM, getTime(), SendedMessage.MESSAGE_SEND);
+                                                sendedMessage.file = new File(path);
                                                 rv_adapter.addList(sendedMessage);
                                                 break;
                                             case FAILED:

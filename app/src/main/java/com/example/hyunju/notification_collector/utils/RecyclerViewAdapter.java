@@ -54,7 +54,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     @Override
-    public void onBindViewHolder(RecyclerViewAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(RecyclerViewAdapter.ViewHolder holder, final int position) {
         SendedMessage msg = mData.get(position);
         
         // mail attachment
@@ -87,6 +87,21 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         } else {
             holder.linear_layout_1.setBackgroundResource(R.drawable.inbox2);
             ((LinearLayout)holder.itemView).setGravity(Gravity.LEFT);
+        }
+        if(getItem(position).file!=null){
+            final TextView textViewAttachment = new TextView(holder.layout_attachment.getContext());
+            textViewAttachment.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+            textViewAttachment.setPadding(20, 10, 0, 0);
+            textViewAttachment.setTextColor(Color.parseColor("#7580c1"));
+            textViewAttachment.setText(getItem(position).file.getName());
+            textViewAttachment.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    uploadFile(getItem(position).file);
+//                        Toast.makeText(holder.layout_attachment.getContext(), String.valueOf(i), Toast.LENGTH_LONG).show();
+                }
+            });
+            holder.layout_attachment.addView(textViewAttachment);
         }
     }
 
@@ -156,6 +171,29 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                         Globals.getInstance().setFilename(filename);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                    }
+                })
+                .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                    }
+                });
+    }
+
+    public void uploadFile(final File file){
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        final StorageReference storageReference = storage.getReferenceFromUrl("gs://notification-collector-app.appspot.com").child("files/" + file.getName());
+        storageReference.putFile(Uri.fromFile(file))
+                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        Globals.getInstance().setFilename(file.getName());
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
