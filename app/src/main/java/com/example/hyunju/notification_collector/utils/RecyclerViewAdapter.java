@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.example.hyunju.notification_collector.ChattingActivity;
 import com.example.hyunju.notification_collector.MailDetailActivity;
 import com.example.hyunju.notification_collector.R;
+import com.example.hyunju.notification_collector.global.GlobalApplication;
 import com.example.hyunju.notification_collector.global.Globals;
 import com.example.hyunju.notification_collector.models.SendedMessage;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -166,7 +167,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public void uploadFile(final String filename) {
         FirebaseStorage storage = FirebaseStorage.getInstance();
         final StorageReference storageReference = storage.getReferenceFromUrl("gs://notification-collector-app.appspot.com").child("files/" + filename);
-        storageReference.putFile(Uri.fromFile(new File("data/data/com.example.hyunju.notification_collector/files/" + filename)))
+        storageReference.putFile(Uri.fromFile(new File(GlobalApplication.getInstance().getFilesDir().getPath().toString() + "/" + filename)))
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
