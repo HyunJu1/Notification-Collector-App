@@ -352,7 +352,6 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
 
                     dm.smsInsert(sendedMessage); // DB에 SMS관련 채팅 삽입
 
-
                     sendedMessages.add(sendedMessage);
 
                     msgList.add(text);
