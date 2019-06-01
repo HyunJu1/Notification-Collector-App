@@ -7,20 +7,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Context;
 import android.graphics.Color;
 import android.net.Uri;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.example.hyunju.notification_collector.ChattingActivity;
-import com.example.hyunju.notification_collector.MailDetailActivity;
 import com.example.hyunju.notification_collector.R;
 import com.example.hyunju.notification_collector.global.GlobalApplication;
-import com.example.hyunju.notification_collector.global.Globals;
 import com.example.hyunju.notification_collector.models.SendedMessage;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -31,7 +26,6 @@ import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
@@ -84,11 +78,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         holder.type = msg.type;
         if (holder.type.equals(SendedMessage.MESSAGE_SEND)) {
             holder.linear_layout_1.setBackgroundResource(R.drawable.outbox2);
-<<<<<<< HEAD
-
-=======
             ((LinearLayout)holder.itemView).setGravity(Gravity.RIGHT);
->>>>>>> 898b96752e8468946d3ab1bb41a0753923c7402f
         } else {
             holder.linear_layout_1.setBackgroundResource(R.drawable.inbox2);
             ((LinearLayout)holder.itemView).setGravity(Gravity.LEFT);
@@ -175,7 +165,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        Globals.getInstance().setFilename(filename);
+                        GlobalApplication.filename = filename;
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -198,7 +188,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        Globals.getInstance().setFilename(file.getName());
+                        GlobalApplication.filename = file.getName();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
