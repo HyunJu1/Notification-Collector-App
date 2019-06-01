@@ -139,6 +139,10 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
                 // 메시지 수신시 DB에 저장
                 mDataManager.smsInsert(result);
 
+                if(result.file!=null){
+                    //TODO : 메시지 수신시 파이어베이스 저장 (파이어베이스 구현시 result.file 을 전송)
+                }
+
                 // 현재 채팅하는 폰번호와 동일하면 리스트에 추가
                 if(result.recipent_phoneNum.equals(mContact.phonenum)){
                     rv_adapter.addList(result);
