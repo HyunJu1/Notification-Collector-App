@@ -102,7 +102,7 @@ public class TgHelper {
                                                         sendedMessage.time = new Date(System.currentTimeMillis()).toString();
                                                         sendedMessage.platform = SendedMessage.PLATFORM_TELEGRAM;
                                                         sendedMessage.type = SendedMessage.MESSAGE_RECEIVER;
-                                                        sendedMessage.recipent_phoneNum = TgUtils.getChatPhoneNum(updateNewChat.message.id);
+                                                        sendedMessage.recipent_phoneNum = TgUtils.getChatPhoneNum(updateNewChat.message.chatId);
                                                         mMessageCallback.onResult(sendedMessage);
                                                     }
                                                 }
@@ -117,6 +117,7 @@ public class TgHelper {
                             sendedMessage.time = new Date(System.currentTimeMillis()).toString();
                             sendedMessage.platform = SendedMessage.PLATFORM_TELEGRAM;
                             sendedMessage.type = SendedMessage.MESSAGE_RECEIVER;
+                            sendedMessage.recipent_phoneNum = TgUtils.getChatPhoneNum(updateNewChat.message.chatId);
                             mMessageCallback.onResult(sendedMessage);
                         }
                         break;
