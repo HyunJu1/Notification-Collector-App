@@ -159,6 +159,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     public void uploadFile(final String filename) {
+        final ProgressDialog progressDialog = new ProgressDialog(GlobalApplication.getInstance());
+        progressDialog.setTitle("잠시만 기다려주세요");
+        progressDialog.show();
+        
         FirebaseStorage storage = FirebaseStorage.getInstance();
         final StorageReference storageReference = storage.getReferenceFromUrl("gs://notification-collector-app.appspot.com").child("files/" + filename);
         storageReference.putFile(Uri.fromFile(new File(GlobalApplication.getInstance().getFilesDir().getPath().toString() + "/" + filename)))

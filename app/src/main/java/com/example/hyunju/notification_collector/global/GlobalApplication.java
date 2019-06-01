@@ -22,6 +22,7 @@ public class GlobalApplication extends Application {
     static GlobalApplication mApplication;
 
     public static boolean isMultiMode = false;
+    public static String filepath = null;
     public static String filename = null;
     public static List<SendedMessage> sendedMessageInMultiMode = new ArrayList<>();
     public static List<NotificationEvent> receivedMessageInMultiMode = new ArrayList<>();

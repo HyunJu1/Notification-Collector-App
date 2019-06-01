@@ -12,6 +12,7 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
 
+import androidx.annotation.NonNull;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -21,14 +22,17 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.telephony.SmsManager;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.hyunju.notification_collector.database.DataManager;
 import com.example.hyunju.notification_collector.global.CollectorActivity;
+import com.example.hyunju.notification_collector.global.GlobalApplication;
 import com.example.hyunju.notification_collector.models.Contact;
 import com.example.hyunju.notification_collector.models.NotificationEvent;
 import com.example.hyunju.notification_collector.models.SendedMessage;
@@ -45,6 +49,11 @@ import com.example.hyunju.notification_collector.utils.RecyclerViewAdapter;
 import com.example.hyunju.notification_collector.utils.SendFacebookMessage;
 import com.example.hyunju.notification_collector.utils.SendMail;
 import com.example.hyunju.notification_collector.utils.TelegramChatManager;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -88,7 +97,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
     private String formatDate;
 
     // firebase
-    private StorageReference mStorageRef;
+    private FirebaseStorage  storage;
 
 
     private BroadcastReceiver onNotice = new BroadcastReceiver() {
@@ -120,6 +129,8 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
 
         setContentView(R.layout.activity_chatting);
 
+        FirebaseApp.initializeApp(this);
+        storage = FirebaseStorage.getInstance();
 
         LocalBroadcastManager.getInstance(this).registerReceiver(onNotice, new IntentFilter("SMS"));
 
@@ -209,9 +220,6 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
         rv_adapter = new RecyclerViewAdapter(this, sendedMessages);
         rv_adapter.setClickListener(this);
         rv_sendedMsg.setAdapter(rv_adapter);
-
-        FirebaseApp.initializeApp(this);
-        mStorageRef = FirebaseStorage.getInstance().getReference();
     }
 
     @Override
@@ -433,20 +441,46 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
                         AlertDialog.Builder mail_builder = new AlertDialog.Builder(ChattingActivity.this); // 이메일 제목 받는 dialog
 
                         mail_builder.setTitle("메일 제목을 입력해주세요");
-                        final EditText editText_subject = new EditText(ChattingActivity.this);
-                        mail_builder.setView(editText_subject);
+
+                        final EditText editText_subject;
+
+                        if(GlobalApplication.filepath != null) {
+                            LinearLayout linearLayout = new LinearLayout(ChattingActivity.this);
+                            linearLayout.setOrientation(LinearLayout.VERTICAL);
+
+                            TextView textView = new TextView(ChattingActivity.this);
+                            textView.setText(GlobalApplication.filename + "이 전송됩니다.");
+                            textView.setGravity(Gravity.CENTER_HORIZONTAL);
+
+                            editText_subject = new EditText(ChattingActivity.this);
+
+                            linearLayout.addView(textView);
+                            linearLayout.addView(editText_subject);
+
+                            mail_builder.setView(linearLayout);
+                        } else {
+                            editText_subject = new EditText(ChattingActivity.this);
+
+                            mail_builder.setView(editText_subject);
+                        }
 
                         mail_builder.setPositiveButton("보내기", new DialogInterface.OnClickListener() { // 제목 입력 후 보내기 누른 경우
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                String subject = editText_subject.getText().toString();
+                                final String subject = editText_subject.getText().toString();
                                 SendMail sm;
+                                // 사용자가 첨부파일을 입력한 경우
                                 if (path != null) {
-
                                     sm = new SendMail(ChattingActivity.this, mContact.email, subject, text, path);
-                                } else {
+
+                                } else if(GlobalApplication.filepath != null) { // firebase에서 파일 전달일 경우
+
+                                    sm = new SendMail(ChattingActivity.this, mContact.email, subject, text, GlobalApplication.filepath, GlobalApplication.filename);
+                                } else { // 첨부파일 없는 경우
                                     sm = new SendMail(ChattingActivity.this, mContact.email, subject, text);
+                                    sm.execute();
                                 }
+
                                 sm.execute();
 
                                 SendedMessage sendedMessage = new SendedMessage(text, SendedMessage.PLATFORM_EMAIL, getTime(), SendedMessage.MESSAGE_SEND);
@@ -523,24 +557,9 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
 
             Intent intent = new Intent(this, MailDetailActivity.class);
 
-
-//            Toast.makeText(this, rv_adapter.getItem(position).get(), Toast.LENGTH_SHORT).show();
-
-//            Bundle bundle = new Bundle();
-//            bundle.putSerializable("mail", rv_adapter.getItem(position));
-//            intent.putExtras(bundle);
-
             intent.putExtra("mail", (Parcelable) rv_adapter.getItem(position));
 
-//            intent.putStringArrayListExtra("str", rv_adapter.getItem(position).getAttachment_str());
-
-//            intent.putExtra("subject", rv_adapter.getItem(position).message);
-//            intent.putExtra("date", rv_adapter.getItem(position).time);
-//            intent.putExtra("body", rv_adapter.getItem(position).getBody());
-//            intent.putExtra("from", mContact.email);
-
             startActivity(intent);
-//            startActivity(new Intent(getApplicationContext(), MailDetailActivity.class).putExtra("mail", (Serializable) rv_adapter.getItem(position)));
         } else {
             Toast.makeText(this, rv_adapter.getItem(position).toString(), Toast.LENGTH_SHORT).show();
         }

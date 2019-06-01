@@ -3,15 +3,18 @@ package com.example.hyunju.notification_collector.utils;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.example.hyunju.notification_collector.configs.EmailConfig;
 
+import java.net.URL;
 import java.util.Properties;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
+import javax.activation.URLDataSource;
 import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -23,7 +26,8 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-
+import javax.mail.Part;
+import javax.mail.internet.MimeUtility;
 
 public class SendMail extends AsyncTask<Void,Void,Void> {
 
@@ -33,6 +37,7 @@ public class SendMail extends AsyncTask<Void,Void,Void> {
     private String subject;
     private String message;
     private String filePath;
+    private String filename;
     private ProgressDialog progressDialog;
 
     public SendMail(Context context, String email, String subject, String message){
@@ -48,6 +53,15 @@ public class SendMail extends AsyncTask<Void,Void,Void> {
         this.subject = subject;
         this.message = message;
         this.filePath = filePath;
+    }
+
+    public SendMail(Context context, String email, String subject, String message, String filePath, String filename){
+        this.context = context;
+        this.email = email;
+        this.subject = subject;
+        this.message = message;
+        this.filePath = filePath;
+        this.filename = filename;
     }
 
     @Override
@@ -86,7 +100,7 @@ public class SendMail extends AsyncTask<Void,Void,Void> {
             mm.setFrom(new InternetAddress(EmailConfig.SEND_EMAIL));
             mm.addRecipient(Message.RecipientType.TO, new InternetAddress(email));
             mm.setSubject(subject);
-            if(filePath != null) {
+            if(filePath != null && filename == null) {
                 BodyPart bodyPart1 = new MimeBodyPart();
                 bodyPart1.setText(message);
 
@@ -102,13 +116,26 @@ public class SendMail extends AsyncTask<Void,Void,Void> {
 
                 mm.setContent(multipart);
 
+            } else if(filename != null) {
+                BodyPart bodyPart = new MimeBodyPart();
+                URL url = new URL(filePath);
+                URLDataSource uds = new URLDataSource(url);
+                bodyPart.setDataHandler(new DataHandler(uds));
+                bodyPart.setDisposition(bodyPart.ATTACHMENT);
+                bodyPart.setFileName(MimeUtility.encodeText(filename));
+
+                Multipart multipart = new MimeMultipart();
+                multipart.addBodyPart(bodyPart);
+
+                mm.setContent(multipart);
+
             } else {
                 mm.setText(message);
             }
 
             Transport.send(mm);
 
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
