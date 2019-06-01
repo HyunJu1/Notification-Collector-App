@@ -21,3 +21,8 @@
 /build
 /captures
 .externalNativeBuild
+
+
+/Korean_NER/.ipynb_checkpoints/
+/Korean_NER/__pycache__/
+/Korean_NER/data/
