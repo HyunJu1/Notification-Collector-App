@@ -9,7 +9,9 @@ import com.example.hyunju.notification_collector.telegram.TgHelper;
 import com.example.hyunju.notification_collector.utils.NetworkService;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
@@ -25,7 +27,7 @@ public class GlobalApplication extends Application {
     public static String filepath = null;
     public static String filename = null;
     public static List<SendedMessage> sendedMessageInMultiMode = new ArrayList<>();
-    public static List<NotificationEvent> receivedMessageInMultiMode = new ArrayList<>();
+    public static Map<Integer, ArrayList<NotificationEvent>> receivedMessageInMultiMode = new HashMap<>();
     public static ArrayList<Contact> selectedContactsInMultiMode = new ArrayList<>();
 
     @Override

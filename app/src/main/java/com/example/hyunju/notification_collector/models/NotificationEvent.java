@@ -9,6 +9,7 @@ public class NotificationEvent {
     private int smallIconRes;
     private Bitmap largeIcon;
     private String postTime;
+    private String phone;
 
     public NotificationEvent(String title, CharSequence text, CharSequence subText, int smallIconRes, Bitmap largeIcon, String postTime) {
         this.title = title;
@@ -19,8 +20,15 @@ public class NotificationEvent {
         this.postTime = postTime;
     }
 
-    public NotificationEvent(String title, CharSequence text, CharSequence subText, String postTime) {
+    public NotificationEvent(String phone, CharSequence text, String postTime) {
+        this.phone = phone;
+        this.text = text;
+        this.postTime = postTime;
+    }
+
+    public NotificationEvent(String title, String phone, CharSequence text, CharSequence subText, String postTime) {
         this.title = title;
+        this.phone = phone;
         this.text = text;
         this.subText = subText;
         this.postTime = postTime;
@@ -74,11 +82,21 @@ public class NotificationEvent {
         this.postTime = postTime;
     }
 
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
     @Override
     public String toString() {
-        return "title='" + title + '\'' +
-                ", text=" + text +'\'' +
+        return "NotificationEvent{" +
+                "title='" + title + '\'' +
+                ", text=" + text +
                 ", subText=" + subText +
-                ", postTime='" + postTime;
+                ", postTime='" + postTime + '\'' +
+                '}';
     }
 }

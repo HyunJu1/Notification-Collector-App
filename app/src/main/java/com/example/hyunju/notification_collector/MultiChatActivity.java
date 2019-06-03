@@ -1,6 +1,7 @@
 package com.example.hyunju.notification_collector;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -38,7 +39,9 @@ public class MultiChatActivity extends AppCompatActivity {
         lv_chats.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Log.d(TAG, i + "!");
+                Intent intent = new Intent(getApplicationContext(), MultiChatDetailActivity.class);
+                intent.putExtra("messageIdx", i);
+                startActivity(intent);
             }
         });
 
