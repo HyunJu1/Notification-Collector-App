@@ -117,6 +117,7 @@ public class SendMail extends AsyncTask<Void,Void,Void> {
                 mm.setContent(multipart);
 
             } else if(filename != null) {
+
                 BodyPart bodyPart = new MimeBodyPart();
                 URL url = new URL(filePath);
                 URLDataSource uds = new URLDataSource(url);
@@ -124,8 +125,12 @@ public class SendMail extends AsyncTask<Void,Void,Void> {
                 bodyPart.setDisposition(bodyPart.ATTACHMENT);
                 bodyPart.setFileName(MimeUtility.encodeText(filename));
 
+                BodyPart bodyPart1 = new MimeBodyPart();
+                bodyPart1.setText(message);
+
                 Multipart multipart = new MimeMultipart();
                 multipart.addBodyPart(bodyPart);
+                multipart.addBodyPart(bodyPart1);
 
                 mm.setContent(multipart);
 

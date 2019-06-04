@@ -170,7 +170,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                         storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                             @Override
                             public void onSuccess(Uri uri) {
-                                Log.e("test", "onSuccess: uri= "+ uri.toString());
                                 GlobalApplication.filepath = uri.toString();
                                 GlobalApplication.filename = filename;
                                 Toast.makeText(GlobalApplication.getInstance(), filename + "을 전달하고 싶은 사용자에게 메세지를 전송하세요", Toast.LENGTH_LONG).show();
@@ -201,7 +200,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                         storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                             @Override
                             public void onSuccess(Uri uri) {
-                                Log.e("test", "onSuccess: uri= "+ uri.toString());
                                 GlobalApplication.filepath = uri.toString();
                                 GlobalApplication.filename = file.getName();
                                 Toast.makeText(GlobalApplication.getInstance(), file.getName() + "을 전달하고 싶은 사용자에게 메세지를 전송하세요", Toast.LENGTH_LONG).show();

@@ -12,6 +12,7 @@ import android.util.Log;
 
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.sun.mail.util.BASE64DecoderStream;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -213,6 +214,8 @@ public class SendedMessage implements Parcelable {
         return body_str;
     }
 
+    public void setBody_str(String body_str) { this.body_str = body_str;}
+
     /**
      * mail 본문 타입에 맞춰서 볼 수 있는 형태로 변환
      * **/
@@ -238,6 +241,10 @@ public class SendedMessage implements Parcelable {
                                 StrictMode.setThreadPolicy(policy);
                             }
                             part.saveFile(filepath);
+//                        } else if(part.getContentType().startsWith("text/") && part.getDisposition() == null) {
+//                            str = part.getContent().toString();
+//                            Log.e("content", str);
+//                            Log.e("content", part.getContent().toString());
                         }
                     }
 
@@ -246,14 +253,19 @@ public class SendedMessage implements Parcelable {
                         if(part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
                             String filename = part.getFileName();
                         }
-                        str = part.getContent().toString();
+//                        str = part.getContent().toString();
+                        Object object = part.getContent();
+                        if(object instanceof BASE64DecoderStream) {
+                            Log.e("base64", "yes");
+
+                        }
                     }
 
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
 
-                return null;
+                return str;
             } else {
                 try {
                     final AsyncTask<Void, Void, String> asyncTask = new AsyncTask<Void, Void, String>() {
@@ -277,7 +289,6 @@ public class SendedMessage implements Parcelable {
                                         }
 
                                         part.saveFile(filepath);
-
                                     }
                                     str = part.getContent().toString();
                                 }

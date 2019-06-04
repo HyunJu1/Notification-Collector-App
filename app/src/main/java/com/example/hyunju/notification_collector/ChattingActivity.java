@@ -183,7 +183,7 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
         if (mails != null) {
             for (int index = 0; index < mails.size(); index++) {
                 SendedMessage mail = mails.get(index);
-                mail.getBody();
+                mail.setBody_str(mail.getBody());
                 sendedMessages.add(new SendedMessage(mail.getMessage(), mail.getTime(), mail.getBody_str(), mail.getAttachment_str(), mail.getType(), getApplicationContext()));
             }
         }
@@ -478,7 +478,6 @@ public class ChattingActivity extends CollectorActivity implements View.OnClickL
                                     sm = new SendMail(ChattingActivity.this, mContact.email, subject, text, GlobalApplication.filepath, GlobalApplication.filename);
                                 } else { // 첨부파일 없는 경우
                                     sm = new SendMail(ChattingActivity.this, mContact.email, subject, text);
-                                    sm.execute();
                                 }
 
                                 sm.execute();
