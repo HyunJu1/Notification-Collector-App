@@ -20,10 +20,12 @@ import com.example.hyunju.notification_collector.R;
 import com.example.hyunju.notification_collector.global.GlobalApplication;
 import com.example.hyunju.notification_collector.models.ChangeGlobalStateEvent;
 import com.example.hyunju.notification_collector.models.Contact;
+import com.example.hyunju.notification_collector.models.NotificationEvent;
 import com.example.hyunju.notification_collector.models.SendedMessage;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 public class GroupMessageDialogFragment extends DialogFragment {
@@ -54,11 +56,18 @@ public class GroupMessageDialogFragment extends DialogFragment {
                         SmsManager smsManager = SmsManager.getDefault();
                         String msg = et_group_message.getText().toString();
 
+                        int currentIdx = GlobalApplication.sendedMessageInMultiMode.size();
+                        ArrayList<NotificationEvent> messagesList = new ArrayList<>();
                         for (Contact c : GlobalApplication.selectedContactsInMultiMode) {
                             smsManager.sendTextMessage(
                                     c.phonenum, null, msg, null, null
                             );
+                            messagesList.add(
+                                    new NotificationEvent(c.name, c.phonenum,null, null, null)
+                            );
                         }
+                        GlobalApplication.receivedMessageInMultiMode.put(currentIdx, messagesList);
+
                         SendedMessage message = new SendedMessage(
                                 msg,
                                 "sms",

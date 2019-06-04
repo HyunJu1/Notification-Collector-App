@@ -10,6 +10,10 @@ import android.telephony.SmsMessage;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.hyunju.notification_collector.models.NotificationEvent;
+
+import org.greenrobot.eventbus.EventBus;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -50,6 +54,9 @@ public class SMSBroadcastReceiver extends BroadcastReceiver {
                         Date curDate = new Date(currentSMS.getTimestampMillis());
                         SimpleDateFormat sdf = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" );
                         String receivedDate = sdf.format( curDate );
+
+                        NotificationEvent notificationEvent = new NotificationEvent(senderNo, message, receivedDate);
+                        EventBus.getDefault().post(notificationEvent);
 
                         Intent msgrcv = new Intent("SMS");
 

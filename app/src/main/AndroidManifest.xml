@@ -66,16 +66,7 @@
         </activity>
 
         <activity android:name=".MultiChatActivity" />
-
-        <service
-            android:name=".utils.NotificationListener"
-            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
-            <intent-filter>
-                <action android:name="android.service.notification.NotificationListenerService" />
-
-            </intent-filter>
-        </service>
-
+        <activity android:name=".MultiChatDetailActivity" />
 
         <receiver
             android:name=".utils.SMSBroadcastReceiver"
