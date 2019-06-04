@@ -241,10 +241,14 @@ public class SendedMessage implements Parcelable {
                                 StrictMode.setThreadPolicy(policy);
                             }
                             part.saveFile(filepath);
-//                        } else if(part.getContentType().startsWith("text/") && part.getDisposition() == null) {
-//                            str = part.getContent().toString();
-//                            Log.e("content", str);
-//                            Log.e("content", part.getContent().toString());
+                        } else if(part.getContentType().startsWith("text/") && part.getDisposition() == null) {
+
+                            if(android.os.Build.VERSION.SDK_INT > 9) {
+                                StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+                                StrictMode.setThreadPolicy(policy);
+                            }
+
+                            str = part.getContent().toString();
                         }
                     }
 
